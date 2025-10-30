@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerenciador de Patrimônio</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <style>
+        /* [ESTILOS MANTIDOS - SEM ALTERAÇÕES] */
+        body{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);min-height:100vh;padding:20px;font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif}
+        .container{background:rgba(255,255,255,.95);border-radius:15px;padding:30px;box-shadow:0 10px 30px rgba(0,0,0,.2)}
+        h1{color:#2c3e50;text-align:center;margin-bottom:30px;font-weight:700;text-shadow:2px 2px 4px rgba(0,0,0,.1)}
+        .card{margin-bottom:20px;border:none;border-radius:12px;box-shadow:0 4px 15px rgba(0,0,0,.1);transition:transform .3s ease,box-shadow .3s ease;background:linear-gradient(135deg,#f8f9fa 0%,#e9ecef 100%);flex:1 1 calc(33.333% - 20px);min-width:300px}
+        .card:hover{transform:translateY(-5px);box-shadow:0 8px 25px rgba(0,0,0,.15)}
+        .card-title{background:linear-gradient(135deg,#3498db,#2980b9);color:#fff;padding:15px;margin:-1rem -1rem 1rem -1rem;border-radius:12px 12px 0 0;font-weight:600;font-size:1.1rem}
+        .card-body{padding:1.5rem}
+        .no-results{color:#e74c3c;text-align:center;font-size:1.1rem;font-weight:500}
+        #preview-modal .modal-body{height:80vh;overflow:auto}
+        #pdf-preview{width:100%;height:100%;border-radius:8px}
+        .card-container{display:flex;flex-wrap:wrap;gap:20px;justify-content:flex-start}
+        .form-label{font-weight:600;color:#2c3e50;margin-bottom:8px}
+        .form-control,.form-select{border:2px solid #e9ecef;border-radius:8px;padding:10px;transition:border-color .3s ease}
+        .form-control:focus,.form-select:focus{border-color:#3498db;box-shadow:0 0 0 .2rem rgba(52,152,219,.25)}
+        .btn{border-radius:8px;padding:10px 20px;font-weight:600;transition:all .3s ease;border:none}
+        .btn-primary{background:linear-gradient(135deg,#3498db,#2980b9)}
+        .btn-primary:hover{background:linear-gradient(135deg,#2980b9,#1f618d);transform:translateY(-2px);box-shadow:0 4px 15px rgba(52,152,219,.4)}
+        .btn-secondary{background:linear-gradient(135deg,#95a5a6,#7f8c8d)}
+        .btn-secondary:hover{background:linear-gradient(135deg,#7f8c8d,#6c7b7d);transform:translateY(-2px)}
+        .btn-success{background:linear-gradient(135deg,#27ae60,#219653)}
+        .btn-success:hover{background:linear-gradient(135deg,#219653,#1e8449);transform:translateY(-2px)}
+        .section-title{color:#2c3e50;border-bottom:2px solid #3498db;padding-bottom:10px;margin-bottom:20px;font-weight:600}
+        .form-check-input:checked{background-color:#3498db;border-color:#3498db}
+        .modal-header{background:linear-gradient(135deg,#3498db,#2980b9);color:#fff;border-radius:15px 15px 0 0}
+        .search-container{position:relative}
+        .client-list-container{position:absolute;top:100%;left:0;right:0;background:#fff;border:1px solid #dee2e6;border-radius:8px;box-shadow:0 4px 15px rgba(0,0,0,.1);z-index:1000;max-height:300px;overflow-y:auto;display:none}
+        .client-list-item{padding:10px 15px;border-bottom:1px solid #eee;cursor:pointer;transition:background-color .2s ease}
+        .client-list-item:hover{background-color:#f8f9fa}
+        .selected-clients-badge{background:#3498db;color:#fff;padding:4px 8px;border-radius:12px;font-size:.8rem;margin-right:5px;margin-bottom:5px;display:inline-block}
+        .search-type-selector{background:#e9ecef;padding:15px;border-radius:8px;margin-bottom:15px}
+        .search-type-buttons{display:flex;gap:15px;flex-wrap:wrap}
+        .search-type-btn{flex:1;min-width:150px}
+        .equipment-count{background:#27ae60;color:#fff;padding:5px 10px;border-radius:15px;font-size:.8rem;font-weight:bold;display:inline-block;margin-bottom:10px}
+        .horizontal-equipment-container{display:flex;flex-wrap:wrap;gap:15px;margin-top:15px}
+        .horizontal-equipment-item{flex:1 1 calc(33.333% - 15px);min-width:250px;background:#fff;padding:15px;border-radius:8px;border-left:4px solid #3498db;box-shadow:0 2px 8px rgba(0,0,0,.1);transition:transform .2s ease,box-shadow .2s ease}
+        .horizontal-equipment-item:hover{transform:translateY(-3px);box-shadow:0 4px 12px rgba(0,0,0,.15)}
+        .horizontal-equipment-item .equipment-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;border-bottom:1px solid #e9ecef;padding-bottom:8px}
+        .horizontal-equipment-item .equipment-name{font-weight:600;color:#2c3e50;font-size:.9rem;margin:0;flex:1}
+        .horizontal-equipment-item .unidade-badge{background:#e74c3c;color:#fff;padding:2px 6px;border-radius:10px;font-size:.7rem;font-weight:bold;margin-left:8px;white-space:nowrap}
+        .horizontal-equipment-item .equipment-details{display:grid;grid-template-columns:1fr;gap:4px}
+        .horizontal-equipment-item .detail-row{display:flex;justify-content:space-between}
+        .horizontal-equipment-item .detail-label{font-weight:500;color:#495057;font-size:.75rem}
+        .horizontal-equipment-item .detail-value{color:#2c3e50;font-size:.75rem;text-align:right}
+        .filter-checkbox-group{background:#fff;border:1px solid #dee2e6;border-radius:8px;max-height:200px;overflow-y:auto;padding:10px;margin-top:5px}
+        .filter-checkbox-item{padding:5px 0;border-bottom:1px solid #f8f9fa}
+        .filter-checkbox-item:last-child{border-bottom:none}
+        .filter-checkbox-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+        .select-all-btn{font-size:.8rem;padding:2px 8px}
+        .filters-container{background:#f8f9fa;padding:20px;border-radius:10px;margin-bottom:20px;border-left:4px solid #f39c12}
+        .filters-container .section-title{color:#2c3e50;border-bottom:2px solid #f39c12;padding-bottom:10px;margin-bottom:20px;font-weight:600}
+        .columns-container{background:#f8f9fa;padding:20px;border-radius:10px;margin-bottom:20px;border-left:4px solid #9b59b6}
+        .columns-container .section-title{color:#2c3e50;border-bottom:2px solid #9b59b6;padding-bottom:10px;margin-bottom:20px;font-weight:600}
+        .category-summary-btn{background:linear-gradient(135deg,#9b59b6,#8e44ad);color:#fff;border:none}
+        .category-summary-btn:hover{background:linear-gradient(135deg,#8e44ad,#7d3c98);transform:translateY(-2px);box-shadow:0 4px 15px rgba(155,89,182,.4)}
+        .filter-summary-card{background:linear-gradient(135deg,#f8f9fa 0%,#e9ecef 100%);border-radius:12px;box-shadow:0 4px 15px rgba(0,0,0,.1);margin-bottom:20px;border-left:4px solid #27ae60}
+        .filter-summary-header{background:linear-gradient(135deg,#27ae60,#219653);color:#fff;padding:15px;border-radius:12px 12px 0 0;font-weight:600;font-size:1.1rem;display:flex;justify-content:space-between;align-items:center}
+        .filter-summary-body{padding:1.5rem}
+        .filter-summary-section{margin-bottom:15px;padding-bottom:15px;border-bottom:1px solid #e9ecef}
+        .filter-summary-section:last-child{margin-bottom:0;padding-bottom:0;border-bottom:none}
+        .filter-summary-title{font-weight:600;color:#2c3e50;margin-bottom:10px;font-size:1rem}
+        .filter-summary-item{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #f8f9fa}
+        .filter-summary-item:last-child{border-bottom:none}
+        .filter-summary-label{font-weight:500;color:#495057}
+        .filter-summary-count{background:#3498db;color:#fff;padding:2px 8px;border-radius:12px;font-size:.75rem;font-weight:bold}
+        .filter-summary-equipment{background:#fff;padding:10px;border-radius:8px;margin-bottom:10px;border-left:3px solid #3498db}
+        .filter-summary-equipment:last-child{margin-bottom:0}
+        .filter-summary-equipment-name{font-weight:600;color:#2c3e50;margin-bottom:5px}
+        .filter-summary-equipment-details{display:grid;grid-template-columns:1fr 1fr;gap:5px;font-size:.8rem}
+        .filter-summary-equipment-detail{display:flex;justify-content:space-between}
+        .filter-summary-equipment-label{font-weight:500;color:#495057}
+        .filter-summary-equipment-value{color:#2c3e50}
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>Gerenciador de Patrimônio</h1>
+
+    <!-- IMPORTAÇÃO DE PLANILHA -->
+    <div class="mb-4">
+        <label for="file-upload" class="form-label">Importar Planilha (.xlsx)</label>
+        <input type="file" id="file-upload" class="form-control" accept=".xlsx">
+    </div>
+
+    <!-- PESQUISA E SELEÇÃO -->
+    <div class="filter-section">
+        <h5 class="section-title">Pesquisar e Selecionar</h5>
+
+        <div class="search-type-selector">
+            <label class="form-label mb-3">Tipo de Pesquisa:</label>
+            <div class="search-type-buttons">
+                <div class="form-check search-type-btn">
+                    <input class="form-check-input" type="radio" name="searchType" id="searchCliente" value="cliente" checked onchange="changeSearchType()">
+                    <label class="form-check-label" for="searchCliente">Pesquisar por Cliente (Coluna J)</label>
+                </div>
+                <div class="form-check search-type-btn">
+                    <input class="form-check-input" type="radio" name="searchType" id="searchUnidade" value="unidade" onchange="changeSearchType()">
+                    <label class="form-check-label" for="searchUnidade">Pesquisar por Unidade (Coluna D)</label>
+                </div>
+                <div class="form-check search-type-btn">
+                    <input class="form-check-input" type="radio" name="searchType" id="searchCategoria" value="categoria" onchange="changeSearchType()">
+                    <label class="form-check-label" for="searchCategoria">Pesquisar por Categoria (Coluna B)</label>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label for="search" class="form-label" id="search-label">Digite para buscar clientes:</label>
+                <div class="search-container">
+                    <input type="text" id="search" class="form-control" placeholder="Digite para buscar..." oninput="showSuggestions()" onfocus="showSuggestions()">
+                    <div id="suggestions" class="client-list-container"></div>
+                </div>
+            </div>
+            <div class="col-md-6 d-flex align-items-end">
+                <button class="btn btn-success w-100" onclick="toggleAllClients()" id="toggle-all-btn">
+                    Selecionar/Desselecionar Todos os Clientes
+                </button>
+            </div>
+        </div>
+
+        <div class="mt-3">
+            <label class="form-label" id="selected-label">Itens Selecionados:</label>
+            <div id="selected-items-display" class="mb-3"><span class="text-muted">Nenhum item selecionado</span></div>
+        </div>
+
+        <div id="category-summary-btn-container" class="d-none mt-3">
+            <button class="btn category-summary-btn w-100" onclick="showCategorySummaryModal()">Ver Resumo por Categoria</button>
+        </div>
+    </div>
+
+    <!-- COLUNAS A EXIBIR -->
+    <div class="columns-container">
+        <h5 class="section-title">Colunas a Exibir</h5>
+        <div id="column-checkboxes" class="row"></div>
+    </div>
+
+    <!-- FILTROS -->
+    <div class="filters-container">
+        <h5 class="section-title">Filtros de Exibição</h5>
+        <div class="filters row g-3">
+            <div class="col-md-4">
+                <div class="filter-checkbox-header">
+                    <label class="form-label">Região</label>
+                    <button type="button" class="btn btn-sm btn-outline-primary select-all-btn" onclick="selectAll('regiao')">Selecionar Todos</button>
+                </div>
+                <div id="filter-regiao-checkboxes" class="filter-checkbox-group"></div>
+            </div>
+            <div class="col-md-4">
+                <div class="filter-checkbox-header">
+                    <label class="form-label">Categoria</label>
+                    <button type="button" class="btn btn-sm btn-outline-primary select-all-btn" onclick="selectAll('categoria')">Selecionar Todos</button>
+                </div>
+                <div id="filter-categoria-checkboxes" class="filter-checkbox-group"></div>
+            </div>
+            <div class="col-md-4">
+                <div class="filter-checkbox-header">
+                    <label class="form-label">Equipamento</label>
+                    <button type="button" class="btn btn-sm btn-outline-primary select-all-btn" onclick="selectAll('equipamento')">Selecionar Todos</button>
+                </div>
+                <div id="filter-equipamento-checkboxes" class="filter-checkbox-group"></div>
+            </div>
+        </div>
+        <div class="mt-3 text-end">
+            <button class="btn btn-secondary" onclick="clearAllFilters()">Limpar Filtros</button>
+        </div>
+    </div>
+
+    <!-- RESUMO DOS FILTROS (CARD) -->
+    <div id="filter-summary-container" class="d-none">
+        <div class="filter-summary-card">
+            <div class="filter-summary-header">
+                <span>Resumo dos Filtros Aplicados</span>
+                <button class="btn btn-sm btn-light" onclick="previewFilterSummaryPDF()">Gerar PDF</button>
+            </div>
+            <div class="filter-summary-body">
+                <div class="filter-summary-section"><div class="filter-summary-title">Filtros Ativos</div><div id="active-filters-list"></div></div>
+                <div class="filter-summary-section"><div class="filter-summary-title">Resumo por Cliente</div><div id="client-summary-list"></div></div>
+                <div class="filter-summary-section"><div class="filter-summary-title">Resumo por Unidade</div><div id="unit-summary-list"></div></div>
+                <div class="filter-summary-section"><div class="filter-summary-title">Equipamentos Encontrados</div><div id="equipment-summary-list"></div></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="d-grid gap-2 d-md-flex justify-content-md-end mb-4">
+        <button class="btn btn-primary" onclick="previewPDF()" disabled id="pdf-btn">Visualizar/Imprimir PDF</button>
+    </div>
+
+    <div class="card-container" id="results"></div>
+    <p id="no-results" class="no-results d-none">Nenhum equipamento encontrado para os itens selecionados.</p>
+</div>
+
+<!-- MODAL PREVIEW PDF -->
+<div class="modal fade" id="preview-modal" tabindex="-1">
+    <div class="modal-dialog modal-xl"><div class="modal-content">
+        <div class="modal-header"><h5 class="modal-title">Pré-visualização do PDF</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+        <div class="modal-body"><iframe id="pdf-preview"></iframe></div>
+        <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+            <button type="button" class="btn btn-primary" onclick="downloadPDF()">Baixar PDF</button></div>
+    </div></div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    const { jsPDF } = window.jspdf;
+    let data = [], filteredData = [];
+    const allFields = ['regiao','categoria','instalacao','unidade','equipamento','serial','cdPat','tec','cnpj','cliente','prevAtual','proxPrev','trocaLamp','trocaProb','trocaRefer','trocaLs','obs'];
+    const fieldLabels = {regiao:'Região',categoria:'Categoria',instalacao:'Instalação',unidade:'Unidade',equipamento:'Equipamento',serial:'Serial',cdPat:'CD PAT',tec:'Tec',cnpj:'CNPJ',cliente:'Cliente',prevAtual:'Prev. Atual',proxPrev:'Prox. Prev',trocaLamp:'Troca de Lâmp',trocaProb:'Troca de Prob',trocaRefer:'Troca Refer',trocaLs:'Troca da LS',obs:'OBS'};
+    let selectedFields = new Set(), selectedItems = new Set(), currentSearchType = 'cliente';
+    let selectedRegioes = new Set(), selectedCategorias = new Set(), selectedEquipamentos = new Set();
+    let isSearchMode = false;
+
+    /* ---------- FUNÇÕES AUXILIARES ---------- */
+    function formatExcelDate(v){if(!v)return'';if(typeof v==='string')return v;if(typeof v==='number'){const d=new Date((v-(25567+2))*86400*1000);return d.toLocaleDateString('pt-BR')}return v;}
+
+    function addRegiaoCategoriaSummary(doc, startY){
+        const sum = {}; let grandTotal = 0;
+        filteredData.forEach(i=>{
+            const c = i.categoria || 'Sem Categoria';
+            const r = i.regiao || 'Sem Região';
+            if(!sum[c]) sum[c] = {total:0};
+            if(!sum[c][r]) sum[c][r] = 0;
+            sum[c][r]++; sum[c].total++; grandTotal++;
+        });
+        const rows = [];
+        Object.keys(sum).sort().forEach(cat=>{
+            if(selectedCategorias.size===0 || selectedCategorias.has(cat)){
+                Object.keys(sum[cat]).sort().forEach(reg=>{
+                    if(reg!=='total') rows.push([cat, reg, sum[cat][reg]]);
+                });
+                if(selectedCategorias.has(cat) || selectedCategorias.size===0){
+                    rows.push([`TOTAL ${cat}`, '', sum[cat].total]);
+                }
+            }
+        });
+        if(selectedCategorias.size>1 || selectedCategorias.size===0) rows.push(['TOTAL GERAL', '', grandTotal]);
+        doc.setFontSize(14); doc.setTextColor(41,128,185);
+        doc.text('Resumo de Equipamentos por Categoria e Região:', 14, startY);
+        doc.autoTable({
+            head:[['Categoria','Região','Quantidade']],
+            body:rows,
+            startY:startY+10,
+            theme:'grid',
+            styles:{fontSize:8,cellPadding:3},
+            headStyles:{fillColor:[41,128,185],textColor:[255,255,255],fontStyle:'bold'}
+        });
+        return doc.lastAutoTable.finalY + 10;
+    }
+
+    /* ---------- CARREGAMENTO DA PLANILHA ---------- */
+    document.getElementById('file-upload').addEventListener('change', e=>{
+        const file = e.target.files[0];
+        if(!file) return;
+        const reader = new FileReader();
+        reader.onload = ev=>{
+            const wb = XLSX.read(ev.target.result,{type:'binary'});
+            const rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1});
+            data = rows.slice(1).map(r=>({
+                regiao:r[0]||'', categoria:r[1]||'', instalacao:formatExcelDate(r[2]), unidade:r[3]||'', equipamento:r[4]||'',
+                serial:r[5]||'', cdPat:r[6]||'', tec:r[7]||'', cnpj:r[8]||'', cliente:r[9]||'',
+                prevAtual:formatExcelDate(r[10]), proxPrev:formatExcelDate(r[11]), trocaLamp:r[12]||'', trocaProb:r[13]||'',
+                trocaRefer:r[14]||'', trocaLs:r[15]||'', obs:r[16]||''
+            }));
+            populateColumnCheckboxes(); populateFilterCheckboxes(); updateSelectedItemsDisplay(); updateResults();
+            document.getElementById('pdf-btn').disabled = false;
+        };
+        reader.readAsBinaryString(file);
+    });
+
+    /* ---------- CHECKBOXES ---------- */
+    function populateColumnCheckboxes(){
+        const c = document.getElementById('column-checkboxes'); c.innerHTML='';
+        allFields.forEach(f=>{ const d=document.createElement('div'); d.className='col-md-3';
+            d.innerHTML=`<div class="form-check"><input class="form-check-input" type="checkbox" id="col-${f}" ${selectedFields.has(f)?'checked':''} onchange="toggleColumn('${f}')">
+                         <label class="form-check-label" for="col-${f}">${fieldLabels[f]}</label></div>`;
+            c.appendChild(d);
+        });
+    }
+    function toggleColumn(f){ selectedFields.has(f)?selectedFields.delete(f):selectedFields.add(f); updateResults(); }
+
+    function populateFilterCheckboxes(){
+        const uniq = (arr)=>[...new Set(arr.filter(Boolean))];
+        const regs = uniq(data.map(i=>i.regiao)), cats = uniq(data.map(i=>i.categoria)), eqs = uniq(data.map(i=>i.equipamento));
+        ['regiao','categoria','equipamento'].forEach((type,idx)=>{
+            const arr = type==='regiao'?regs:type==='categoria'?cats:eqs;
+            const cont = document.getElementById(`filter-${type}-checkboxes`); cont.innerHTML='';
+            arr.forEach(v=>{ const d=document.createElement('div'); d.className='filter-checkbox-item';
+                d.innerHTML=`<div class="form-check"><input class="form-check-input" type="checkbox" id="${type}-${v}" value="${v}" onchange="updateFilter('${type}','${v}')">
+                             <label class="form-check-label" for="${type}-${v}">${v}</label></div>`;
+                cont.appendChild(d);
+            });
+        });
+    }
+    function updateFilter(t,v){
+        const cb = document.getElementById(`${t}-${v}`);
+        const set = t==='regiao'?selectedRegioes:t==='categoria'?selectedCategorias:selectedEquipamentos;
+        cb.checked?set.add(v):set.delete(v);
+        updateResults();
+    }
+    function selectAll(t){
+        const set = t==='regiao'?selectedRegioes:t==='categoria'?selectedCategorias:selectedEquipamentos;
+        set.clear();
+        document.querySelectorAll(`#filter-${t}-checkboxes input[type="checkbox"]`).forEach(cb=>{cb.checked=true;set.add(cb.value);});
+        updateResults();
+    }
+    function clearAllFilters(){
+        [selectedRegioes,selectedCategorias,selectedEquipamentos].forEach(s=>s.clear());
+        document.querySelectorAll('.filter-checkbox-group input[type="checkbox"]').forEach(cb=>cb.checked=false);
+        updateResults();
+    }
+
+    /* ---------- PESQUISA E RESULTADOS ---------- */
+    function changeSearchType(){
+        currentSearchType = document.querySelector('input[name="searchType"]:checked').value;
+        const lbl = {cliente:'clientes',unidade:'unidades',categoria:'categorias'};
+        document.getElementById('search-label').textContent = `Digite para buscar ${lbl[currentSearchType]}:`;
+        document.getElementById('selected-label').textContent = `${lbl[currentSearchType].charAt(0).toUpperCase()+lbl[currentSearchType].slice(1)} Selecionados:`;
+        document.getElementById('search').placeholder = `Digite para buscar ${lbl[currentSearchType]}...`;
+        document.getElementById('toggle-all-btn').textContent = `Selecionar/Desselecionar Todos os ${lbl[currentSearchType].charAt(0).toUpperCase()+lbl[currentSearchType].slice(1)}`;
+        document.getElementById('category-summary-btn-container').classList.toggle('d-none', currentSearchType!=='categoria');
+        selectedItems.clear(); updateSelectedItemsDisplay(); updateResults();
+    }
+
+    function showSuggestions(){
+        const term = document.getElementById('search').value.toLowerCase();
+        const cont = document.getElementById('suggestions');
+        if(term.length===0){ hideSuggestions(); return; }
+        const src = currentSearchType==='cliente'?data.map(i=>i.cliente):
+                    currentSearchType==='unidade'?data.map(i=>i.unidade):
+                    data.map(i=>i.categoria);
+        const uniq = [...new Set(src.filter(Boolean))];
+        const filtered = uniq.filter(v=>v.toLowerCase().includes(term));
+        cont.innerHTML = filtered.length===0?'<div class="client-list-item text-muted">Nenhum resultado</div>':
+            filtered.map(v=>`<div class="client-list-item" onclick="selectItem('${v.replace(/'/g,"\\'")}')">${v}</div>`).join('');
+        cont.style.display='block';
+    }
+    function hideSuggestions(){ document.getElementById('suggestions').style.display='none'; }
+    function selectItem(v){ selectedItems.add(v); document.getElementById('search').value=''; hideSuggestions(); updateSelectedItemsDisplay(); updateResults(); }
+
+    function toggleAllClients(){
+        const src = currentSearchType==='cliente'?data.map(i=>i.cliente):
+                    currentSearchType==='unidade'?data.map(i=>i.unidade):
+                    data.map(i=>i.categoria);
+        const all = [...new Set(src.filter(Boolean))];
+        const allSelected = all.every(i=>selectedItems.has(i));
+        allSelected?selectedItems.clear():all.forEach(i=>selectedItems.add(i));
+        updateSelectedItemsDisplay(); updateResults();
+    }
+
+    function updateSelectedItemsDisplay(){
+        const d = document.getElementById('selected-items-display');
+        d.innerHTML = selectedItems.size===0?'<span class="text-muted">Nenhum item selecionado</span>':
+            Array.from(selectedItems).map(i=>`<span class="selected-clients-badge" onclick="selectedItems.delete('${i.replace(/'/g,"\\'")}');updateSelectedItemsDisplay();updateResults()">${i}</span>`).join('');
+    }
+
+    function updateResults(){
+        const results = document.getElementById('results'), no = document.getElementById('no-results');
+        if(selectedItems.size>0){
+            isSearchMode = true;
+            filteredData = data.filter(i=>
+                (currentSearchType==='cliente'?selectedItems.has(i.cliente):
+                 currentSearchType==='unidade'?selectedItems.has(i.unidade):
+                 selectedItems.has(i.categoria)) &&
+                (selectedRegioes.size===0||selectedRegioes.has(i.regiao)) &&
+                (selectedCategorias.size===0||selectedCategorias.has(i.categoria)) &&
+                (selectedEquipamentos.size===0||selectedEquipamentos.has(i.equipamento))
+            );
+        }else{
+            isSearchMode = false;
+            filteredData = data.filter(i=>
+                (selectedRegioes.size===0||selectedRegioes.has(i.regiao)) &&
+                (selectedCategorias.size===0||selectedCategorias.has(i.categoria)) &&
+                (selectedEquipamentos.size===0||selectedEquipamentos.has(i.equipamento))
+            );
+        }
+
+        const grouped = {};
+        const keyFn = isSearchMode?
+            (i=> currentSearchType==='cliente'?i.cliente:currentSearchType==='unidade'?i.unidade:i.categoria):
+            (i=> i.regiao||'Sem Região');
+        filteredData.forEach(i=>{ const k=keyFn(i); if(!grouped[k])grouped[k]=[]; grouped[k].push(i); });
+
+        results.innerHTML=''; 
+        if(filteredData.length===0){ no.classList.remove('d-none'); document.getElementById('filter-summary-container').classList.add('d-none'); return; }
+        no.classList.add('d-none');
+        if(isSearchMode){ updateFilterSummary(); document.getElementById('filter-summary-container').classList.remove('d-none'); }
+        else document.getElementById('filter-summary-container').classList.add('d-none');
+
+        Object.keys(grouped).forEach(k=>{
+            const items = grouped[k];
+            const card = document.createElement('div'); card.className='card';
+            const title = isSearchMode? (currentSearchType==='cliente'?`Cliente ${k}`:currentSearchType==='unidade'?`Unidade ${k}`:`Categoria ${k}`) : `Região ${k}`;
+            card.innerHTML = `<div class="card-title">${title} <span class="equipment-count">${items.length} equipamentos</span></div>
+                              <div class="card-body"><div class="horizontal-equipment-container">
+                                  ${items.map(createEquipmentCard).join('')}
+                              </div></div>`;
+            results.appendChild(card);
+        });
+    }
+
+    function createEquipmentCard(i){
+        let det = '';
+        Array.from(selectedFields).forEach(f=>{ if(f!=='cliente'&&f!=='unidade'&&f!=='categoria'&&f!=='regiao'&&i[f]) det+=`<div class="detail-row"><span class="detail-label">${fieldLabels[f]}:</span><span class="detail-value">${i[f]}</span></div>`; });
+        return `<div class="horizontal-equipment-item">
+                    <div class="equipment-header"><div class="equipment-name">${i.equipamento}</div><div class="unidade-badge">${i.unidade}</div></div>
+                    <div class="equipment-details">${det}</div>
+                </div>`;
+    }
+
+    /* ---------- RESUMO DOS FILTROS (CARD) - CORRIGIDO ---------- */
+    function updateFilterSummary(){
+        const af = document.getElementById('active-filters-list'); af.innerHTML='';
+        const lbl = {cliente:'Clientes',unidade:'Unidades',categoria:'Categorias'};
+        
+        // Filtros ativos
+        ['search','regiao','categoria','equipamento'].forEach(t=>{
+            const set = t==='search'?selectedItems:(t==='regiao'?selectedRegioes:t==='categoria'?selectedCategorias:selectedEquipamentos);
+            const txt = t==='search'?`${lbl[currentSearchType]} Selecionados:`:(t==='regiao'?'Regiões':t==='categoria'?'Categorias':'Equipamentos')+` Selecionadas:`;
+            const el = document.createElement('div'); el.className='filter-summary-item';
+            el.innerHTML=`<span class="filter-summary-label">${txt}</span><span class="filter-summary-count">${set.size}</span>`;
+            af.appendChild(el);
+        });
+
+        // Resumo por Cliente
+        const cs = document.getElementById('client-summary-list'); cs.innerHTML='';
+        [...new Set(filteredData.map(i=>i.cliente))].forEach(c=>{ 
+            const n = filteredData.filter(i=>i.cliente===c).length;
+            const el = document.createElement('div'); el.className='filter-summary-item';
+            el.innerHTML=`<span class="filter-summary-label">${c}</span><span class="filter-summary-count">${n}</span>`;
+            cs.appendChild(el);
+        });
+
+        // Resumo por Unidade
+        const us = document.getElementById('unit-summary-list'); us.innerHTML='';
+        [...new Set(filteredData.map(i=>i.unidade))].forEach(u=>{ 
+            const n = filteredData.filter(i=>i.unidade===u).length;
+            const el = document.createElement('div'); el.className='filter-summary-item';
+            el.innerHTML=`<span class="filter-summary-label">${u}</span><span class="filter-summary-count">${n}</span>`;
+            us.appendChild(el);
+        });
+
+        // Equipamentos Encontrados
+        const eq = document.getElementById('equipment-summary-list'); eq.innerHTML='';
+        [...new Set(filteredData.map(i=>i.equipamento))].sort().forEach(e=>{ 
+            const items = filteredData.filter(i=>i.equipamento===e);
+            const n = items.length;
+            const el = document.createElement('div'); el.className='filter-summary-equipment';
+            el.innerHTML = `
+                <div class="filter-summary-equipment-name">${e}</div>
+                <div class="filter-summary-equipment-details">
+                    <div class="filter-summary-equipment-detail"><span class="filter-summary-equipment-label">Quantidade:</span><span class="filter-summary-equipment-value">${n}</span></div>
+                    <div class="filter-summary-equipment-detail"><span class="filter-summary-equipment-label">Unidades:</span><span class="filter-summary-equipment-value">${[...new Set(items.map(i=>i.unidade))].join(', ')}</span></div>
+                </div>`;
+            eq.appendChild(el);
+        });
+    }
+
+    /* ---------- GERAÇÃO DE PDF ---------- */
+    function buildCommonHeader(doc, title, itemsLabel, itemsText){
+        doc.setFontSize(16); doc.setTextColor(41,128,185);
+        doc.text(title,14,15);
+        const today = new Date(); const fd = `${String(today.getDate()).padStart(2,'0')}/${String(today.getMonth()+1).padStart(2,'0')}/${today.getFullYear()}`;
+        doc.setFontSize(10); doc.setTextColor(100,100,100);
+        doc.text(`Data de Emissão: ${fd}`,14,22);
+        if(itemsText) doc.text(`${itemsLabel}: ${itemsText}`,14,29);
+        return itemsText?35:29;
+    }
+
+    function previewPDF(){ generatePDF(true); }
+    function downloadPDF(){ generatePDF(false); }
+    function generatePDF(isPreview){
+        const doc = new jsPDF({orientation:'landscape'});
+        const titleMap = {cliente:'Relatório de Patrimônio por Cliente',unidade:'Relatório de Patrimônio por Unidade',categoria:'Relatório de Patrimônio por Categoria'};
+        const itemsLabelMap = {cliente:'Clientes Selecionados',unidade:'Unidades Selecionadas',categoria:'Categorias Selecionadas'};
+        const itemsText = Array.from(selectedItems).join(', ');
+        const startY = buildCommonHeader(doc, titleMap[currentSearchType], itemsLabelMap[currentSearchType], itemsText);
+
+        let y = addRegiaoCategoriaSummary(doc, startY);
+
+        const headers = ['Unidade', ...Array.from(selectedFields).filter(f=>f!=='cliente').map(f=>fieldLabels[f])];
+        const body = filteredData.map(i=> [i.unidade||'', ...Array.from(selectedFields).filter(f=>f!=='cliente').map(f=>i[f]||'')]);
+        doc.autoTable({head:[headers],body,startY:y,theme:'grid',
+            styles:{fontSize:8,cellPadding:3},headStyles:{fillColor:[41,128,185],textColor:[255,255,255],fontStyle:'bold'}});
+
+        if(isPreview){
+            const blob = doc.output('blob'); const url = URL.createObjectURL(blob);
+            document.getElementById('pdf-preview').src = url;
+            new bootstrap.Modal(document.getElementById('preview-modal')).show();
+            window.currentPDF = doc;
+        }else doc.save('relatorio_patrimonio.pdf');
+    }
+
+    function previewFilterSummaryPDF(){ generateFilterSummaryPDF(true); }
+    function generateFilterSummaryPDF(isPreview){
+        const doc = new jsPDF({orientation:'landscape'});
+        const pageW = doc.internal.pageSize.width, m = 15; let y = 20;
+        doc.setFontSize(18); doc.setTextColor(41,128,185);
+        doc.text('Relatório de Patrimônio - Resumo dos Filtros', pageW/2, y, {align:'center'}); y+=10;
+        const fd = new Date().toLocaleDateString('pt-BR');
+        doc.setFontSize(10); doc.setTextColor(100,100,100);
+        doc.text(`Data de Emissão: ${fd}`, pageW/2, y, {align:'center'}); y+=15;
+
+        doc.setFontSize(12); doc.setTextColor(0,0,0);
+        doc.text(`Total de Equipamentos: ${filteredData.length}`, m, y); y+=8;
+        doc.text(`Total de Clientes: ${[...new Set(filteredData.map(i=>i.cliente))].length}`, m, y); y+=8;
+        doc.text(`Total de Unidades: ${[...new Set(filteredData.map(i=>i.unidade))].length}`, m, y); y+=15;
+
+        y = addRegiaoCategoriaSummary(doc, y);
+
+        const units = [...new Set(filteredData.map(i=>i.unidade))].sort();
+        doc.setFontSize(14); doc.setTextColor(41,128,185);
+        doc.text('Resumo por Unidade:', m, y); y+=10;
+        doc.setFontSize(9);
+        units.forEach(u=>{ if(y>180){doc.addPage();y=20;}
+            const cnt = filteredData.filter(i=>i.unidade===u).length;
+            const txt = `• ${u}: ${cnt} equipamentos`;
+            const w = doc.getTextWidth(txt);
+            if(w > pageW-2*m-30){
+                const words = u.split(' '); let l1='',l2='';
+                words.forEach(wd=>{ if(doc.getTextWidth(`• ${l1} ${wd}:`) <= pageW-2*m-30) l1+= (l1?' ':'')+wd; else l2+= (l2?' ':'')+wd; });
+                doc.text(`• ${l1}:`, m, y); y+=5;
+                doc.text(`  ${l2} - ${cnt} equipamentos`, m, y); y+=6;
+            }else{ doc.text(txt, m, y); y+=6; }
+        });
+
+        y+=10; if(y>150){doc.addPage();y=20;}
+        doc.setFontSize(14); doc.setTextColor(41,128,185);
+        doc.text('Equipamentos Encontrados:', m, y); y+=10;
+        const hd = ['Unidade','Categoria','Equipamento','Serial','CD PAT'];
+        const bd = filteredData.map(i=>[i.unidade||'N/A',i.categoria||'N/A',i.equipamento||'N/A',i.serial||'N/A',i.cdPat||'N/A']);
+        doc.autoTable({startY:y,head:[hd],body:bd,theme:'grid',
+            styles:{fontSize:7,cellPadding:2,overflow:'linebreak',cellWidth:'wrap'},
+            headStyles:{fillColor:[41,128,185],textColor:[255,255,255],fontStyle:'bold'},
+            margin:{left:m,right:m},pageBreak:'auto'});
+
+        if(isPreview){
+            const blob = doc.output('blob'); const url = URL.createObjectURL(blob);
+            document.getElementById('pdf-preview').src = url;
+            new bootstrap.Modal(document.getElementById('preview-modal')).show();
+            window.currentPDF = doc;
+        }else doc.save('resumo_filtros_patrimonio.pdf');
+    }
+</script>
+</body>
+</html>
