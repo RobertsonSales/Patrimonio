@@ -1,0 +1,1623 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerenciador de Patrimônio</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <style>
+        /* [ESTILOS ORIGINAIS MANTIDOS - SEM ALTERAÇÕES] */
+        body{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);min-height:100vh;padding:20px;font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif}
+        .container{background:rgba(255,255,255,.95);border-radius:15px;padding:30px;box-shadow:0 10px 30px rgba(0,0,0,.2)}
+        h1{color:#2c3e50;text-align:center;margin-bottom:30px;font-weight:700;text-shadow:2px 2px 4px rgba(0,0,0,.1)}
+        .card{margin-bottom:20px;border:none;border-radius:12px;box-shadow:0 4px 15px rgba(0,0,0,.1);transition:transform .3s ease,box-shadow .3s ease;background:linear-gradient(135deg,#f8f9fa 0%,#e9ecef 100%);flex:1 1 calc(33.333% - 20px);min-width:300px}
+        .card:hover{transform:translateY(-5px);box-shadow:0 8px 25px rgba(0,0,0,.15)}
+        .card-title{background:linear-gradient(135deg,#3498db,#2980b9);color:#fff;padding:15px;margin:-1rem -1rem 1rem -1rem;border-radius:12px 12px 0 0;font-weight:600;font-size:1.1rem}
+        .card-body{padding:1.5rem}
+        .no-results{color:#e74c3c;text-align:center;font-size:1.1rem;font-weight:500}
+        #preview-modal .modal-body{height:80vh;overflow:auto}
+        .card-container{display:flex;flex-wrap:wrap;gap:20px;justify-content:flex-start}
+        .form-label{font-weight:600;color:#2c3e50;margin-bottom:8px}
+        .form-control,.form-select{border:2px solid #e9ecef;border-radius:8px;padding:10px;transition:border-color .3s ease}
+        .form-control:focus,.form-select:focus{border-color:#3498db;box-shadow:0 0 0 .2rem rgba(52,152,219,.25)}
+        .btn{border-radius:8px;padding:10px 20px;font-weight:600;transition:all .3s ease;border:none}
+        .btn-primary{background:linear-gradient(135deg,#3498db,#2980b9)}
+        .btn-primary:hover{background:linear-gradient(135deg,#2980b9,#1f618d);transform:translateY(-2px);box-shadow:0 4px 15px rgba(52,152,219,.4)}
+        .btn-secondary{background:linear-gradient(135deg,#95a5a6,#7f8c8d)}
+        .btn-secondary:hover{background:linear-gradient(135deg,#7f8c8d,#6c7b7d);transform:translateY(-2px)}
+        .btn-success{background:linear-gradient(135deg,#27ae60,#219653)}
+        .btn-success:hover{background:linear-gradient(135deg,#219653,#1e8449);transform:translateY(-2px)}
+        .section-title{color:#2c3e50;border-bottom:2px solid #3498db;padding-bottom:10px;margin-bottom:20px;font-weight:600}
+        .form-check-input:checked{background-color:#3498db;border-color:#3498db}
+        .modal-header{background:linear-gradient(135deg,#3498db,#2980b9);color:#fff;border-radius:15px 15px 0 0}
+        .search-container{position:relative}
+        .client-list-container{position:absolute;top:100%;left:0;right:0;background:#fff;border:1px solid #dee2e6;border-radius:8px;box-shadow:0 4px 15px rgba(0,0,0,.1);z-index:1000;max-height:300px;overflow-y:auto;display:none}
+        .client-list-item{padding:10px 15px;border-bottom:1px solid #eee;cursor:pointer;transition:background-color .2s ease}
+        .client-list-item:hover{background-color:#f8f9fa}
+        .selected-clients-badge{background:#3498db;color:#fff;padding:4px 8px;border-radius:12px;font-size:.8rem;margin-right:5px;margin-bottom:5px;display:inline-block}
+        .search-type-selector{background:#e9ecef;padding:15px;border-radius:8px;margin-bottom:15px}
+        .search-type-buttons{display:flex;gap:15px;flex-wrap:wrap}
+        .search-type-btn{flex:1;min-width:150px}
+        .equipment-count{background:#27ae60;color:#fff;padding:5px 10px;border-radius:15px;font-size:.8rem;font-weight:bold;display:inline-block;margin-bottom:10px}
+        .horizontal-equipment-container{display:flex;flex-wrap:wrap;gap:15px;margin-top:15px}
+        .horizontal-equipment-item{flex:1 1 calc(33.333% - 15px);min-width:250px;background:#fff;padding:15px;border-radius:8px;border-left:4px solid #3498db;box-shadow:0 2px 8px rgba(0,0,0,.1);transition:transform .2s ease,box-shadow .2s ease}
+        .horizontal-equipment-item:hover{transform:translateY(-3px);box-shadow:0 4px 12px rgba(0,0,0,.15)}
+        .horizontal-equipment-item .equipment-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;border-bottom:1px solid #e9ecef;padding-bottom:8px}
+        .horizontal-equipment-item .equipment-name{font-weight:600;color:#2c3e50;font-size:.9rem;margin:0;flex:1}
+        .horizontal-equipment-item .unidade-badge{background:#e74c3c;color:#fff;padding:2px 6px;border-radius:10px;font-size:.7rem;font-weight:bold;margin-left:8px;white-space:nowrap}
+        .horizontal-equipment-item .equipment-details{display:grid;grid-template-columns:1fr;gap:4px}
+        .horizontal-equipment-item .detail-row{display:flex;justify-content:space-between}
+        .horizontal-equipment-item .detail-label{font-weight:500;color:#495057;font-size:.75rem}
+        .horizontal-equipment-item .detail-value{color:#2c3e50;font-size:.75rem;text-align:right}
+        .filter-checkbox-group{background:#fff;border:1px solid #dee2e6;border-radius:8px;max-height:200px;overflow-y:auto;padding:10px;margin-top:5px}
+        .filter-checkbox-item{padding:5px 0;border-bottom:1px solid #f8f9fa}
+        .filter-checkbox-item:last-child{border-bottom:none}
+        .filter-checkbox-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+        .select-all-btn{font-size:.8rem;padding:2px 8px}
+        .filters-container{background:#f8f9fa;padding:20px;border-radius:10px;margin-bottom:20px;border-left:4px solid #f39c12}
+        .filters-container .section-title{color:#2c3e50;border-bottom:2px solid #f39c12;padding-bottom:10px;margin-bottom:20px;font-weight:600}
+        .columns-container{background:#f8f9fa;padding:20px;border-radius:10px;margin-bottom:20px;border-left:4px solid #9b59b6}
+        .columns-container .section-title{color:#2c3e50;border-bottom:2px solid #9b59b6;padding-bottom:10px;margin-bottom:20px;font-weight:600}
+        .category-summary-btn{background:linear-gradient(135deg,#9b59b6,#8e44ad);color:#fff;border:none}
+        .category-summary-btn:hover{background:linear-gradient(135deg,#8e44ad,#7d3c98);transform:translateY(-2px);box-shadow:0 4px 15px rgba(155,89,182,.4)}
+        .filter-summary-card{background:linear-gradient(135deg,#f8f9fa 0%,#e9ecef 100%);border-radius:12px;box-shadow:0 4px 15px rgba(0,0,0,.1);margin-bottom:20px;border-left:4px solid #27ae60}
+        .filter-summary-header{background:linear-gradient(135deg,#27ae60,#219653);color:#fff;padding:15px;border-radius:12px 12px 0 0;font-weight:600;font-size:1.1rem;display:flex;justify-content:space-between;align-items:center}
+        .filter-summary-body{padding:1.5rem}
+        .filter-summary-section{margin-bottom:15px;padding-bottom:15px;border-bottom:1px solid #e9ecef}
+        .filter-summary-section:last-child{margin-bottom:0;padding-bottom:0;border-bottom:none}
+        .filter-summary-title{font-weight:600;color:#2c3e50;margin-bottom:10px;font-size:1rem}
+        .filter-summary-item{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #f8f9fa}
+        .filter-summary-item:last-child{border-bottom:none}
+        .filter-summary-label{font-weight:500;color:#495057}
+        .filter-summary-count{background:#3498db;color:#fff;padding:2px 8px;border-radius:12px;font-size:.75rem;font-weight:bold}
+        .filter-summary-equipment{background:#fff;padding:10px;border-radius:8px;margin-bottom:10px;border-left:3px solid #3498db}
+        .filter-summary-equipment:last-child{margin-bottom:0}
+        .filter-summary-equipment-name{font-weight:600;color:#2c3e50;margin-bottom:5px}
+        .filter-summary-equipment-details{display:grid;grid-template-columns:1fr 1fr;gap:5px;font-size:.8rem}
+        .filter-summary-equipment-detail{display:flex;justify-content:space-between}
+        .filter-summary-equipment-label{font-weight:500;color:#495057}
+        .filter-summary-equipment-value{color:#2c3e50}
+
+        /* ESTILOS DE UPLOAD E MOBILE */
+        .file-upload-container {
+            background: linear-gradient(135deg, #ff9a9e 0%, #fad0c4 100%);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 25px;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+            border: 2px dashed #e74c3c;
+            transition: all 0.3s ease;
+        }
+        .file-upload-container:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            border-color: #c0392b;
+        }
+        .file-upload-label {
+            font-weight: 700;
+            font-size: 1.2rem;
+            color: #c0392b;
+            margin-bottom: 10px;
+            display: block;
+        }
+        .file-upload-icon {
+            font-size: 2rem;
+            margin-right: 10px;
+            vertical-align: middle;
+            color: #e74c3c;
+        }
+        .file-upload-input {
+            border: 2px solid #e74c3c;
+            border-radius: 8px;
+            padding: 12px;
+            background-color: rgba(255,255,255,0.9);
+            transition: all 0.3s ease;
+        }
+        .file-upload-input:focus {
+            border-color: #c0392b;
+            box-shadow: 0 0 0 0.25rem rgba(231, 76, 60, 0.25);
+        }
+        .mobile-pdf-actions {
+            display: none;
+            margin-top: 15px;
+            gap: 10px;
+        }
+
+        /* ESTILOS DO VISUALIZADOR DE PDF (CORRIGIDO PARA MOBILE) */
+        #pdf-preview-body { background:#f8f9fa; position:relative; }
+        #pdf-embed, #pdf-object { display:block; width:100%; height:100%; border:none; border-radius:8px; }
+        #pdf-fallback-link { color:#3498db; text-decoration:underline; }
+
+        /* NOVOS ESTILOS PARA RESUMOS EM TABELAS DINÂMICAS */
+        .summary-table-container {
+            margin-top: 20px;
+        }
+        .summary-table-card {
+            margin-bottom: 25px;
+        }
+        .summary-table {
+            width: 100%;
+            font-size: 0.85rem;
+            border-collapse: collapse;
+        }
+        .summary-table th {
+            background-color: #3498db;
+            color: white;
+            padding: 8px 10px;
+            text-align: left;
+            position: sticky;
+            top: 0;
+        }
+        .summary-table td {
+            padding: 8px 10px;
+            border-bottom: 1px solid #e9ecef;
+        }
+        .summary-table tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+        .summary-table tr:hover {
+            background-color: #e9ecef;
+        }
+        .category-count-badge {
+            background-color: #9b59b6;
+            color: white;
+            padding: 2px 6px;
+            border-radius: 10px;
+            font-size: 0.7rem;
+            margin-left: 5px;
+        }
+        .category-column {
+            text-align: center;
+            font-weight: 600;
+        }
+        .total-row {
+            background-color: #2c3e50 !important;
+            color: white;
+            font-weight: bold;
+        }
+
+        /* NOVO BOTÃO RESUMO DETALHADO */
+        .detailed-summary-btn {
+            background: linear-gradient(135deg, #f39c12, #e67e22);
+            color: #fff;
+            border: none;
+            margin-top: 10px;
+        }
+        .detailed-summary-btn:hover {
+            background: linear-gradient(135deg, #e67e22, #d35400);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(243, 156, 18, 0.4);
+        }
+
+        @media (max-width: 768px) {
+            .mobile-pdf-actions {
+                display: flex;
+                flex-direction: column;
+                position: absolute;
+                bottom: 10px;
+                left: 10px;
+                right: 10px;
+                z-index: 10;
+            }
+            #preview-modal .modal-body {
+                height: 70vh;
+                padding: 0;
+            }
+            .summary-table {
+                font-size: 0.75rem;
+            }
+            .summary-table th, .summary-table td {
+                padding: 6px 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>Gerenciador de Patrimônio</h1>
+
+    <!-- IMPORTAÇÃO DE PLANILHA -->
+    <div class="file-upload-container">
+        <span class="file-upload-icon">📊</span>
+        <label for="file-upload" class="file-upload-label">Importar Planilha (.xlsx)</label>
+        <input type="file" id="file-upload" class="form-control file-upload-input" accept=".xlsx">
+        <small class="text-muted mt-2 d-block">Selecione um arquivo Excel (.xlsx) para carregar os dados de patrimônio</small>
+    </div>
+
+    <!-- PESQUISA E SELEÇÃO -->
+    <div class="filter-section">
+        <h5 class="section-title">Pesquisar e Selecionar</h5>
+
+        <div class="search-type-selector">
+            <label class="form-label mb-3">Tipo de Pesquisa:</label>
+            <div class="search-type-buttons">
+                <div class="form-check search-type-btn">
+                    <input class="form-check-input" type="radio" name="searchType" id="searchCliente" value="cliente" checked onchange="changeSearchType()">
+                    <label class="form-check-label" for="searchCliente">Pesquisar por Cliente</label>
+                </div>
+                <div class="form-check search-type-btn">
+                    <input class="form-check-input" type="radio" name="searchType" id="searchUnidade" value="unidade" onchange="changeSearchType()">
+                    <label class="form-check-label" for="searchUnidade">Pesquisar por Unidade</label>
+                </div>
+                <div class="form-check search-type-btn">
+                    <input class="form-check-input" type="radio" name="searchType" id="searchCategoria" value="categoria" onchange="changeSearchType()">
+                    <label class="form-check-label" for="searchCategoria">Pesquisar por Categoria</label>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label for="search" class="form-label" id="search-label">Digite para buscar clientes:</label>
+                <div class="search-container">
+                    <input type="text" id="search" class="form-control" placeholder="Digite para buscar..." oninput="showSuggestions()" onfocus="showSuggestions()">
+                    <div id="suggestions" class="client-list-container"></div>
+                </div>
+            </div>
+
+            <!-- NOVO BOTÃO LIMPAR PESQUISA -->
+            <div class="col-md-3 d-flex align-items-end">
+                <button class="btn btn-danger w-100" onclick="clearSearch()">Limpar Pesquisa</button>
+            </div>
+
+            <div class="col-md-3 d-flex align-items-end">
+                <button class="btn btn-success w-100" onclick="toggleAllClients()" id="toggle-all-btn">
+                    Selecionar/Desselecionar Todos os Clientes
+                </button>
+            </div>
+        </div>
+
+        <div class="mt-3">
+            <label class="form-label" id="selected-label">Itens Selecionados:</label>
+            <div id="selected-items-display" class="mb-3"><span class="text-muted">Nenhum item selecionado</span></div>
+        </div>
+
+        <div id="category-summary-btn-container" class="d-none mt-3">
+            <button class="btn category-summary-btn w-100" onclick="showCategorySummaryModal()">Ver Resumo por Categoria</button>
+        </div>
+    </div>
+
+    <!-- COLUNAS A EXIBIR -->
+    <div class="columns-container">
+        <h5 class="section-title">Colunas a Exibir</h5>
+        <div id="column-checkboxes" class="row"></div>
+    </div>
+
+    <!-- FILTROS -->
+    <div class="filters-container">
+        <h5 class="section-title">Filtros de Exibição</h5>
+        
+        <!-- NOVO BOTÃO RESUMO DETALHADO -->
+        <div class="mb-3">
+            <button class="btn detailed-summary-btn w-100" onclick="showDetailedSummaryModal()">
+                Ver Resumo Detalhado por Cliente
+            </button>
+        </div>
+        
+        <div class="filters row g-3">
+            <div class="col-md-4">
+                <div class="filter-checkbox-header">
+                    <label class="form-label">Região</label>
+                    <button type="button" class="btn btn-sm btn-outline-primary select-all-btn" onclick="selectAll('regiao')">Selecionar Todos</button>
+                </div>
+                <div id="filter-regiao-checkboxes" class="filter-checkbox-group"></div>
+            </div>
+            <div class="col-md-4">
+                <div class="filter-checkbox-header">
+                    <label class="form-label">Categoria</label>
+                    <button type="button" class="btn btn-sm btn-outline-primary select-all-btn" onclick="selectAll('categoria')">Selecionar Todos</button>
+                </div>
+                <div id="filter-categoria-checkboxes" class="filter-checkbox-group"></div>
+            </div>
+            <div class="col-md-4">
+                <div class="filter-checkbox-header">
+                    <label class="form-label">Equipamento</label>
+                    <button type="button" class="btn btn-sm btn-outline-primary select-all-btn" onclick="selectAll('equipamento')">Selecionar Todos</button>
+                </div>
+                <div id="filter-equipamento-checkboxes" class="filter-checkbox-group"></div>
+            </div>
+        </div>
+        <div class="mt-3 text-end">
+            <button class="btn btn-secondary" onclick="clearAllFilters()">Limpar Filtros</button>
+        </div>
+    </div>
+
+    <!-- RESUMO DOS FILTROS (CARD) -->
+    <div id="filter-summary-container" class="d-none">
+        <div class="filter-summary-card">
+            <div class="filter-summary-header">
+                <span>Resumo dos Filtros Aplicados</span>
+                <button class="btn btn-sm btn-light" onclick="previewFilterSummaryPDF()">Gerar PDF</button>
+            </div>
+            <div class="filter-summary-body">
+                <div class="filter-summary-section"><div class="filter-summary-title">Filtros Ativos</div><div id="active-filters-list"></div></div>
+                
+                <!-- RESUMO POR CLIENTE EM TABELA DINÂMICA -->
+                <div class="filter-summary-section">
+                    <div class="filter-summary-title">Resumo por Cliente</div>
+                    <div class="table-responsive">
+                        <table class="table table-striped table-sm summary-table" id="client-summary-table">
+                            <thead id="client-summary-header">
+                                <!-- Cabeçalho será preenchido dinamicamente -->
+                            </thead>
+                            <tbody id="client-summary-body">
+                                <!-- Dados serão preenchidos dinamicamente -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <!-- RESUMO POR UNIDADE EM TABELA DINÂMICA -->
+                <div class="filter-summary-section">
+                    <div class="filter-summary-title">Resumo por Unidade</div>
+                    <div class="table-responsive">
+                        <table class="table table-striped table-sm summary-table" id="unit-summary-table">
+                            <thead id="unit-summary-header">
+                                <!-- Cabeçalho será preenchido dinamicamente -->
+                            </thead>
+                            <tbody id="unit-summary-body">
+                                <!-- Dados serão preenchidos dinamicamente -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <div class="filter-summary-section"><div class="filter-summary-title">Equipamentos Encontrados</div><div id="equipment-summary-list"></div></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="d-grid gap-2 d-md-flex justify-content-md-end mb-4">
+        <button class="btn btn-success" onclick="exportToExcel()" disabled id="excel-btn">Exportar para Excel</button>
+        <button class="btn btn-primary" onclick="previewPDF()" disabled id="pdf-btn">Visualizar/Imprimir PDF</button>
+    </div>
+
+    <div class="card-container" id="results"></div>
+    <p id="no-results" class="no-results d-none">Nenhum equipamento encontrado para os itens selecionados.</p>
+</div>
+
+<!-- MODAL PREVIEW PDF - CORRIGIDO PARA MOBILE -->
+<div class="modal fade" id="preview-modal" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Pré-visualização do PDF</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="pdf-preview-body" style="position:relative; height:80vh; padding:0;">
+                <embed id="pdf-embed" type="application/pdf" width="100%" height="100%" style="border:none; border-radius:8px;">
+                <object id="pdf-object" data="" type="application/pdf" width="100%" height="100%" style="border:none; border-radius:8px;">
+                    <p>Seu navegador não suporta visualização de PDF. <a href="#" id="pdf-fallback-link">Baixar PDF</a></p>
+                </object>
+                <div class="mobile-pdf-actions">
+                    <button type="button" class="btn btn-primary" onclick="downloadPDF()">Baixar PDF</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                </div>
+            </div>
+            <div class="modal-footer d-none d-md-flex">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                <button type="button" class="btn btn-primary" onclick="downloadPDF()">Baixar PDF</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- NOVO MODAL RESUMO DETALHADO -->
+<div class="modal fade" id="detailed-summary-modal" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Resumo Detalhado por Cliente</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="table-responsive">
+                    <table class="table table-striped table-sm summary-table" id="detailed-summary-table">
+                        <thead id="detailed-summary-header">
+                            <!-- Cabeçalho será preenchido dinamicamente -->
+                        </thead>
+                        <tbody id="detailed-summary-body">
+                            <!-- Dados serão preenchidos dinamicamente -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                <button type="button" class="btn btn-primary" onclick="generateDetailedSummaryPDF()">Gerar PDF</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    const { jsPDF } = window.jspdf;
+    let data = [], filteredData = [];
+    const allFields = ['regiao','categoria','instalacao','unidade','equipamento','serial','cdPat','tec','cnpj','cliente','prevAtual','proxPrev','trocaLamp','trocaProb','trocaRefer','trocaLs','obs'];
+    const fieldLabels = {regiao:'Região',categoria:'Categoria',instalacao:'Instalação',unidade:'Unidade',equipamento:'Equipamento',serial:'Serial',cdPat:'CD PAT',tec:'Tec',cnpj:'CNPJ',cliente:'Cliente',prevAtual:'Prev. Atual',proxPrev:'Prox. Prev',trocaLamp:'Troca de Lâmp',trocaProb:'Troca de Prob',trocaRefer:'Troca Refer',trocaLs:'Troca da LS',obs:'OBS'};
+    let selectedFields = new Set(), selectedItems = new Set(), currentSearchType = 'cliente';
+    let selectedRegioes = new Set(), selectedCategorias = new Set(), selectedEquipamentos = new Set();
+    let isSearchMode = false;
+    let currentPdfBlobUrl = null;
+
+    /* ---------- FUNÇÕES AUXILIARES ---------- */
+    function formatExcelDate(v){if(!v)return'';if(typeof v==='string')return v;if(typeof v==='number'){const d=new Date((v-(25567+2))*86400*1000);return d.toLocaleDateString('pt-BR')}return v;}
+
+    // RESUMO POR CATEGORIA E REGIÃO EM CARDS LADO A LADO - CORRIGIDO
+    function addRegiaoCategoriaSummaryCards(doc, startY){
+        const sum = {}; let grandTotal = 0;
+        filteredData.forEach(i=>{
+            const c = i.categoria || 'Sem Categoria';
+            const r = i.regiao || 'Sem Região';
+            if(!sum[c]) sum[c] = {total:0};
+            if(!sum[c][r]) sum[c][r] = 0;
+            sum[c][r]++; sum[c].total++; grandTotal++;
+        });
+
+        const categories = Object.keys(sum).sort();
+        const cardsPerRow = 4;
+        let col = 0, rowY = startY + 10;
+        const cardHeight = 50;
+        const cardWidth = 68;
+        const cardGap = 4;
+        const pageBottomMargin = 15;
+
+        doc.setFontSize(13); 
+        doc.setTextColor(41,128,185);
+        doc.text('Resumo por Categoria e Região:', 14, startY);
+        startY += 10;
+
+        categories.forEach((cat, idx) => {
+            if (selectedCategorias.size === 0 || selectedCategorias.has(cat)) {
+                // Verificar se precisa de nova página
+                if (col === 0 && rowY + cardHeight > doc.internal.pageSize.height - pageBottomMargin) {
+                    doc.addPage();
+                    rowY = 15;
+                }
+
+                const regions = Object.keys(sum[cat]).filter(r => r !== 'total').sort();
+                const totalCat = sum[cat].total;
+
+                const cardX = 14 + col * (cardWidth + cardGap);
+                
+                doc.setFillColor(41,128,185);
+                doc.rect(cardX, rowY, cardWidth, 7, 'F');
+                doc.setTextColor(255,255,255);
+                doc.setFontSize(8.5);
+                doc.text(cat.substring(0, 25), cardX + 2, rowY + 5);
+
+                doc.setDrawColor(200,200,200);
+                doc.setLineWidth(0.1);
+                doc.rect(cardX, rowY, cardWidth, cardHeight);
+                doc.setTextColor(0,0,0);
+                doc.setFontSize(7);
+                let y = rowY + 12;
+                regions.forEach(r => {
+                    doc.text(`${r.substring(0, 15)}: ${sum[cat][r]}`, cardX + 2, y);
+                    y += 5;
+                });
+                doc.text(`Total: ${totalCat}`, cardX + 2, y + 5);
+
+                col++;
+                if (col >= cardsPerRow) {
+                    col = 0;
+                    rowY += cardHeight + cardGap;
+                }
+            }
+        });
+
+        return rowY + (col > 0 ? cardHeight + cardGap : 0);
+    }
+
+    /* ---------- NOVA FUNÇÃO PARA RESUMO GERAL - ATUALIZADA ---------- */
+    function addGeneralSummary(doc, startY) {
+        const pageHeight = doc.internal.pageSize.height;
+        const pageBottomMargin = 15;
+        
+        // Calcular totais
+        const totalEquipamentos = filteredData.length;
+        const totalUnidades = new Set(filteredData.map(i => i.unidade)).size;
+        const totalClientes = new Set(filteredData.map(i => i.cliente)).size;
+        
+        // Calcular concentração por região (agora com clientes e unidades)
+        const regioes = {};
+        filteredData.forEach(i => {
+            const regiao = i.regiao || 'Sem Região';
+            const cliente = i.cliente || 'Sem Cliente';
+            const unidade = i.unidade || 'Sem Unidade';
+            
+            if (!regioes[regiao]) {
+                regioes[regiao] = {
+                    equipamentos: 0,
+                    clientes: new Set(),
+                    unidades: new Set()
+                };
+            }
+            
+            regioes[regiao].equipamentos++;
+            regioes[regiao].clientes.add(cliente);
+            regioes[regiao].unidades.add(unidade);
+        });
+        
+        // Calcular concentração por categoria
+        const categorias = {};
+        filteredData.forEach(i => {
+            const categoria = i.categoria || 'Sem Categoria';
+            categorias[categoria] = (categorias[categoria] || 0) + 1;
+        });
+        
+        // Calcular concentração por unidade
+        const unidades = {};
+        filteredData.forEach(i => {
+            const unidade = i.unidade || 'Sem Unidade';
+            unidades[unidade] = (unidades[unidade] || 0) + 1;
+        });
+
+        // Título do resumo geral
+        doc.setFontSize(14);
+        doc.setTextColor(41,128,185);
+        doc.setFont(undefined, 'bold');
+        doc.text('Resumo Geral - Concentração de Equipamentos', 14, startY);
+        doc.setFont(undefined, 'normal');
+        startY += 8;
+
+        // Totais gerais
+        doc.setFontSize(10);
+        doc.setTextColor(0,0,0);
+        doc.text(`Total de Equipamentos: ${totalEquipamentos}`, 14, startY);
+        startY += 5;
+        doc.text(`Total de Unidades: ${totalUnidades}`, 14, startY);
+        startY += 5;
+        doc.text(`Total de Clientes: ${totalClientes}`, 14, startY);
+        startY += 10;
+
+        // Verificar se precisa de nova página
+        if (startY > pageHeight - pageBottomMargin - 80) {
+            doc.addPage();
+            startY = 15;
+        }
+
+        // Tabela de concentração por região (ATUALIZADA)
+        doc.setFontSize(11);
+        doc.setTextColor(41,128,185);
+        doc.setFont(undefined, 'bold');
+        doc.text('Concentração por Região:', 14, startY);
+        doc.setFont(undefined, 'normal');
+        startY += 7;
+
+        const regiaoRows = Object.keys(regioes).sort().map(regiao => [
+            regiao,
+            regioes[regiao].equipamentos,
+            `${((regioes[regiao].equipamentos / totalEquipamentos) * 100).toFixed(1)}%`,
+            regioes[regiao].clientes.size,
+            regioes[regiao].unidades.size
+        ]);
+
+        // Adicionar linha de total
+        const totalEquipRegioes = Object.values(regioes).reduce((sum, r) => sum + r.equipamentos, 0);
+        const totalClientesRegioes = Object.values(regioes).reduce((sum, r) => sum + r.clientes.size, 0);
+        const totalUnidadesRegioes = Object.values(regioes).reduce((sum, r) => sum + r.unidades.size, 0);
+        
+        regiaoRows.push([
+            'TOTAL',
+            totalEquipRegioes,
+            '100%',
+            totalClientesRegioes,
+            totalUnidadesRegioes
+        ]);
+
+        doc.autoTable({
+            head: [['Região', 'Equipamentos', '%', 'Clientes', 'Unidades']],
+            body: regiaoRows,
+            startY: startY,
+            theme: 'grid',
+            styles: { fontSize: 8, cellPadding: 2, overflow: 'linebreak' },
+            headStyles: { fillColor: [41,128,185], textColor: 255, fontStyle: 'bold', fontSize: 8 },
+            alternateRowStyles: { fillColor: [245,245,245] },
+            margin: { left: 14, right: 14, bottom: pageBottomMargin },
+            pageBreak: 'auto',
+            rowPageBreak: 'avoid',
+            showHead: 'everyPage',
+            didParseCell: (data) => {
+                if (data.row.index === regiaoRows.length - 1) {
+                    data.cell.styles.fillColor = [44, 62, 80];
+                    data.cell.styles.textColor = [255, 255, 255];
+                    data.cell.styles.fontStyle = 'bold';
+                }
+            }
+        });
+        startY = doc.lastAutoTable.finalY + 10;
+
+        // Verificar se precisa de nova página
+        if (startY > pageHeight - pageBottomMargin - 80) {
+            doc.addPage();
+            startY = 15;
+        }
+
+        // Tabela de concentração por categoria
+        doc.setFontSize(11);
+        doc.setTextColor(41,128,185);
+        doc.setFont(undefined, 'bold');
+        doc.text('Concentração por Categoria:', 14, startY);
+        doc.setFont(undefined, 'normal');
+        startY += 7;
+
+        const categoriaRows = Object.keys(categorias).sort().map(categoria => [
+            categoria,
+            categorias[categoria],
+            `${((categorias[categoria] / totalEquipamentos) * 100).toFixed(1)}%`
+        ]);
+
+        // Adicionar linha de total
+        categoriaRows.push([
+            'TOTAL',
+            totalEquipamentos,
+            '100%'
+        ]);
+
+        doc.autoTable({
+            head: [['Categoria', 'Quantidade', 'Percentual']],
+            body: categoriaRows,
+            startY: startY,
+            theme: 'grid',
+            styles: { fontSize: 8, cellPadding: 2, overflow: 'linebreak' },
+            headStyles: { fillColor: [41,128,185], textColor: 255, fontStyle: 'bold', fontSize: 8 },
+            alternateRowStyles: { fillColor: [245,245,245] },
+            margin: { left: 14, right: 14, bottom: pageBottomMargin },
+            pageBreak: 'auto',
+            rowPageBreak: 'avoid',
+            showHead: 'everyPage',
+            didParseCell: (data) => {
+                if (data.row.index === categoriaRows.length - 1) {
+                    data.cell.styles.fillColor = [44, 62, 80];
+                    data.cell.styles.textColor = [255, 255, 255];
+                    data.cell.styles.fontStyle = 'bold';
+                }
+            }
+        });
+        startY = doc.lastAutoTable.finalY + 10;
+
+        // Verificar se precisa de nova página
+        if (startY > pageHeight - pageBottomMargin - 80) {
+            doc.addPage();
+            startY = 15;
+        }
+
+        // Tabela das 10 unidades com mais equipamentos
+        doc.setFontSize(11);
+        doc.setTextColor(41,128,185);
+        doc.setFont(undefined, 'bold');
+        doc.text('Top 10 Unidades com Maior Concentração:', 14, startY);
+        doc.setFont(undefined, 'normal');
+        startY += 7;
+
+        const unidadesOrdenadas = Object.keys(unidades)
+            .sort((a, b) => unidades[b] - unidades[a])
+            .slice(0, 10);
+
+        const unidadeRows = unidadesOrdenadas.map(unidade => [
+            unidade,
+            unidades[unidade],
+            `${((unidades[unidade] / totalEquipamentos) * 100).toFixed(1)}%`
+        ]);
+
+        doc.autoTable({
+            head: [['Unidade', 'Quantidade', 'Percentual']],
+            body: unidadeRows,
+            startY: startY,
+            theme: 'grid',
+            styles: { fontSize: 8, cellPadding: 2, overflow: 'linebreak' },
+            headStyles: { fillColor: [41,128,185], textColor: 255, fontStyle: 'bold', fontSize: 8 },
+            alternateRowStyles: { fillColor: [245,245,245] },
+            margin: { left: 14, right: 14, bottom: pageBottomMargin },
+            pageBreak: 'auto',
+            rowPageBreak: 'avoid',
+            showHead: 'everyPage'
+        });
+        startY = doc.lastAutoTable.finalY + 15;
+
+        return startY;
+    }
+
+    function populateColumnCheckboxes(){
+        const container = document.getElementById('column-checkboxes');
+        allFields.forEach((field, index) => {
+            const div = document.createElement('div');
+            div.className = 'col-md-4 form-check';
+            div.innerHTML = `<input class="form-check-input" type="checkbox" value="${field}" id="col-${field}" onchange="updateSelectedFields()">
+                             <label class="form-check-label" for="col-${field}">${fieldLabels[field]}</label>`;
+            container.appendChild(div);
+        });
+    }
+
+    function updateSelectedFields(){
+        selectedFields.clear();
+        document.querySelectorAll('#column-checkboxes .form-check-input:checked').forEach(cb => selectedFields.add(cb.value));
+        applyFilters();
+    }
+
+    function changeSearchType(){
+        currentSearchType = document.querySelector('input[name="searchType"]:checked').value;
+        const label = document.getElementById('search-label');
+        const selectedLabel = document.getElementById('selected-label');
+        const toggleBtn = document.getElementById('toggle-all-btn');
+        label.textContent = `Digite para buscar ${currentSearchType}s:`;
+        selectedLabel.textContent = `${currentSearchType.charAt(0).toUpperCase() + currentSearchType.slice(1)}s Selecionados:`;
+        toggleBtn.textContent = `Selecionar/Desselecionar Todos os ${currentSearchType.charAt(0).toUpperCase() + currentSearchType.slice(1)}s`;
+        selectedItems.clear();
+        updateSelectedDisplay();
+        populateSuggestions();
+        applyFilters();
+        const categorySummaryBtn = document.getElementById('category-summary-btn-container');
+        categorySummaryBtn.classList.toggle('d-none', currentSearchType !== 'categoria');
+    }
+
+    function populateSuggestions(){
+        const suggestions = new Set(data.map(i => i[currentSearchType]).filter(v => v));
+        const list = document.getElementById('suggestions');
+        list.innerHTML = '';
+        suggestions.forEach(s => {
+            const div = document.createElement('div');
+            div.className = 'client-list-item';
+            div.textContent = s;
+            div.onclick = () => toggleItem(s);
+            list.appendChild(div);
+        });
+    }
+
+    function showSuggestions(){
+        const input = document.getElementById('search').value.toLowerCase();
+        const list = document.getElementById('suggestions');
+        const items = list.querySelectorAll('.client-list-item');
+        let hasVisible = false;
+        items.forEach(item => {
+            const visible = item.textContent.toLowerCase().includes(input);
+            item.style.display = visible ? 'block' : 'none';
+            if (visible) hasVisible = true;
+        });
+        list.style.display = hasVisible ? 'block' : 'none';
+    }
+
+    function toggleItem(item){
+        if (selectedItems.has(item)) selectedItems.delete(item);
+        else selectedItems.add(item);
+        updateSelectedDisplay();
+        applyFilters();
+    }
+
+    function toggleAllClients(){
+        const allItems = new Set(data.map(i => i[currentSearchType]).filter(v => v));
+        if (selectedItems.size === allItems.size) selectedItems.clear();
+        else selectedItems = new Set(allItems);
+        updateSelectedDisplay();
+        applyFilters();
+    }
+
+    /* ---------- NOVA FUNÇÃO LIMPAR PESQUISA ---------- */
+    function clearSearch(){
+        document.getElementById('search').value = '';
+        hideSuggestions();
+        selectedItems.clear();
+        updateSelectedDisplay();
+        applyFilters();               // reaplica filtros (mantém os de região/categoria/equipamento)
+    }
+
+    function updateSelectedDisplay(){
+        const display = document.getElementById('selected-items-display');
+        display.innerHTML = selectedItems.size === 0 ? '<span class="text-muted">Nenhum item selecionado</span>' : 
+            Array.from(selectedItems).map(i => `<span class="selected-clients-badge">${i} <button type="button" class="btn-close btn-close-white" style="font-size:0.6rem" onclick="toggleItem('${i}')"></button></span>`).join('');
+    }
+
+    function populateFilters(){
+        const filters = {
+            regiao: new Set(data.map(i => i.regiao).filter(v => v)),
+            categoria: new Set(data.map(i => i.categoria).filter(v => v)),
+            equipamento: new Set(data.map(i => i.equipamento).filter(v => v))
+        };
+
+        Object.keys(filters).forEach(key => {
+            const container = document.getElementById(`filter-${key}-checkboxes`);
+            container.innerHTML = '';
+            Array.from(filters[key]).sort().forEach(value => {
+                const div = document.createElement('div');
+                div.className = 'filter-checkbox-item form-check';
+                div.innerHTML = `<input class="form-check-input" type="checkbox" value="${value}" id="filter-${key}-${value}" onchange="updateFilter('${key}', this)">
+                                 <label class="form-check-label" for="filter-${key}-${value}">${value}</label>`;
+                container.appendChild(div);
+            });
+        });
+    }
+
+    function updateFilter(type, checkbox){
+        const set = type === 'regiao' ? selectedRegioes : type === 'categoria' ? selectedCategorias : selectedEquipamentos;
+        if (checkbox.checked) set.add(checkbox.value);
+        else set.delete(checkbox.value);
+        applyFilters();
+    }
+
+    function selectAll(type){
+        const checkboxes = document.querySelectorAll(`#filter-${type}-checkboxes .form-check-input`);
+        const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+        checkboxes.forEach(cb => {
+            cb.checked = !allChecked;
+            updateFilter(type, cb);
+        });
+    }
+
+    function clearAllFilters(){
+        ['regiao', 'categoria', 'equipamento'].forEach(type => {
+            document.querySelectorAll(`#filter-${type}-checkboxes .form-check-input`).forEach(cb => {
+                cb.checked = false;
+            });
+            if (type === 'regiao') selectedRegioes.clear();
+            else if (type === 'categoria') selectedCategorias.clear();
+            else selectedEquipamentos.clear();
+        });
+        selectedItems.clear();
+        updateSelectedDisplay();
+        applyFilters();
+    }
+
+    function applyFilters(){
+        filteredData = data.filter(i => {
+            const matchesSearch = selectedItems.size === 0 || selectedItems.has(i[currentSearchType]);
+            const matchesRegiao = selectedRegioes.size === 0 || selectedRegioes.has(i.regiao);
+            const matchesCategoria = selectedCategorias.size === 0 || selectedCategorias.has(i.categoria);
+            const matchesEquipamento = selectedEquipamentos.size === 0 || selectedEquipamentos.has(i.equipamento);
+            return matchesSearch && matchesRegiao && matchesCategoria && matchesEquipamento;
+        });
+
+        const results = document.getElementById('results');
+        results.innerHTML = '';
+        const noResults = document.getElementById('no-results');
+        noResults.classList.toggle('d-none', filteredData.length > 0);
+
+        isSearchMode = selectedItems.size > 0;
+
+        const groupBy = currentSearchType === 'categoria' ? 'categoria' : (currentSearchType === 'unidade' ? 'unidade' : 'cliente');
+        const grouped = {};
+        filteredData.forEach(i=>{
+            const key = i[groupBy] || 'Sem ' + groupBy;
+            if(!grouped[key]) grouped[key] = [];
+            grouped[key].push(i);
+        });
+
+        Object.keys(grouped).sort().forEach(k=>{
+            const d = document.createElement('div'); d.className='card';
+            d.innerHTML=`<div class="card-title">${k} <span class="equipment-count">${grouped[k].length} equipamentos</span></div>
+                         <div class="card-body"><div class="horizontal-equipment-container"></div></div>`;
+            const container = d.querySelector('.horizontal-equipment-container');
+            grouped[k].forEach(eq=>{
+                const e = document.createElement('div'); e.className='horizontal-equipment-item';
+                let details = '';
+                allFields.forEach(f=>{
+                    if(selectedFields.has(f) && eq[f]) details += `<div class="detail-row"><div class="detail-label">${fieldLabels[f]}:</div><div class="detail-value">${eq[f]}</div></div>`;
+                });
+                e.innerHTML = `<div class="equipment-header"><div class="equipment-name">${eq.equipamento}</div><span class="unidade-badge">${eq.unidade}</span></div>
+                               <div class="equipment-details">${details}</div>`;
+                container.appendChild(e);
+            });
+            results.appendChild(d);
+        });
+
+        updateFilterSummary();
+    }
+
+    /* ---------- RESUMO DOS FILTROS ---------- */
+    function updateFilterSummary(){
+        const c = document.getElementById('filter-summary-container');
+        if(selectedItems.size === 0 || filteredData.length === 0){ c.classList.add('d-none'); return; }
+        c.classList.remove('d-none');
+
+        const a = document.getElementById('active-filters-list'); a.innerHTML='';
+        const activeFilters = [];
+        if(selectedItems.size>0) activeFilters.push(`${currentSearchType.charAt(0).toUpperCase()+currentSearchType.slice(1)}: ${[...selectedItems].join(', ')}`);
+        if(selectedRegioes.size>0) activeFilters.push(`Regiões: ${[...selectedRegioes].join(', ')}`);
+        if(selectedCategorias.size>0) activeFilters.push(`Categorias: ${[...selectedCategorias].join(', ')}`);
+        if(selectedEquipamentos.size>0) activeFilters.push(`Equipamentos: ${[...selectedEquipamentos].join(', ')}`);
+        a.innerHTML = activeFilters.map(f=>`<div class="filter-summary-item"><div class="filter-summary-label">${f}</div></div>`).join('');
+
+        const clientSummary = {};
+        const allCategories = new Set();
+        
+        filteredData.forEach(i => {
+            const client = i.cliente || 'Sem Cliente';
+            const category = i.categoria || 'Sem Categoria';
+            
+            if (!clientSummary[client]) {
+                clientSummary[client] = { 
+                    unidades: new Set(), 
+                    categorias: {},
+                    totalEquipamentos: 0
+                };
+            }
+            
+            clientSummary[client].unidades.add(i.unidade);
+            clientSummary[client].categorias[category] = (clientSummary[client].categorias[category] || 0) + 1;
+            clientSummary[client].totalEquipamentos++;
+            allCategories.add(category);
+        });
+
+        const clientHeader = document.getElementById('client-summary-header');
+        clientHeader.innerHTML = '';
+        let headerRow = document.createElement('tr');
+        headerRow.innerHTML = '<th>Cliente</th><th>Unidades</th><th>Total</th>';
+        Array.from(allCategories).sort().forEach(cat => {
+            headerRow.innerHTML += `<th>${cat}</th>`;
+        });
+        clientHeader.appendChild(headerRow);
+
+        const clientBody = document.getElementById('client-summary-body');
+        clientBody.innerHTML = '';
+        Object.keys(clientSummary).sort().forEach(client => {
+            const row = document.createElement('tr');
+            let rowHTML = `<td>${client}</td><td>${clientSummary[client].unidades.size}</td><td class="category-column"><strong>${clientSummary[client].totalEquipamentos}</strong></td>`;
+            Array.from(allCategories).sort().forEach(cat => {
+                const count = clientSummary[client].categorias[cat] || 0;
+                rowHTML += `<td class="category-column">${count > 0 ? count : '-'}</td>`;
+            });
+            row.innerHTML = rowHTML;
+            clientBody.appendChild(row);
+        });
+
+        const totalRow = document.createElement('tr');
+        totalRow.className = 'total-row';
+        let totalHTML = `<td><strong>TOTAL</strong></td><td><strong>${new Set(filteredData.map(i => i.unidade)).size}</strong></td><td class="category-column"><strong>${filteredData.length}</strong></td>`;
+        Array.from(allCategories).sort().forEach(cat => {
+            const totalCat = filteredData.filter(i => i.categoria === cat).length;
+            totalHTML += `<td class="category-column"><strong>${totalCat}</strong></td>`;
+        });
+        totalRow.innerHTML = totalHTML;
+        clientBody.appendChild(totalRow);
+
+        const unitSummary = {};
+        filteredData.forEach(i => {
+            const unit = i.unidade || 'Sem Unidade';
+            const category = i.categoria || 'Sem Categoria';
+            if (!unitSummary[unit]) unitSummary[unit] = { categorias: {}, totalEquipamentos: 0 };
+            unitSummary[unit].categorias[category] = (unitSummary[unit].categorias[category] || 0) + 1;
+            unitSummary[unit].totalEquipamentos++;
+        });
+
+        const unitHeader = document.getElementById('unit-summary-header');
+        unitHeader.innerHTML = '';
+        headerRow = document.createElement('tr');
+        headerRow.innerHTML = '<th>Unidade</th>';
+        Array.from(allCategories).sort().forEach(cat => {
+            headerRow.innerHTML += `<th>${cat}</th>`;
+        });
+        headerRow.innerHTML += '<th>Total</th>';
+        unitHeader.appendChild(headerRow);
+
+        const unitBody = document.getElementById('unit-summary-body');
+        unitBody.innerHTML = '';
+        Object.keys(unitSummary).sort().forEach(unit => {
+            const row = document.createElement('tr');
+            let rowHTML = `<td>${unit}</td>`;
+            Array.from(allCategories).sort().forEach(cat => {
+                const count = unitSummary[unit].categorias[cat] || 0;
+                rowHTML += `<td class="category-column">${count > 0 ? count : '-'}</td>`;
+            });
+            rowHTML += `<td class="category-column"><strong>${unitSummary[unit].totalEquipamentos}</strong></td>`;
+            row.innerHTML = rowHTML;
+            unitBody.appendChild(row);
+        });
+
+        const totalUnitRow = document.createElement('tr');
+        totalUnitRow.className = 'total-row';
+        let totalUnitHTML = `<td><strong>TOTAL</strong></td>`;
+        Array.from(allCategories).sort().forEach(cat => {
+            const totalCat = filteredData.filter(i => i.categoria === cat).length;
+            totalUnitHTML += `<td class="category-column"><strong>${totalCat}</strong></td>`;
+        });
+        totalUnitHTML += `<td class="category-column"><strong>${filteredData.length}</strong></td>`;
+        totalUnitRow.innerHTML = totalUnitHTML;
+        unitBody.appendChild(totalUnitRow);
+
+        const e = document.getElementById('equipment-summary-list'); e.innerHTML='';
+        const equipCount = {};
+        filteredData.forEach(i=>{ const eq = i.equipamento || 'Sem Equipamento'; equipCount[eq] = (equipCount[eq] || 0) + 1; });
+        Object.keys(equipCount).sort().forEach(eq=>{
+            const d = document.createElement('div'); d.className='filter-summary-equipment';
+            d.innerHTML = `<div class="filter-summary-equipment-name">${eq}</div>
+                           <div class="filter-summary-equipment-details">
+                             <div class="filter-summary-equipment-detail"><div class="filter-summary-equipment-label">Quantidade:</div><div class="filter-summary-equipment-value">${equipCount[eq]}</div></div>
+                           </div>`;
+            e.appendChild(d);
+        });
+    }
+
+    /* ---------- NOVO MODAL RESUMO DETALHADO ---------- */
+    function showDetailedSummaryModal(){
+        // Calcular resumo detalhado
+        const clientSummary = {};
+        const allCategories = new Set();
+        
+        filteredData.forEach(i => {
+            const client = i.cliente || 'Sem Cliente';
+            const category = i.categoria || 'Sem Categoria';
+            
+            if (!clientSummary[client]) {
+                clientSummary[client] = { 
+                    unidades: new Set(), 
+                    categorias: {},
+                    totalEquipamentos: 0
+                };
+            }
+            
+            clientSummary[client].unidades.add(i.unidade);
+            clientSummary[client].categorias[category] = (clientSummary[client].categorias[category] || 0) + 1;
+            clientSummary[client].totalEquipamentos++;
+            allCategories.add(category);
+        });
+
+        // Preencher tabela no modal
+        const header = document.getElementById('detailed-summary-header');
+        const body = document.getElementById('detailed-summary-body');
+        
+        header.innerHTML = '';
+        let headerRow = document.createElement('tr');
+        headerRow.innerHTML = '<th>Cliente</th><th>Unidades</th><th>Total</th>';
+        Array.from(allCategories).sort().forEach(cat => {
+            headerRow.innerHTML += `<th>${cat}</th>`;
+        });
+        header.appendChild(headerRow);
+
+        body.innerHTML = '';
+        Object.keys(clientSummary).sort().forEach(client => {
+            const row = document.createElement('tr');
+            let rowHTML = `<td>${client}</td><td>${clientSummary[client].unidades.size}</td><td class="category-column"><strong>${clientSummary[client].totalEquipamentos}</strong></td>`;
+            Array.from(allCategories).sort().forEach(cat => {
+                const count = clientSummary[client].categorias[cat] || 0;
+                rowHTML += `<td class="category-column">${count > 0 ? count : '-'}</td>`;
+            });
+            row.innerHTML = rowHTML;
+            body.appendChild(row);
+        });
+
+        // Adicionar linha de total
+        const totalRow = document.createElement('tr');
+        totalRow.className = 'total-row';
+        let totalHTML = `<td><strong>TOTAL</strong></td><td><strong>${new Set(filteredData.map(i => i.unidade)).size}</strong></td><td class="category-column"><strong>${filteredData.length}</strong></td>`;
+        Array.from(allCategories).sort().forEach(cat => {
+            const totalCat = filteredData.filter(i => i.categoria === cat).length;
+            totalHTML += `<td class="category-column"><strong>${totalCat}</strong></td>`;
+        });
+        totalRow.innerHTML = totalHTML;
+        body.appendChild(totalRow);
+
+        // Exibir modal
+        const modal = new bootstrap.Modal(document.getElementById('detailed-summary-modal'));
+        modal.show();
+    }
+
+    /* ---------- NOVA FUNÇÃO PARA GERAR PDF DO RESUMO DETALHADO - CORRIGIDA ---------- */
+    function generateDetailedSummaryPDF(){
+        const doc = new jsPDF('l','mm','a4');
+        const pageHeight = doc.internal.pageSize.height;
+        const pageBottomMargin = 15;
+        let startY = 18;
+
+        doc.setFontSize(15); doc.setTextColor(41,128,185);
+        doc.setFont(undefined, 'bold');
+        doc.text('Resumo Detalhado por Cliente', 14, startY);
+        doc.setFont(undefined, 'normal');
+        startY += 9;
+
+        doc.setFontSize(9); doc.setTextColor(100,100,100);
+        doc.text(`Data de geração: ${new Date().toLocaleString('pt-BR')}`, 14, startY);
+        startY += 10;
+
+        // Adicionar resumo geral antes da tabela detalhada
+        startY = addGeneralSummary(doc, startY);
+
+        // Verificar se precisa de nova página
+        if (startY > pageHeight - pageBottomMargin - 30) { 
+            doc.addPage(); 
+            startY = 18; 
+        }
+
+        // Título da tabela detalhada
+        doc.setFontSize(13); doc.setTextColor(41,128,185);
+        doc.setFont(undefined, 'bold');
+        doc.text('Detalhamento por Cliente:', 14, startY);
+        doc.setFont(undefined, 'normal');
+        startY += 8;
+
+        // Calcular resumo detalhado
+        const clientSummary = {};
+        const allCategories = new Set();
+        
+        filteredData.forEach(i => {
+            const client = i.cliente || 'Sem Cliente';
+            const category = i.categoria || 'Sem Categoria';
+            
+            if (!clientSummary[client]) {
+                clientSummary[client] = { 
+                    unidades: new Set(), 
+                    categorias: {},
+                    totalEquipamentos: 0
+                };
+            }
+            
+            clientSummary[client].unidades.add(i.unidade);
+            clientSummary[client].categorias[category] = (clientSummary[client].categorias[category] || 0) + 1;
+            clientSummary[client].totalEquipamentos++;
+            allCategories.add(category);
+        });
+
+        // Preparar dados para a tabela
+        const clientHeaders = [['Cliente', 'Unidades', 'Total', ...Array.from(allCategories).sort().map(c => c.length > 15 ? c.substring(0,13) + '...' : c)]];
+        const clientRows = Object.keys(clientSummary).sort().map(k => [
+            k.length > 30 ? k.substring(0,28) + '...' : k, 
+            clientSummary[k].unidades.size, 
+            clientSummary[k].totalEquipamentos,
+            ...Array.from(allCategories).sort().map(cat => clientSummary[k].categorias[cat] || 0)
+        ]);
+
+        const clientTotalRow = ['TOTAL', new Set(filteredData.map(i => i.unidade)).size, filteredData.length, ...Array.from(allCategories).sort().map(cat => filteredData.filter(i => i.categoria === cat).length)];
+        clientRows.push(clientTotalRow);
+
+        // Gerar tabela
+        doc.autoTable({
+            head: clientHeaders,
+            body: clientRows,
+            startY: startY,
+            theme: 'grid',
+            styles: { fontSize: 7, cellPadding: 2, overflow: 'linebreak' },
+            headStyles: { fillColor: [41,128,185], textColor: 255, fontStyle: 'bold', fontSize: 7.5 },
+            alternateRowStyles: { fillColor: [245,245,245] },
+            margin: { left: 14, right: 14, bottom: pageBottomMargin },
+            pageBreak: 'auto',
+            rowPageBreak: 'avoid',
+            showHead: 'everyPage',
+            didParseCell: (data) => {
+                if (data.row.index === clientRows.length - 1) {
+                    data.cell.styles.fillColor = [44, 62, 80];
+                    data.cell.styles.textColor = [255, 255, 255];
+                    data.cell.styles.fontStyle = 'bold';
+                }
+            }
+        });
+
+        const pdfBlob = doc.output('blob');
+        openPDFPreview(pdfBlob);
+    }
+
+    /* ---------- PDF (VISUALIZAR/IMPRIMIR) - CORRIGIDO ---------- */
+    function previewPDF(){
+        const doc = new jsPDF('l','mm','a4');
+        const pageHeight = doc.internal.pageSize.height;
+        const pageBottomMargin = 15;
+        let startY = 15;
+
+        doc.setFontSize(16); doc.setTextColor(41,128,185);
+        doc.text('Relatório de Patrimônio', 14, startY);
+        startY += 7;
+
+        doc.setFontSize(9); doc.setTextColor(100,100,100);
+        doc.text(`Gerado em: ${new Date().toLocaleString('pt-BR')}`, 14, startY);
+        startY += 8;
+
+        if(isSearchMode || selectedRegioes.size>0 || selectedCategorias.size>0 || selectedEquipamentos.size>0){
+            doc.setFontSize(9); doc.setTextColor(0,0,0);
+            let filters = [];
+            if(isSearchMode) filters.push(`${currentSearchType.charAt(0).toUpperCase() + currentSearchType.slice(1)}: ${Array.from(selectedItems).join(', ')}`);
+            if(selectedRegioes.size>0) filters.push(`Regiões: ${Array.from(selectedRegioes).join(', ')}`);
+            if(selectedCategorias.size>0) filters.push(`Categorias: ${Array.from(selectedCategorias).join(', ')}`);
+            if(selectedEquipamentos.size>0) filters.push(`Equipamentos: ${Array.from(selectedEquipamentos).join(', ')}`);
+            
+            const filterText = `Filtros: ${filters.join(' | ')}`;
+            const splitFilters = doc.splitTextToSize(filterText, doc.internal.pageSize.width - 28);
+            
+            if(startY + (splitFilters.length * 5) > pageHeight - pageBottomMargin){
+                doc.addPage();
+                startY = 15;
+            }
+            
+            doc.text(splitFilters, 14, startY);
+            startY += splitFilters.length * 5 + 3;
+        }
+
+        startY = addRegiaoCategoriaSummaryCards(doc, startY);
+
+        const fields = Array.from(selectedFields);
+        if (fields.length === 0) {
+            if(startY > pageHeight - pageBottomMargin - 10){
+                doc.addPage();
+                startY = 15;
+            }
+            doc.setFontSize(11); doc.setTextColor(150,0,0);
+            doc.text('Nenhuma coluna selecionada para exibição.', 14, startY);
+            const pdfBlob = doc.output('blob');
+            openPDFPreview(pdfBlob);
+            return;
+        }
+        
+        const headers = fields.map(f => fieldLabels[f]);
+
+        if(isSearchMode && currentSearchType !== 'unidade') {
+            const groupedData = groupBy(filteredData, currentSearchType);
+            Object.keys(groupedData).sort().forEach((groupKey, groupIndex) => {
+                const groupItems = groupedData[groupKey];
+                
+                if (startY > pageHeight - pageBottomMargin - 20) {
+                    doc.addPage();
+                    startY = 15;
+                }
+
+                doc.setFontSize(10); 
+                doc.setTextColor(41,128,185);
+                doc.setFont(undefined, 'bold');
+                doc.text(`${fieldLabels[currentSearchType]}: ${groupKey}`, 14, startY);
+                doc.setFont(undefined, 'normal');
+                startY += 6;
+
+                const rows = groupItems.map(i => fields.map(f => {
+                    const val = i[f] || '';
+                    return String(val).length > 50 ? String(val).substring(0,47) + '...' : val;
+                }));
+                
+                doc.autoTable({
+                    head: [headers],
+                    body: rows,
+                    startY: startY,
+                    theme: 'grid',
+                    styles: { 
+                        fontSize: 6.5, 
+                        cellPadding: 1.5, 
+                        overflow: 'linebreak',
+                        valign: 'middle'
+                    },
+                    headStyles: { 
+                        fillColor: [41,128,185], 
+                        textColor: [255,255,255], 
+                        fontStyle: 'bold',
+                        fontSize: 7
+                    },
+                    margin: { top: 15, left: 14, right: 14, bottom: pageBottomMargin },
+                    pageBreak: 'auto',
+                    rowPageBreak: 'avoid',
+                    showHead: 'everyPage',
+                    tableLineColor: [200,200,200],
+                    tableLineWidth: 0.1
+                });
+                
+                startY = doc.lastAutoTable.finalY + 10;
+            });
+        } else {
+            if (startY > pageHeight - pageBottomMargin - 25) {
+                doc.addPage();
+                startY = 15;
+            }
+            
+            const rows = filteredData.map(i => fields.map(f => {
+                const val = i[f] || '';
+                return String(val).length > 50 ? String(val).substring(0,47) + '...' : val;
+            }));
+            
+            doc.autoTable({
+                head: [headers],
+                body: rows,
+                startY: startY,
+                theme: 'grid',
+                styles: { 
+                    fontSize: 6.5, 
+                    cellPadding: 1.5, 
+                    overflow: 'linebreak',
+                    valign: 'middle'
+                },
+                headStyles: { 
+                    fillColor: [41,128,185], 
+                    textColor: [255,255,255], 
+                    fontStyle: 'bold',
+                    fontSize: 7
+                },
+                margin: { top: 15, left: 14, right: 14, bottom: pageBottomMargin },
+                pageBreak: 'auto',
+                rowPageBreak: 'avoid',
+                showHead: 'everyPage',
+                tableLineColor: [200,200,200],
+                tableLineWidth: 0.1
+            });
+        }
+
+        const pdfBlob = doc.output('blob');
+        openPDFPreview(pdfBlob);
+    }
+
+    function previewFilterSummaryPDF(){
+        const doc = new jsPDF('l','mm','a4');
+        const pageHeight = doc.internal.pageSize.height;
+        const pageBottomMargin = 15;
+        let startY = 18;
+
+        doc.setFontSize(15); doc.setTextColor(41,128,185);
+        doc.setFont(undefined, 'bold');
+        doc.text('Resumo dos Filtros Aplicados', 14, startY);
+        doc.setFont(undefined, 'normal');
+        startY += 9;
+
+        doc.setFontSize(9); doc.setTextColor(100,100,100);
+        doc.text(`Data de geração: ${new Date().toLocaleString('pt-BR')}`, 14, startY);
+        startY += 10;
+
+        doc.setFontSize(11); doc.setTextColor(0,0,0);
+        doc.setFont(undefined, 'bold');
+        doc.text('Filtros Ativos:', 14, startY);
+        doc.setFont(undefined, 'normal');
+        startY += 7;
+        
+        const activeFilters = [];
+        if(selectedRegioes.size>0) activeFilters.push(`Regiões: ${Array.from(selectedRegioes).join(', ')}`);
+        if(selectedCategorias.size>0) activeFilters.push(`Categorias: ${Array.from(selectedCategorias).join(', ')}`);
+        if(selectedEquipamentos.size>0) activeFilters.push(`Equipamentos: ${Array.from(selectedEquipamentos).join(', ')}`);
+        
+        if(activeFilters.length>0){
+            doc.setFontSize(8);
+            activeFilters.forEach(f=>{ 
+                const splitText = doc.splitTextToSize(f, doc.internal.pageSize.width - 40);
+                if(startY + (splitText.length * 5) > pageHeight - pageBottomMargin) { 
+                    doc.addPage(); 
+                    startY = 18; 
+                } 
+                doc.text(splitText, 20, startY); 
+                startY += splitText.length * 5;
+            });
+        }else{ 
+            doc.setFontSize(8);
+            doc.text('Nenhum filtro ativo', 20, startY); 
+            startY += 5; 
+        }
+        startY += 8;
+
+        if (startY > pageHeight - pageBottomMargin - 30) { 
+            doc.addPage(); 
+            startY = 18; 
+        }
+
+        doc.setFontSize(11); doc.setTextColor(41,128,185);
+        doc.setFont(undefined, 'bold');
+        doc.text('Resumo por Cliente:', 14, startY);
+        doc.setFont(undefined, 'normal');
+        startY += 7;
+
+        const clientSummary = {};
+        const allCategories = new Set();
+        filteredData.forEach(i => {
+            const client = i.cliente || 'Sem Cliente';
+            const category = i.categoria || 'Sem Categoria';
+            if (!clientSummary[client]) clientSummary[client] = { unidades: new Set(), categorias: {}, total: 0 };
+            clientSummary[client].unidades.add(i.unidade);
+            clientSummary[client].categorias[category] = (clientSummary[client].categorias[category] || 0) + 1;
+            clientSummary[client].total++;
+            allCategories.add(category);
+        });
+
+        const clientHeaders = [['Cliente', 'Unid.', 'Total', ...Array.from(allCategories).sort().map(c => c.length > 15 ? c.substring(0,13) + '...' : c)]];
+        const clientRows = Object.keys(clientSummary).sort().map(k => [
+            k.length > 30 ? k.substring(0,28) + '...' : k, 
+            clientSummary[k].unidades.size, 
+            clientSummary[k].total,
+            ...Array.from(allCategories).sort().map(cat => clientSummary[k].categorias[cat] || 0)
+        ]);
+
+        const clientTotalRow = ['TOTAL', new Set(filteredData.map(i => i.unidade)).size, filteredData.length, ...Array.from(allCategories).sort().map(cat => filteredData.filter(i => i.categoria === cat).length)];
+        clientRows.push(clientTotalRow);
+
+        doc.autoTable({
+            head: clientHeaders,
+            body: clientRows,
+            startY: startY,
+            theme: 'grid',
+            styles: { fontSize: 7, cellPadding: 2, overflow: 'linebreak' },
+            headStyles: { fillColor: [41,128,185], textColor: 255, fontStyle: 'bold', fontSize: 7.5 },
+            alternateRowStyles: { fillColor: [245,245,245] },
+            margin: { left: 14, right: 14, bottom: pageBottomMargin },
+            pageBreak: 'auto',
+            rowPageBreak: 'avoid',
+            showHead: 'everyPage',
+            didParseCell: (data) => {
+                if (data.row.index === clientRows.length - 1) {
+                    data.cell.styles.fillColor = [44, 62, 80];
+                    data.cell.styles.textColor = [255, 255, 255];
+                    data.cell.styles.fontStyle = 'bold';
+                }
+            }
+        });
+        startY = doc.lastAutoTable.finalY + 12;
+
+        if (startY > pageHeight - pageBottomMargin - 30) { 
+            doc.addPage(); 
+            startY = 18; 
+        }
+
+        doc.setFontSize(11); doc.setTextColor(41,128,185);
+        doc.setFont(undefined, 'bold');
+        doc.text('Resumo por Unidade:', 14, startY);
+        doc.setFont(undefined, 'normal');
+        startY += 7;
+
+        const unitSummary = {};
+        filteredData.forEach(i => {
+            const unit = i.unidade || 'Sem Unidade';
+            const category = i.categoria || 'Sem Categoria';
+            if (!unitSummary[unit]) unitSummary[unit] = { categorias: {}, total: 0 };
+            unitSummary[unit].categorias[category] = (unitSummary[unit].categorias[category] || 0) + 1;
+            unitSummary[unit].total++;
+        });
+
+        const unitHeaders = [['Unidade', ...Array.from(allCategories).sort().map(c => c.length > 15 ? c.substring(0,13) + '...' : c), 'Total']];
+        const unitRows = Object.keys(unitSummary).sort().map(k => [
+            k.length > 30 ? k.substring(0,28) + '...' : k, 
+            ...Array.from(allCategories).sort().map(cat => unitSummary[k].categorias[cat] || 0), 
+            unitSummary[k].total
+        ]);
+
+        const unitTotalRow = ['TOTAL', ...Array.from(allCategories).sort().map(cat => filteredData.filter(i => i.categoria === cat).length), filteredData.length];
+        unitRows.push(unitTotalRow);
+
+        doc.autoTable({
+            head: unitHeaders,
+            body: unitRows,
+            startY: startY,
+            theme: 'grid',
+            styles: { fontSize: 7, cellPadding: 2, overflow: 'linebreak' },
+            headStyles: { fillColor: [41,128,185], textColor: 255, fontStyle: 'bold', fontSize: 7.5 },
+            alternateRowStyles: { fillColor: [245,245,245] },
+            margin: { left: 14, right: 14, bottom: pageBottomMargin },
+            pageBreak: 'auto',
+            rowPageBreak: 'avoid',
+            showHead: 'everyPage',
+            didParseCell: (data) => {
+                if (data.row.index === unitRows.length - 1) {
+                    data.cell.styles.fillColor = [44, 62, 80];
+                    data.cell.styles.textColor = [255, 255, 255];
+                    data.cell.styles.fontStyle = 'bold';
+                }
+            }
+        });
+        startY = doc.lastAutoTable.finalY + 12;
+
+        if (startY > pageHeight - pageBottomMargin - 30) { 
+            doc.addPage(); 
+            startY = 18; 
+        }
+
+        doc.setFontSize(11); doc.setTextColor(41,128,185);
+        doc.setFont(undefined, 'bold');
+        doc.text('Equipamentos Encontrados:', 14, startY);
+        doc.setFont(undefined, 'normal');
+        startY += 7;
+
+        const equipCount = {};
+        filteredData.forEach(i => { equipCount[i.equipamento || 'Sem Equipamento'] = (equipCount[i.equipamento || 'Sem Equipamento'] || 0) + 1; });
+        const equipRows = Object.keys(equipCount).sort().map(k => [
+            k.length > 50 ? k.substring(0,48) + '...' : k, 
+            equipCount[k]
+        ]);
+
+        doc.autoTable({
+            head: [['Equipamento', 'Quantidade']],
+            body: equipRows,
+            startY: startY,
+            theme: 'grid',
+            styles: { fontSize: 7, cellPadding: 2, overflow: 'linebreak' },
+            headStyles: { fillColor: [41,128,185], textColor: 255, fontStyle: 'bold', fontSize: 7.5 },
+            alternateRowStyles: { fillColor: [245,245,245] },
+            margin: { left: 14, right: 14, bottom: pageBottomMargin },
+            pageBreak: 'auto',
+            rowPageBreak: 'avoid',
+            showHead: 'everyPage'
+        });
+
+        const pdfBlob = doc.output('blob');
+        openPDFPreview(pdfBlob);
+    }
+
+    function showCategorySummaryModal(){
+        const grouped = groupBy(filteredData, 'categoria');
+        const modalBody = Object.keys(grouped).sort().map(k=>{
+            const items = grouped[k];
+            const subGrouped = groupBy(items, 'regiao');
+            return `<div class="mb-3"><h6>${k} <span class="equipment-count">${items.length} equipamentos</span></h6>
+                    ${Object.keys(subGrouped).sort().map(r=>`<div class="ms-3 mb-2">${r}: ${subGrouped[r].length} equipamentos</div>`).join('')}</div>`;
+        }).join('');
+        const modal = new bootstrap.Modal(document.createElement('div'));
+        modal._element.className = 'modal fade';
+        modal._element.innerHTML = `<div class="modal-dialog modal-lg"><div class="modal-content">
+            <div class="modal-header"><h5 class="modal-title">Resumo por Categoria</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+            <div class="modal-body">${modalBody}</div>
+            <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button></div>
+        </div></div>`;
+        document.body.appendChild(modal._element);
+        modal.show();
+        modal._element.addEventListener('hidden.bs.modal', ()=>document.body.removeChild(modal._element));
+    }
+
+    function exportToExcel() {
+        if (filteredData.length === 0 || selectedFields.size === 0) return;
+        const wb = XLSX.utils.book_new();
+        const wsData = [Array.from(selectedFields).map(f => fieldLabels[f])];
+        filteredData.forEach(item => wsData.push(Array.from(selectedFields).map(f => item[f] || '')));
+        const ws = XLSX.utils.aoa_to_sheet(wsData);
+        XLSX.utils.book_append_sheet(wb, ws, 'Patrimônio Filtrado');
+        XLSX.writeFile(wb, `relatorio_patrimonio_${new Date().toISOString().slice(0,10)}.xlsx`);
+    }
+
+    function groupBy(arr, key){
+        return arr.reduce((g,i)=>{ const k=i[key]||'Sem '+key; (g[k]=g[k]||[]).push(i); return g; },{});
+    }
+
+    function openPDFPreview(blob){
+        if (currentPdfBlobUrl) URL.revokeObjectURL(currentPdfBlobUrl);
+        currentPdfBlobUrl = URL.createObjectURL(blob);
+        const embed = document.getElementById('pdf-embed');
+        const object = document.getElementById('pdf-object');
+        const link = document.getElementById('pdf-fallback-link');
+        embed.src = currentPdfBlobUrl;
+        object.data = currentPdfBlobUrl;
+        link.href = currentPdfBlobUrl;
+        const modal = new bootstrap.Modal(document.getElementById('preview-modal'));
+        modal.show();
+    }
+
+    function downloadPDF(){
+        const a = document.createElement('a');
+        a.href = currentPdfBlobUrl;
+        a.download = `relatorio_patrimonio_${new Date().toISOString().slice(0,10)}.pdf`;
+        a.click();
+    }
+
+    // Inicialização
+    document.addEventListener('DOMContentLoaded', ()=>{
+        populateColumnCheckboxes();
+        document.addEventListener('click', e=>{
+            if(!e.target.closest('.search-container')) hideSuggestions();
+        });
+        document.getElementById('file-upload').addEventListener('change', e=>{
+            const reader = new FileReader();
+            reader.onload = e=>{
+                const wb = XLSX.read(e.target.result, {type:'binary'});
+                const ws = wb.Sheets[wb.SheetNames[0]];
+                const rows = XLSX.utils.sheet_to_json(ws, {header:1, defval:''});
+                data = rows.slice(1).map(r=>({
+                    regiao: r[0],
+                    categoria: r[1],
+                    instalacao: r[2],
+                    unidade: r[3],
+                    equipamento: r[4],
+                    serial: r[5],
+                    cdPat: r[6],
+                    tec: r[7],
+                    cnpj: r[8],
+                    cliente: r[9],
+                    prevAtual: formatExcelDate(r[10]),
+                    proxPrev: formatExcelDate(r[11]),
+                    trocaLamp: r[12],
+                    trocaProb: r[13],
+                    trocaRefer: r[14],
+                    trocaLs: r[15],
+                    obs: r[16]
+                })).filter(i=>Object.values(i).some(v=>v!==''));
+                populateFilters();
+                populateSuggestions();
+                document.getElementById('excel-btn').disabled = false;
+                document.getElementById('pdf-btn').disabled = false;
+                alert(`Planilha carregada com sucesso! Número de registros: ${data.length}`);
+            };
+            reader.readAsBinaryString(e.target.files[0]);
+        });
+    });
+
+    function hideSuggestions(){ document.getElementById('suggestions').style.display='none'; }
+</script>
+</body>
+</html>
