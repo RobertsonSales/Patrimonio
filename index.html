@@ -194,6 +194,88 @@
             transform: translateY(-2px);
             box-shadow: 0 4px 15px rgba(243, 156, 18, 0.4);
         }
+
+        /* AJUSTES DE USABILIDADE E SEÇÕES RETRÁTEIS */
+        #column-checkboxes .form-check,
+        .filter-checkbox-group .form-check {
+            padding-left: 0;
+            display: flex;
+            align-items: flex-start;
+            gap: 0.65rem;
+            min-height: auto;
+        }
+        #column-checkboxes .form-check-input,
+        .filter-checkbox-group .form-check-input {
+            position: static;
+            float: none;
+            margin: 0;
+            flex: 0 0 auto;
+        }
+        #column-checkboxes .form-check-label,
+        .filter-checkbox-group .form-check-label {
+            display: block;
+            line-height: 1.35;
+            margin: 0;
+            word-break: break-word;
+        }
+        #column-checkboxes .form-check {
+            margin-bottom: 10px;
+        }
+        .filter-checkbox-item {
+            padding: 8px 4px;
+        }
+        .dashboard-card {
+            margin-bottom: 25px;
+            overflow: hidden;
+        }
+        .dashboard-card-header {
+            background: linear-gradient(135deg, #8e44ad, #6c3483);
+            border: none;
+            padding: 0;
+        }
+        .dashboard-card .card-body {
+            padding: 0;
+        }
+        .dashboard-card .file-upload-container {
+            margin-bottom: 0;
+            border-radius: 0;
+            box-shadow: none;
+            border-width: 0 0 0 0;
+        }
+        .toggle-section-btn {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            background: none;
+            border: none;
+            text-align: left;
+            color: inherit;
+            font-weight: 600;
+        }
+        .dashboard-toggle-btn {
+            color: #fff;
+            padding: 15px 20px;
+            font-size: 1.05rem;
+        }
+        .filter-summary-title-btn {
+            padding: 0;
+        }
+        .toggle-section-btn .filter-summary-title {
+            margin-bottom: 0;
+        }
+        .toggle-icon {
+            font-size: 1rem;
+            transition: transform 0.25s ease;
+            flex-shrink: 0;
+        }
+        .toggle-section-btn[aria-expanded="false"] .toggle-icon {
+            transform: rotate(-90deg);
+        }
+        .toggle-section-btn[aria-expanded="true"] .toggle-icon {
+            transform: rotate(0deg);
+        }
     </style>
 </head>
 <body>
@@ -201,11 +283,23 @@
 <div class="container">
     <h1>Gerenciador de Patrimônio</h1>
 
-    <div class="file-upload-container">
-        <span class="file-upload-icon">📊</span>
-        <label for="file-upload" class="file-upload-label">Importar Planilha (.xlsx)</label>
-        <input type="file" id="file-upload" class="form-control file-upload-input" accept=".xlsx">
-        <small class="text-muted mt-2 d-block">Selecione um arquivo Excel (.xlsx) para carregar os dados de patrimônio</small>
+    <div class="card dashboard-card" id="dashboard-inicial-card">
+        <div class="card-header dashboard-card-header">
+            <button class="toggle-section-btn dashboard-toggle-btn" type="button" data-bs-toggle="collapse" data-bs-target="#dashboard-inicial-collapse" aria-expanded="true" aria-controls="dashboard-inicial-collapse">
+                <span>Dashboard Inicial</span>
+                <span class="toggle-icon">▾</span>
+            </button>
+        </div>
+        <div id="dashboard-inicial-collapse" class="collapse show">
+            <div class="card-body">
+                <div class="file-upload-container">
+                    <span class="file-upload-icon">📊</span>
+                    <label for="file-upload" class="file-upload-label">Importar Planilha (.xlsx)</label>
+                    <input type="file" id="file-upload" class="form-control file-upload-input" accept=".xlsx">
+                    <small class="text-muted mt-2 d-block">Selecione um arquivo Excel (.xlsx) para carregar os dados de patrimônio</small>
+                </div>
+            </div>
+        </div>
     </div>
 
     <div class="filter-section">
@@ -230,7 +324,7 @@
         </div>
 
         <div class="row g-3">
-            <div class="col-md-6">
+            <div class="col-md-5">
                 <label for="search" class="form-label" id="search-label">Digite para buscar clientes:</label>
                 <div class="search-container">
                     <input type="text" id="search" class="form-control" placeholder="Digite para buscar..." oninput="showSuggestions()" onfocus="showSuggestions()">
@@ -242,9 +336,9 @@
                 <button class="btn btn-danger w-100" onclick="clearSearch()">Limpar Pesquisa</button>
             </div>
 
-            <div class="col-md-3 d-flex align-items-end">
+            <div class="col-md-4 d-flex align-items-end">
                 <button class="btn btn-success w-100" onclick="toggleAllClients()" id="toggle-all-btn">
-                    Selecionar/Desselecionar Todos os Clientes
+                    Marcar/Desmarcar Todos os Clientes
                 </button>
             </div>
         </div>
@@ -255,7 +349,7 @@
         </div>
 
         <div id="category-summary-btn-container" class="d-none mt-3">
-            <button class="btn category-summary-btn w-100" onclick="showCategorySummaryModal()">Ver Resumo por Categoria</button>
+            <button class="btn category-summary-btn w-100" onclick="showCategorySummaryModal()">Clique para Ver o Resumo por Categoria</button>
         </div>
     </div>
 
@@ -269,7 +363,7 @@
         
         <div class="mb-3">
             <button class="btn detailed-summary-btn w-100" onclick="showDetailedSummaryModal()">
-                Ver Resumo Detalhado por Cliente
+                Clique aqui para Exibir ou Ocultar o Resumo Detalhado por Cliente
             </button>
         </div>
         
@@ -311,30 +405,48 @@
                 <div class="filter-summary-section"><div class="filter-summary-title">Filtros Ativos</div><div id="active-filters-list"></div></div>
                 
                 <div class="filter-summary-section">
-                    <div class="filter-summary-title">Resumo por Cliente</div>
-                    <div class="table-responsive">
-                        <table class="table table-striped table-sm summary-table" id="client-summary-table">
-                            <thead id="client-summary-header">
-                                </thead>
-                            <tbody id="client-summary-body">
-                                </tbody>
-                        </table>
+                    <button class="toggle-section-btn filter-summary-title-btn" type="button" data-bs-toggle="collapse" data-bs-target="#client-summary-collapse" aria-expanded="true" aria-controls="client-summary-collapse">
+                        <span class="filter-summary-title">Clique para Exibir ou Ocultar o Resumo por Cliente</span>
+                        <span class="toggle-icon">▾</span>
+                    </button>
+                    <div id="client-summary-collapse" class="collapse show mt-3">
+                        <div class="table-responsive">
+                            <table class="table table-striped table-sm summary-table" id="client-summary-table">
+                                <thead id="client-summary-header">
+                                    </thead>
+                                <tbody id="client-summary-body">
+                                    </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
                 
                 <div class="filter-summary-section">
-                    <div class="filter-summary-title">Resumo por Unidade</div>
-                    <div class="table-responsive">
-                        <table class="table table-striped table-sm summary-table" id="unit-summary-table">
-                            <thead id="unit-summary-header">
-                                </thead>
-                            <tbody id="unit-summary-body">
-                                </tbody>
-                        </table>
+                    <button class="toggle-section-btn filter-summary-title-btn" type="button" data-bs-toggle="collapse" data-bs-target="#unit-summary-collapse" aria-expanded="true" aria-controls="unit-summary-collapse">
+                        <span class="filter-summary-title">Clique para Exibir ou Ocultar o Resumo por Unidade</span>
+                        <span class="toggle-icon">▾</span>
+                    </button>
+                    <div id="unit-summary-collapse" class="collapse show mt-3">
+                        <div class="table-responsive">
+                            <table class="table table-striped table-sm summary-table" id="unit-summary-table">
+                                <thead id="unit-summary-header">
+                                    </thead>
+                                <tbody id="unit-summary-body">
+                                    </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
                 
-                <div class="filter-summary-section"><div class="filter-summary-title">Equipamentos Encontrados</div><div id="equipment-summary-list"></div></div>
+                <div class="filter-summary-section">
+                    <button class="toggle-section-btn filter-summary-title-btn" type="button" data-bs-toggle="collapse" data-bs-target="#equipment-summary-collapse" aria-expanded="true" aria-controls="equipment-summary-collapse">
+                        <span class="filter-summary-title">Clique para Exibir ou Ocultar os Equipamentos Encontrados</span>
+                        <span class="toggle-icon">▾</span>
+                    </button>
+                    <div id="equipment-summary-collapse" class="collapse show mt-3">
+                        <div id="equipment-summary-list"></div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -429,6 +541,13 @@
         a.click();
         document.body.removeChild(a);
     }
+
+    function collapseInitialDashboardCard() {
+        const collapseElement = document.getElementById('dashboard-inicial-collapse');
+        if (!collapseElement || typeof bootstrap === 'undefined' || !bootstrap.Collapse) return;
+        const collapseInstance = bootstrap.Collapse.getOrCreateInstance(collapseElement, { toggle: false });
+        if (collapseElement.classList.contains('show')) collapseInstance.hide();
+    }
     
     /* ---------- FUNÇÕES DE MANIPULAÇÃO DE DADOS E FILTROS ---------- */
     function processExcelData(dataArray){
@@ -447,6 +566,7 @@
         document.getElementById('pdf-btn').disabled = false;
         alert(`Planilha carregada com sucesso! Número de registros: ${data.length}`);
         applyFilters(); // Aplica filtros iniciais (todos)
+        setTimeout(collapseInitialDashboardCard, 150);
     }
     
     document.getElementById('file-upload').addEventListener('change', (e) => {
@@ -670,7 +790,7 @@
 
         label.textContent = `Digite para buscar ${currentSearchType}s:`;
         selectedLabel.textContent = `${currentSearchType.charAt(0).toUpperCase() + currentSearchType.slice(1)}s Selecionados:`;
-        toggleBtn.textContent = `Selecionar/Desselecionar Todos os ${currentSearchType.charAt(0).toUpperCase() + currentSearchType.slice(1)}s`;
+        toggleBtn.textContent = `Marcar/Desmarcar Todos os ${currentSearchType.charAt(0).toUpperCase() + currentSearchType.slice(1)}s`;
 
         document.getElementById('search').value = '';
         selectedItems.clear();
@@ -1487,5 +1607,6 @@
         populateColumnCheckboxes();
     });
 </script>
+<script defer src="https://static.cloudflareinsights.com/beacon.min.js/v8c78df7c7c0f484497ecbca7046644da1771523124516" integrity="sha512-8DS7rgIrAmghBFwoOTujcf6D9rXvH8xm8JQ1Ja01h9QX8EzXldiszufYa4IFfKdLUKTTrnSFXLDkUEOTrZQ8Qg==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
 </body>
 </html>
