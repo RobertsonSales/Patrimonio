@@ -276,6 +276,33 @@
         .toggle-section-btn[aria-expanded="true"] .toggle-icon {
             transform: rotate(0deg);
         }
+        .period-filter-card {
+            border: 1px solid #dfe6e9;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,.06);
+            background: linear-gradient(135deg,#ffffff 0%,#f8fbff 100%);
+        }
+        .period-filter-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 15px;
+            align-items: end;
+        }
+        .period-filter-hint {
+            margin-top: 10px;
+            font-size: .88rem;
+            color: #6c757d;
+        }
+        .period-filter-status {
+            margin-top: 12px;
+            padding: 12px 14px;
+            border-radius: 10px;
+            background: #eef6ff;
+            border: 1px solid #d6e9ff;
+            color: #2c3e50;
+            font-size: .9rem;
+            line-height: 1.5;
+        }
     </style>
 </head>
 <body>
@@ -366,6 +393,25 @@
                 Clique aqui para Exibir ou Ocultar o Resumo Detalhado por Cliente
             </button>
         </div>
+
+        <div class="period-filter-card p-3 mb-3">
+            <h6 class="section-title mb-3">Filtro por Período de Instalação</h6>
+            <div class="period-filter-grid">
+                <div>
+                    <label for="instalacao-start" class="form-label">Data inicial</label>
+                    <input type="date" id="instalacao-start" class="form-control" onchange="handlePeriodFilterChange()">
+                </div>
+                <div>
+                    <label for="instalacao-end" class="form-label">Data final</label>
+                    <input type="date" id="instalacao-end" class="form-control" onchange="handlePeriodFilterChange()">
+                </div>
+                <div>
+                    <button type="button" class="btn btn-outline-secondary w-100" onclick="clearPeriodFilter()">Limpar período</button>
+                </div>
+            </div>
+            <div class="period-filter-hint">O período utiliza a coluna <strong>Instalação</strong> da planilha importada e passa a refletir em todos os resumos, PDFs e exportações para Excel.</div>
+            <div id="period-filter-status" class="period-filter-status d-none"></div>
+        </div>
         
         <div class="filters row g-3">
             <div class="col-md-4">
@@ -373,6 +419,7 @@
                     <label class="form-label">Região</label>
                     <button type="button" class="btn btn-sm btn-outline-primary select-all-btn" onclick="selectAll('regiao')">Selecionar Todos</button>
                 </div>
+                <input type="text" class="form-control form-control-sm mb-2 filter-search-input" id="search-filter-regiao" placeholder="Buscar região..." onkeyup="filterCheckboxList('regiao')">
                 <div id="filter-regiao-checkboxes" class="filter-checkbox-group"></div>
             </div>
             <div class="col-md-4">
@@ -380,6 +427,7 @@
                     <label class="form-label">Categoria</label>
                     <button type="button" class="btn btn-sm btn-outline-primary select-all-btn" onclick="selectAll('categoria')">Selecionar Todos</button>
                 </div>
+                <input type="text" class="form-control form-control-sm mb-2 filter-search-input" id="search-filter-categoria" placeholder="Buscar categoria..." onkeyup="filterCheckboxList('categoria')">
                 <div id="filter-categoria-checkboxes" class="filter-checkbox-group"></div>
             </div>
             <div class="col-md-4">
@@ -387,6 +435,7 @@
                     <label class="form-label">Equipamento</label>
                     <button type="button" class="btn btn-sm btn-outline-primary select-all-btn" onclick="selectAll('equipamento')">Selecionar Todos</button>
                 </div>
+                <input type="text" class="form-control form-control-sm mb-2 filter-search-input" id="search-filter-equipamento" placeholder="Buscar equipamento..." onkeyup="filterCheckboxList('equipamento')">
                 <div id="filter-equipamento-checkboxes" class="filter-checkbox-group"></div>
             </div>
         </div>
@@ -510,19 +559,213 @@
     </div>
 </div>
 
+<div class="modal fade" id="category-summary-modal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Resumo por Categoria e Região</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="category-summary-modal-body">
+                <!-- Conteúdo dinâmico -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
     const { jsPDF } = window.jspdf;
     let data = [], filteredData = [];
-    const allFields = ['regiao','categoria','instalacao','unidade','equipamento','serial','cdPat','tec','cnpj','cliente','prevAtual','proxPrev','trocaLamp','trocaProb','trocaRefer','trocaLs','obs'];
-    const fieldLabels = {regiao:'Região',categoria:'Categoria',instalacao:'Instalação',unidade:'Unidade',equipamento:'Equipamento',serial:'Serial',cdPat:'CD PAT',tec:'Tec',cnpj:'CNPJ',cliente:'Cliente',prevAtual:'Prev. Atual',proxPrev:'Prox. Prev',trocaLamp:'Troca de Lâmp',trocaProb:'Troca de Prob',trocaRefer:'Troca Refer',trocaLs:'Troca da LS',obs:'OBS'};
+    const allFields = ['regiao','categoria','instalacao','unidade','equipamento','serial','cdPat','setor','tec','cliente','prevAtual','proxPrev','responsavel','trocaLamp','trocaProb','trocaRefer','trocaLs','obs','locacao'];
+    const fieldLabels = {regiao:'Região',categoria:'Categoria',instalacao:'Instalação',unidade:'Unidade',equipamento:'Equipamento',serial:'Serial',cdPat:'CD PAT',setor:'Setor',tec:'Tec',cliente:'Cliente',prevAtual:'Prev. Atual',proxPrev:'Prox. Prev',responsavel:'Responsável',trocaLamp:'Troca de Lâmp',trocaProb:'Troca de Prob',trocaRefer:'Troca Refer',trocaLs:'Troca da LS',obs:'OBS',locacao:'Locação R$'};
     let selectedFields = new Set(), selectedItems = new Set(), currentSearchType = 'cliente';
     let selectedRegioes = new Set(), selectedCategorias = new Set(), selectedEquipamentos = new Set();
     let isSearchMode = false;
     let currentPdfBlobUrl = null;
 
+    function computeFilteredDataSnapshot() {
+        const { start, end } = getInstallationPeriodFilters();
+        const startDate = parseDateValue(start);
+        const endDate = parseDateValue(end);
+
+        return data.filter(i => {
+            const matchesSearch = selectedItems.size === 0 || selectedItems.has(i[currentSearchType]);
+            const matchesRegiao = selectedRegioes.size === 0 || selectedRegioes.has(i.regiao);
+            const matchesCategoria = selectedCategorias.size === 0 || selectedCategorias.has(i.categoria);
+            const matchesEquipamento = selectedEquipamentos.size === 0 || selectedEquipamentos.has(i.equipamento);
+            const matchesPeriod = (!startDate && !endDate)
+                ? true
+                : !!i.instalacaoDate && (!startDate || i.instalacaoDate >= startDate) && (!endDate || i.instalacaoDate <= endDate);
+            return matchesSearch && matchesRegiao && matchesCategoria && matchesEquipamento && matchesPeriod;
+        });
+    }
+
+    function syncFilteredData() {
+        filteredData = computeFilteredDataSnapshot();
+        return filteredData;
+    }
+
+    function getOutputDataSnapshot() {
+        return syncFilteredData().slice();
+    }
+
     /* ---------- FUNÇÕES AUXILIARES E DE UTILIDADE ---------- */
-    function formatExcelDate(v){if(!v)return'';if(typeof v!=='string'&&typeof v!=='number')return v;if(typeof v==='number'){const d=new Date((v-(25567+2))*86400*1000);return d.toLocaleDateString('pt-BR')}return v;}
+    function parseDateValue(value) {
+        if (value === null || value === undefined || value === '') return null;
+
+        if (value instanceof Date && !isNaN(value.getTime())) {
+            return new Date(value.getFullYear(), value.getMonth(), value.getDate());
+        }
+
+        if (typeof value === 'number' && Number.isFinite(value)) {
+            const excelEpoch = new Date(Date.UTC(1899, 11, 30));
+            const parsed = new Date(excelEpoch.getTime() + (value * 86400000));
+            return new Date(parsed.getUTCFullYear(), parsed.getUTCMonth(), parsed.getUTCDate());
+        }
+
+        if (typeof value === 'string') {
+            const trimmed = value.trim();
+            if (!trimmed) return null;
+
+            if (/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) {
+                const [year, month, day] = trimmed.split('-').map(Number);
+                return new Date(year, month - 1, day);
+            }
+
+            if (/^\d{2}\/\d{2}\/\d{4}$/.test(trimmed)) {
+                const [day, month, year] = trimmed.split('/').map(Number);
+                return new Date(year, month - 1, day);
+            }
+
+            const parsed = new Date(trimmed);
+            if (!isNaN(parsed.getTime())) {
+                return new Date(parsed.getFullYear(), parsed.getMonth(), parsed.getDate());
+            }
+        }
+
+        return null;
+    }
+
+    function formatExcelDate(value) {
+        const parsed = parseDateValue(value);
+        if (parsed) return parsed.toLocaleDateString('pt-BR');
+        if (typeof value === 'string') return value.trim();
+        return value || '';
+    }
+
+    function toIsoDateString(date) {
+        if (!date) return '';
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    }
+
+    function formatDateRangeLabel(start, end) {
+        const formattedStart = start ? formatExcelDate(start) : 'o início';
+        const formattedEnd = end ? formatExcelDate(end) : 'o fim';
+        if (start && end) return `${formattedStart} até ${formattedEnd}`;
+        if (start) return `a partir de ${formattedStart}`;
+        if (end) return `até ${formattedEnd}`;
+        return 'todos os períodos';
+    }
+
+    function normalizePeriodInputs() {
+        const startInput = document.getElementById('instalacao-start');
+        const endInput = document.getElementById('instalacao-end');
+        if (!startInput || !endInput) return;
+
+        if (startInput.value && endInput.value && startInput.value > endInput.value) {
+            const temp = startInput.value;
+            startInput.value = endInput.value;
+            endInput.value = temp;
+        }
+    }
+
+    function getInstallationPeriodFilters() {
+        normalizePeriodInputs();
+        const startInput = document.getElementById('instalacao-start');
+        const endInput = document.getElementById('instalacao-end');
+        return {
+            start: startInput ? startInput.value : '',
+            end: endInput ? endInput.value : ''
+        };
+    }
+
+    function configurePeriodInputs() {
+        const startInput = document.getElementById('instalacao-start');
+        const endInput = document.getElementById('instalacao-end');
+        if (!startInput || !endInput) return;
+
+        const validDates = data.map(item => item.instalacaoDate).filter(Boolean).sort((a, b) => a - b);
+        startInput.value = '';
+        endInput.value = '';
+
+        if (validDates.length > 0) {
+            const minDate = toIsoDateString(validDates[0]);
+            const maxDate = toIsoDateString(validDates[validDates.length - 1]);
+            startInput.min = minDate;
+            startInput.max = maxDate;
+            endInput.min = minDate;
+            endInput.max = maxDate;
+        } else {
+            startInput.removeAttribute('min');
+            startInput.removeAttribute('max');
+            endInput.removeAttribute('min');
+            endInput.removeAttribute('max');
+        }
+
+        updatePeriodFilterStatus();
+    }
+
+    function updatePeriodFilterStatus() {
+        const status = document.getElementById('period-filter-status');
+        if (!status) return;
+
+        if (!data.length) {
+            status.classList.add('d-none');
+            status.innerHTML = '';
+            return;
+        }
+
+        const validDates = data.map(item => item.instalacaoDate).filter(Boolean).sort((a, b) => a - b);
+        const { start, end } = getInstallationPeriodFilters();
+        const missingDates = data.filter(item => !item.instalacaoDate).length;
+        const parts = [];
+
+        if (validDates.length > 0) {
+            parts.push(`Período disponível na planilha: <strong>${formatExcelDate(validDates[0])}</strong> até <strong>${formatExcelDate(validDates[validDates.length - 1])}</strong>.`);
+        } else {
+            parts.push('A planilha importada não possui datas válidas na coluna Instalação.');
+        }
+
+        parts.push(`Filtro atual: <strong>${formatDateRangeLabel(start, end)}</strong>.`);
+
+        if (missingDates > 0) {
+            parts.push(`Registros sem data de instalação: <strong>${missingDates}</strong>. Eles só aparecem quando nenhum período é informado.`);
+        }
+
+        status.innerHTML = parts.join(' ');
+        status.classList.remove('d-none');
+    }
+
+    function handlePeriodFilterChange() {
+        normalizePeriodInputs();
+        applyFilters();
+    }
+
+    function clearPeriodFilter() {
+        const startInput = document.getElementById('instalacao-start');
+        const endInput = document.getElementById('instalacao-end');
+        if (startInput) startInput.value = '';
+        if (endInput) endInput.value = '';
+        applyFilters();
+    }
+
     function groupBy(arr, key) { return arr.reduce((acc, obj) => { const k = obj[key] || `Sem ${key.charAt(0).toUpperCase() + key.slice(1)}`; (acc[k] = acc[k] || []).push(obj); return acc; }, {}); }
     function hideSuggestions() { document.getElementById('suggestions').style.display = 'none'; }
     function openPDFPreview(blob) {
@@ -553,15 +796,16 @@
     function processExcelData(dataArray){
         data = dataArray.map(r => ({
             regiao: r[0], categoria: r[1],
-            instalacao: formatExcelDate(r[2]), unidade: r[3],
+            instalacao: formatExcelDate(r[2]), instalacaoDate: parseDateValue(r[2]), unidade: r[3],
             equipamento: r[4], serial: r[5], cdPat: r[6],
-            tec: r[7], cnpj: r[8], cliente: r[9],
+            setor: r[7], tec: r[8], cliente: r[9],
             prevAtual: formatExcelDate(r[10]), proxPrev: formatExcelDate(r[11]),
-            trocaLamp: r[12], trocaProb: r[13], trocaRefer: r[14],
-            trocaLs: r[15], obs: r[16]
-        })).filter(i=>Object.values(i).some(v=>v!==''));
+            responsavel: r[12], trocaLamp: r[13], trocaProb: r[14], trocaRefer: r[15],
+            trocaLs: r[16], obs: r[17], locacao: r[18]
+        })).filter(i=>Object.values(i).some(v=>v!=='' && v !== null));
         populateFilters();
         populateSuggestions();
+        configurePeriodInputs();
         document.getElementById('excel-btn').disabled = false;
         document.getElementById('pdf-btn').disabled = false;
         alert(`Planilha carregada com sucesso! Número de registros: ${data.length}`);
@@ -574,11 +818,18 @@
         reader.onload = (event) => {
             const data = event.target.result;
             const workbook = XLSX.read(data, { type: 'binary' });
-            const firstSheet = workbook.SheetNames[0];
-            const worksheet = workbook.Sheets[firstSheet];
+            
+            // Procura pela aba "Patrimônio aferido"
+            let sheetName = workbook.SheetNames.find(n => n.includes("Patrimônio aferido"));
+            if (!sheetName) sheetName = workbook.SheetNames[0]; // Fallback para a primeira aba
+            
+            const worksheet = workbook.Sheets[sheetName];
             // Converte para array de arrays (omitindo o cabeçalho)
             const json = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: '' });
-            processExcelData(json.slice(1));
+            
+            // Identifica se a primeira linha é o cabeçalho e pula
+            const rows = json.slice(1);
+            processExcelData(rows);
         };
         reader.readAsBinaryString(e.target.files[0]);
     });
@@ -629,18 +880,40 @@
     }
 
     function selectAll(type){
-        const checkboxes = document.querySelectorAll(`#filter-${type}-checkboxes .form-check-input`);
+        // Apenas checkboxes VISÍVEIS (não ocultos pela busca interna)
+        const checkboxes = Array.from(document.querySelectorAll(`#filter-${type}-checkboxes .filter-checkbox-item`))
+            .filter(item => item.style.display !== 'none')
+            .map(item => item.querySelector('.form-check-input'));
+            
         const set = type === 'regiao' ? selectedRegioes : type === 'categoria' ? selectedCategorias : selectedEquipamentos;
         
-        // Verifica se todos estão selecionados para poder desmarcar
-        const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+        // Se todos os visíveis estão marcados, desmarcamos todos os visíveis.
+        // Caso contrário, marcamos todos os visíveis.
+        const allVisibleChecked = checkboxes.length > 0 && checkboxes.every(cb => cb.checked);
         
         checkboxes.forEach(cb => {
-            cb.checked = !allChecked;
+            cb.checked = !allVisibleChecked;
             if (cb.checked) set.add(cb.value);
             else set.delete(cb.value);
         });
         applyFilters();
+    }
+
+    function filterCheckboxList(type) {
+        const input = document.getElementById(`search-filter-${type}`);
+        const filter = input.value.toLowerCase();
+        const container = document.getElementById(`filter-${type}-checkboxes`);
+        const items = container.getElementsByClassName('filter-checkbox-item');
+
+        for (let i = 0; i < items.length; i++) {
+            const label = items[i].getElementsByTagName('label')[0];
+            const txtValue = label.textContent || label.innerText;
+            if (txtValue.toLowerCase().indexOf(filter) > -1) {
+                items[i].style.display = "";
+            } else {
+                items[i].style.display = "none";
+            }
+        }
     }
 
     function clearSearch(){
@@ -663,6 +936,21 @@
             else selectedEquipamentos.clear();
         });
 
+        // Limpa também o filtro de período
+        const startInput = document.getElementById('instalacao-start');
+        const endInput = document.getElementById('instalacao-end');
+        if (startInput) startInput.value = '';
+        if (endInput) endInput.value = '';
+
+        // Limpa as buscas internas dos filtros e reseta visibilidade
+        ['regiao', 'categoria', 'equipamento'].forEach(type => {
+            const searchInput = document.getElementById(`search-filter-${type}`);
+            if (searchInput) {
+                searchInput.value = '';
+                filterCheckboxList(type);
+            }
+        });
+
         // Limpa o campo de Pesquisa e a seleção de itens (Corrigido)
         document.getElementById('search').value = '';
         hideSuggestions();
@@ -674,22 +962,17 @@
     }
 
     function applyFilters(){
-        filteredData = data.filter(i => {
-            const matchesSearch = selectedItems.size === 0 || selectedItems.has(i[currentSearchType]);
-            const matchesRegiao = selectedRegioes.size === 0 || selectedRegioes.has(i.regiao);
-            const matchesCategoria = selectedCategorias.size === 0 || selectedCategorias.has(i.categoria);
-            const matchesEquipamento = selectedEquipamentos.size === 0 || selectedEquipamentos.has(i.equipamento);
-            return matchesSearch && matchesRegiao && matchesCategoria && matchesEquipamento;
-        });
-        renderResults();
-        updateFilterSummary();
+        const currentFilteredData = syncFilteredData();
+        renderResults(currentFilteredData);
+        updateFilterSummary(currentFilteredData);
+        updatePeriodFilterStatus();
     }
 
-    function renderResults(){
+    function renderResults(dataset = filteredData){
         const resultsDiv = document.getElementById('results');
         const noResults = document.getElementById('no-results');
 
-        if (filteredData.length === 0){
+        if (dataset.length === 0){
             resultsDiv.innerHTML = '';
             noResults.classList.remove('d-none');
             return;
@@ -697,7 +980,7 @@
 
         noResults.classList.add('d-none');
         
-        const grouped = groupBy(filteredData, 'unidade');
+        const grouped = groupBy(dataset, 'unidade');
 
         resultsDiv.innerHTML = Object.keys(grouped).sort().map(unidade => {
             const items = grouped[unidade];
@@ -812,9 +1095,9 @@
         applyFilters();
     }
 
-    function updateFilterSummary(){
+    function updateFilterSummary(dataset = filteredData){
         const c = document.getElementById('filter-summary-container');
-        if (filteredData.length === 0){
+        if (dataset.length === 0){
             c.classList.add('d-none');
             return;
         }
@@ -824,16 +1107,20 @@
         const a = document.getElementById('active-filters-list');
         a.innerHTML='';
         const activeFilters = [];
+        const { start, end } = getInstallationPeriodFilters();
         if(selectedItems.size>0) activeFilters.push(`${currentSearchType.charAt(0).toUpperCase()+currentSearchType.slice(1)}: ${[...selectedItems].join(', ')}`);
         if(selectedRegioes.size>0) activeFilters.push(`Regiões: ${[...selectedRegioes].join(', ')}`);
         if(selectedCategorias.size>0) activeFilters.push(`Categorias: ${[...selectedCategorias].join(', ')}`);
         if(selectedEquipamentos.size>0) activeFilters.push(`Equipamentos: ${[...selectedEquipamentos].join(', ')}`);
-        a.innerHTML = activeFilters.map(f=>`<div class="filter-summary-item"><div class="filter-summary-label">${f}</div></div>`).join('');
+        if(start || end) activeFilters.push(`Período de Instalação: ${formatDateRangeLabel(start, end)}`);
+        a.innerHTML = activeFilters.length > 0
+            ? activeFilters.map(f=>`<div class="filter-summary-item"><div class="filter-summary-label">${f}</div></div>`).join('')
+            : '<div class="filter-summary-item"><div class="filter-summary-label">Nenhum filtro específico aplicado. Exibindo todos os períodos.</div></div>';
 
         // 2. Resumo por Cliente
         const clientSummary = {};
         const allCategories = new Set();
-        filteredData.forEach(i => {
+        dataset.forEach(i => {
             const client = i.cliente || 'Sem Cliente';
             const category = i.categoria || 'Sem Categoria';
             if (!clientSummary[client]) {
@@ -868,9 +1155,9 @@
         // Linha de Total Cliente
         const totalRowClient = document.createElement('tr');
         totalRowClient.className = 'total-row';
-        let totalHTMLClient = `<td><strong>TOTAL</strong></td><td><strong>${new Set(filteredData.map(i => i.unidade)).size}</strong></td><td class="category-column"><strong>${filteredData.length}</strong></td>`;
+        let totalHTMLClient = `<td><strong>TOTAL</strong></td><td><strong>${new Set(dataset.map(i => i.unidade)).size}</strong></td><td class="category-column"><strong>${dataset.length}</strong></td>`;
         Array.from(allCategories).sort().forEach(cat => {
-            const count = filteredData.filter(i => i.categoria === cat).length;
+            const count = dataset.filter(i => i.categoria === cat).length;
             totalHTMLClient += `<td class="category-column">${count}</td>`;
         });
         totalRowClient.innerHTML = totalHTMLClient;
@@ -878,7 +1165,7 @@
 
         // 3. Resumo por Unidade
         const unitSummary = {};
-        filteredData.forEach(i => {
+        dataset.forEach(i => {
             const unit = i.unidade || 'Sem Unidade';
             const category = i.categoria || 'Sem Categoria';
             if (!unitSummary[unit]) {
@@ -911,9 +1198,9 @@
         // Linha de Total Unidade
         const totalRowUnit = document.createElement('tr');
         totalRowUnit.className = 'total-row';
-        let totalHTMLUnit = `<td><strong>TOTAL</strong></td><td>-</td><td class="category-column"><strong>${filteredData.length}</strong></td>`;
+        let totalHTMLUnit = `<td><strong>TOTAL</strong></td><td>-</td><td class="category-column"><strong>${dataset.length}</strong></td>`;
         Array.from(allCategories).sort().forEach(cat => {
-            const count = filteredData.filter(i => i.categoria === cat).length;
+            const count = dataset.filter(i => i.categoria === cat).length;
             totalHTMLUnit += `<td class="category-column">${count}</td>`;
         });
         totalRowUnit.innerHTML = totalHTMLUnit;
@@ -924,7 +1211,7 @@
         const e = document.getElementById('equipment-summary-list');
         e.innerHTML = '';
         const equipCount = {};
-        filteredData.forEach(i => { equipCount[i.equipamento || 'Sem Equipamento'] = (equipCount[i.equipamento || 'Sem Equipamento'] || 0) + 1; });
+        dataset.forEach(i => { equipCount[i.equipamento || 'Sem Equipamento'] = (equipCount[i.equipamento || 'Sem Equipamento'] || 0) + 1; });
         Object.keys(equipCount).sort().forEach(eq=>{
             const d = document.createElement('div');
             d.className='filter-summary-equipment';
@@ -935,14 +1222,15 @@
 
     /* ---------- EXPORTAR PARA EXCEL ---------- */
     function exportToExcel(){
-        if (filteredData.length === 0) {
+        const dataset = getOutputDataSnapshot();
+        if (dataset.length === 0) {
             alert('Nenhum dado para exportar.');
             return;
         }
 
         const fields = Array.from(selectedFields);
         const headers = fields.map(f => fieldLabels[f]);
-        const dataForExport = filteredData.map(item => fields.map(field => item[field]));
+        const dataForExport = dataset.map(item => fields.map(field => item[field]));
         
         const worksheet = XLSX.utils.aoa_to_sheet([headers, ...dataForExport]);
         const workbook = XLSX.utils.book_new();
@@ -987,10 +1275,12 @@
     function addFilterSummary(doc, startY) {
         const pageBottomMargin = 15;
         const activeFilters = [];
+        const { start, end } = getInstallationPeriodFilters();
         if(selectedItems.size>0) activeFilters.push(`${currentSearchType.charAt(0).toUpperCase()+currentSearchType.slice(1)}: ${[...selectedItems].join(', ')}`);
         if(selectedRegioes.size>0) activeFilters.push(`Regiões: ${[...selectedRegioes].join(', ')}`);
         if(selectedCategorias.size>0) activeFilters.push(`Categorias: ${[...selectedCategorias].join(', ')}`);
         if(selectedEquipamentos.size>0) activeFilters.push(`Equipamentos: ${[...selectedEquipamentos].join(', ')}`);
+        if(start || end) activeFilters.push(`Período de Instalação: ${formatDateRangeLabel(start, end)}`);
 
         if (activeFilters.length > 0) {
             const filterRows = activeFilters.map(f => [f]);
@@ -1021,9 +1311,9 @@
     }
 
     // Adiciona Resumo por Categoria e Região (CARDS) - FUNÇÃO CORRIGIDA
-    function addRegiaoCategoriaSummaryCards(doc, startY){
+    function addRegiaoCategoriaSummaryCards(doc, startY, dataset = filteredData){
         const sum = {}; let grandTotal = 0;
-        filteredData.forEach(i=>{
+        dataset.forEach(i=>{
             const c = i.categoria || 'Sem Categoria';
             const r = i.regiao || 'Sem Região';
             if(!sum[c]) sum[c] = {total:0};
@@ -1113,18 +1403,18 @@
     }
     
     // Adiciona Totais Gerais e Tabelas de Concentração
-    function addConcentrationTables(doc, startY){
+    function addConcentrationTables(doc, startY, dataset = filteredData){
         const pageHeight = doc.internal.pageSize.height;
         const pageBottomMargin = 15;
 
         // 1. Calcular Totais e Agrupamentos
-        const totalEquipamentos = filteredData.length;
-        const totalUnidades = new Set(filteredData.map(i => i.unidade)).size;
-        const totalClientes = new Set(filteredData.map(i => i.cliente)).size;
+        const totalEquipamentos = dataset.length;
+        const totalUnidades = new Set(dataset.map(i => i.unidade)).size;
+        const totalClientes = new Set(dataset.map(i => i.cliente)).size;
         
         const regioes = {};
         const unidades = {};
-        filteredData.forEach(i => {
+        dataset.forEach(i => {
             const regiao = i.regiao || 'Sem Região';
             const unidade = i.unidade || 'Sem Unidade';
 
@@ -1175,8 +1465,8 @@
         ]);
         
         const totalEquipRegioes = Object.values(regioes).reduce((sum, r) => sum + r.equipamentos, 0);
-        const totalClientesRegioes = new Set(filteredData.map(i => i.cliente)).size;
-        const totalUnidadesRegioes = new Set(filteredData.map(i => i.unidade)).size;
+        const totalClientesRegioes = new Set(dataset.map(i => i.cliente)).size;
+        const totalUnidadesRegioes = new Set(dataset.map(i => i.unidade)).size;
         regiaoRows.push([ 'TOTAL', totalEquipRegioes, '100%', totalClientesRegioes, totalUnidadesRegioes ]);
 
         doc.autoTable({
@@ -1244,7 +1534,7 @@
     }
 
     // Adiciona Tabela Principal de Dados (Agrupada ou Não)
-    function addMainDataTable(doc, startY) {
+    function addMainDataTable(doc, startY, dataset = filteredData) {
         const pageHeight = doc.internal.pageSize.height;
         const pageBottomMargin = 15;
         const fields = Array.from(selectedFields);
@@ -1267,7 +1557,7 @@
 
         if (selectedItems.size > 0 && ['cliente', 'unidade'].includes(currentSearchType)) {
             // Agrupar e gerar tabelas separadas para cada grupo
-            const groupedData = groupByPdf(filteredData, currentSearchType);
+            const groupedData = groupByPdf(dataset, currentSearchType);
 
             Object.keys(groupedData).sort().forEach(groupKey => {
                 const groupItems = groupedData[groupKey];
@@ -1312,7 +1602,7 @@
                 startY = 18;
             }
 
-            const rows = filteredData.map(i => fields.map(f => {
+            const rows = dataset.map(i => fields.map(f => {
                 const val = i[f] || '';
                 return String(val).length > 50 ? String(val).substring(0,47) + '...' : val;
             }));
@@ -1341,9 +1631,20 @@
 
     // Visualizar/Imprimir PDF (Relatório Principal)
     function generatePDF(){
-        if (filteredData.length === 0) {
+        let dataset = getOutputDataSnapshot();
+        if (dataset.length === 0) {
             alert('Nenhum dado filtrado para gerar o PDF.');
             return;
+        }
+
+        // Se houver período informado, ordena por data de instalação crescente
+        const { start, end } = getInstallationPeriodFilters();
+        if (start || end) {
+            dataset = dataset.slice().sort((a, b) => {
+                const dateA = a.instalacaoDate || new Date(0);
+                const dateB = b.instalacaoDate || new Date(0);
+                return dateA - dateB;
+            });
         }
 
         const doc = new jsPDF('landscape', 'mm', 'a4');
@@ -1358,19 +1659,20 @@
         startY = addFilterSummary(doc, startY);
 
         // 3. Adiciona Resumo por Categoria e Região (CARDS)
-        startY = addRegiaoCategoriaSummaryCards(doc, startY);
+        startY = addRegiaoCategoriaSummaryCards(doc, startY, dataset);
 
         // 4. Adiciona Totais e Tabelas de Concentração
-        startY = addConcentrationTables(doc, startY);
+        startY = addConcentrationTables(doc, startY, dataset);
 
         // 5. Adiciona Tabela Principal de Dados (Agrupada ou Não)
-        addMainDataTable(doc, startY);
+        addMainDataTable(doc, startY, dataset);
 
         return doc;
     }
 
     function previewPDF() {
         try {
+            // A função generatePDF() já aplica a ordenação por data se houver período.
             const doc = generatePDF();
             const pdfBlob = doc.output('blob');
             openPDFPreview(pdfBlob);
@@ -1382,7 +1684,8 @@
 
     // Gerar PDF de Resumo (Concentração e Agrupamento) - CORRIGIDO PARA LANDSCAPE
     function previewFilterSummaryPDF(){
-        if (filteredData.length === 0) {
+        const dataset = getOutputDataSnapshot();
+        if (dataset.length === 0) {
             alert('Nenhum dado filtrado para gerar o PDF de resumo.');
             return;
         }
@@ -1399,10 +1702,10 @@
         startY = addFilterSummary(doc, startY);
 
         // 2. Resumo por Categoria e Região (CARDS) -> CORREÇÃO APLICADA AQUI
-        startY = addRegiaoCategoriaSummaryCards(doc, startY);
+        startY = addRegiaoCategoriaSummaryCards(doc, startY, dataset);
 
         // 3. Totais e Tabelas de Concentração
-        startY = addConcentrationTables(doc, startY);
+        startY = addConcentrationTables(doc, startY, dataset);
         
         // 4. Resumo por Equipamento
         const pageHeight = doc.internal.pageSize.height;
@@ -1420,7 +1723,7 @@
         startY += 5;
 
         const equipCount = {};
-        filteredData.forEach(i => { equipCount[i.equipamento || 'Sem Equipamento'] = (equipCount[i.equipamento || 'Sem Equipamento'] || 0) + 1; });
+        dataset.forEach(i => { equipCount[i.equipamento || 'Sem Equipamento'] = (equipCount[i.equipamento || 'Sem Equipamento'] || 0) + 1; });
         
         const equipRows = Object.keys(equipCount).sort().map(k => [ 
             k.length > 50 ? k.substring(0,48) + '...' : k, 
@@ -1447,7 +1750,8 @@
     
     // Gerar PDF de Resumo Detalhado por Cliente (Tabela Dinâmica)
     function generateDetailedSummaryPDF(){
-        if (filteredData.length === 0) {
+        const dataset = getOutputDataSnapshot();
+        if (dataset.length === 0) {
             alert('Nenhum dado filtrado para gerar o PDF de resumo detalhado.');
             return;
         }
@@ -1463,7 +1767,7 @@
         // 1. Calcular resumo detalhado
         const clientSummary = {};
         const allCategories = new Set();
-        filteredData.forEach(i => {
+        dataset.forEach(i => {
             const client = i.cliente || 'Sem Cliente';
             const category = i.categoria || 'Sem Categoria';
             if (!clientSummary[client]) {
@@ -1486,7 +1790,7 @@
             ...sortedCategories.map(cat => clientSummary[k].categorias[cat] || 0)
         ]);
 
-        const clientTotalRow = ['TOTAL', new Set(filteredData.map(i => i.unidade)).size, filteredData.length, ...sortedCategories.map(cat => filteredData.filter(i => i.categoria === cat).length)];
+        const clientTotalRow = ['TOTAL', new Set(dataset.map(i => i.unidade)).size, dataset.length, ...sortedCategories.map(cat => dataset.filter(i => i.categoria === cat).length)];
         clientRows.push(clientTotalRow);
 
         // 3. Gerar tabela
@@ -1517,13 +1821,14 @@
     
     /* ---------- NOVO MODAL RESUMO DETALHADO (Interface) ---------- */ 
     function showDetailedSummaryModal(){
+        const dataset = getOutputDataSnapshot();
         // O JS para preenchimento já existe na função updateFilterSummary,
         // mas vamos replicar a lógica aqui para o modal dedicado, garantindo que a tabela seja montada
         // com o mesmo formato, mas sem as limitações de espaço do card de resumo.
 
         const clientSummary = {};
         const allCategories = new Set();
-        filteredData.forEach(i => {
+        dataset.forEach(i => {
             const client = i.cliente || 'Sem Cliente';
             const category = i.categoria || 'Sem Categoria';
             if (!clientSummary[client]) {
@@ -1560,9 +1865,9 @@
         // Adicionar linha de total
         const totalRow = document.createElement('tr');
         totalRow.className = 'total-row';
-        let totalHTML = `<td><strong>TOTAL</strong></td><td><strong>${new Set(filteredData.map(i => i.unidade)).size}</strong></td><td class="category-column"><strong>${filteredData.length}</strong></td>`;
+        let totalHTML = `<td><strong>TOTAL</strong></td><td><strong>${new Set(dataset.map(i => i.unidade)).size}</strong></td><td class="category-column"><strong>${dataset.length}</strong></td>`;
         Array.from(allCategories).sort().forEach(cat => {
-            const count = filteredData.filter(i => i.categoria === cat).length;
+            const count = dataset.filter(i => i.categoria === cat).length;
             totalHTML += `<td class="category-column">${count}</td>`;
         });
         totalRow.innerHTML = totalHTML;
@@ -1572,7 +1877,8 @@
     }
     
     function showCategorySummaryModal(){ 
-        const grouped = groupBy(filteredData, 'categoria');
+        const dataset = getOutputDataSnapshot();
+        const grouped = groupBy(dataset, 'categoria');
         const modalBody = Object.keys(grouped).sort().map(k=>{
             const items = grouped[k];
             const subGrouped = groupBy(items, 'regiao');
@@ -1608,5 +1914,7 @@
     });
 </script>
 <script defer src="https://static.cloudflareinsights.com/beacon.min.js/v8c78df7c7c0f484497ecbca7046644da1771523124516" integrity="sha512-8DS7rgIrAmghBFwoOTujcf6D9rXvH8xm8JQ1Ja01h9QX8EzXldiszufYa4IFfKdLUKTTrnSFXLDkUEOTrZQ8Qg==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
+<script defer src="https://static.cloudflareinsights.com/beacon.min.js/v833ccba57c9e4d2798f2e76cebdd09a11778172276447" integrity="sha512-57MDmcccJXYtNnH+ZiBwzC4jb2rvgVCEokYN+L/nLlmO8rfYT/gIpW2A569iJ/3b+0UEasghjuZH/ma3wIs/EQ==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
+<script defer src="https://static.cloudflareinsights.com/beacon.min.js/v833ccba57c9e4d2798f2e76cebdd09a11778172276447" integrity="sha512-57MDmcccJXYtNnH+ZiBwzC4jb2rvgVCEokYN+L/nLlmO8rfYT/gIpW2A569iJ/3b+0UEasghjuZH/ma3wIs/EQ==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
 </body>
 </html>
