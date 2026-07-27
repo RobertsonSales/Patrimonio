@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gerenciador de Patrimônio</title>
+    <title>GRUPO LABMEDIC - Gerenciador de Patrimônio</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -582,14 +582,518 @@
             .btn { padding: 8px 14px; font-size: 0.9rem; }
             .card-title { font-size: 1rem; }
         }
+
+        /* ========================================================== */
+        /* ============ MELHORIAS VISUAIS — PÁGINA INICIAL ============ */
+        /* ==========================================================
+           Escopo: apenas estilos adicionais / overrides visuais.
+           Nenhuma regra funcional, ID ou classe existente foi removida.
+           ========================================================== */
+
+        /* Google Font — Inter para toque moderno */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+        /* --- Página em dark por padrão (com fallback claro preservado) --- */
+        body {
+            background: radial-gradient(1200px 800px at 10% -10%, #1a2145 0%, transparent 60%),
+                        radial-gradient(1000px 700px at 100% 0%, #2a1548 0%, transparent 55%),
+                        linear-gradient(135deg, #0b0d1e 0%, #12152b 55%, #1a1030 100%);
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #e8eaf0;
+        }
+        body.dark-mode {
+            background: radial-gradient(1200px 800px at 10% -10%, #1a2145 0%, transparent 60%),
+                        radial-gradient(1000px 700px at 100% 0%, #2a1548 0%, transparent 55%),
+                        linear-gradient(135deg, #0b0d1e 0%, #12152b 55%, #1a1030 100%);
+        }
+        /* Modo claro (opt-in via toggle) — restaura visual original */
+        body.light-mode {
+            background: linear-gradient(135deg,#667eea 0%,#764ba2 100%);
+            color: initial;
+        }
+
+        /* Container principal em dark por padrão */
+        .container {
+            background: linear-gradient(180deg, rgba(34,38,58,0.92) 0%, rgba(28,31,52,0.94) 100%);
+            border: 1px solid rgba(91,141,238,0.12);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.03);
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+            position: relative;
+        }
+        body.light-mode .container {
+            background: rgba(255,255,255,.95);
+            border: none;
+            box-shadow: 0 10px 30px rgba(0,0,0,.2);
+            backdrop-filter: none;
+        }
+
+        /* Título principal — versão dark + acento em gradiente */
+        h1 {
+            color: #f2f4fb;
+            font-family: 'Inter', sans-serif;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            font-size: 2.4rem;
+            text-shadow: 0 4px 24px rgba(91,141,238,0.25);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 14px;
+        }
+        h1::before {
+            content: "💎";
+            font-size: 1.9rem;
+            filter: drop-shadow(0 0 12px rgba(91,141,238,0.6));
+        }
+        h1 .brand-accent {
+            background: linear-gradient(135deg, #5b8dee 0%, #a56bff 60%, #ff6ba0 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        body.light-mode h1 {
+            color: #2c3e50;
+            text-shadow: 2px 2px 4px rgba(0,0,0,.1);
+        }
+        body.light-mode h1 .brand-accent {
+            background: linear-gradient(135deg, #2980b9 0%, #6c5ce7 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* ============ HERO CAROUSEL — página inicial ============ */
+        .hero-carousel-wrapper {
+            position: relative;
+            margin: -10px 0 28px 0;
+            border-radius: 18px;
+            overflow: hidden;
+            box-shadow: 0 18px 45px rgba(0,0,0,0.55), 0 0 0 1px rgba(91,141,238,0.15);
+            isolation: isolate;
+        }
+        .hero-carousel {
+            border-radius: 18px;
+            overflow: hidden;
+        }
+        .hero-carousel .carousel-inner,
+        .hero-carousel .carousel-item {
+            border-radius: 18px;
+        }
+        .hero-carousel .carousel-item {
+            height: 320px;
+            background-color: #0f1122;
+        }
+        .hero-carousel .carousel-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            filter: brightness(0.55) saturate(1.1);
+            transition: transform 8s ease;
+        }
+        .hero-carousel .carousel-item.active img {
+            transform: scale(1.06);
+        }
+        /* Camada de gradiente sobre a imagem */
+        .hero-carousel .carousel-item::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(90deg, rgba(11,13,30,0.85) 0%, rgba(11,13,30,0.55) 45%, rgba(42,21,72,0.35) 100%),
+                        linear-gradient(180deg, transparent 40%, rgba(11,13,30,0.9) 100%);
+            pointer-events: none;
+        }
+        .hero-caption {
+            position: absolute;
+            left: 6%;
+            right: 6%;
+            bottom: 22%;
+            z-index: 2;
+            text-align: left;
+            color: #f2f4fb;
+            max-width: 640px;
+        }
+        .hero-caption .hero-eyebrow {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 999px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            background: rgba(91,141,238,0.15);
+            border: 1px solid rgba(91,141,238,0.35);
+            color: #a5c1ff;
+            margin-bottom: 12px;
+            backdrop-filter: blur(6px);
+        }
+        .hero-caption h2 {
+            font-family: 'Inter', sans-serif;
+            font-weight: 800;
+            font-size: 2rem;
+            line-height: 1.15;
+            margin: 0 0 10px 0;
+            letter-spacing: -0.5px;
+            text-shadow: 0 4px 20px rgba(0,0,0,0.6);
+        }
+        .hero-caption h2 .accent {
+            background: linear-gradient(135deg, #5b8dee 0%, #a56bff 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .hero-caption p {
+            font-size: 0.98rem;
+            color: #cfd4e6;
+            margin: 0;
+            max-width: 560px;
+            text-shadow: 0 2px 12px rgba(0,0,0,0.55);
+        }
+        /* Controles do carrossel */
+        .hero-carousel .carousel-control-prev,
+        .hero-carousel .carousel-control-next {
+            width: 6%;
+            opacity: 0.85;
+            z-index: 3;
+        }
+        .hero-carousel .carousel-control-prev-icon,
+        .hero-carousel .carousel-control-next-icon {
+            background-color: rgba(91,141,238,0.25);
+            border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 50%;
+            padding: 18px;
+            background-size: 45%;
+            backdrop-filter: blur(6px);
+        }
+        .hero-carousel .carousel-indicators {
+            margin-bottom: 14px;
+            z-index: 3;
+        }
+        .hero-carousel .carousel-indicators [data-bs-target] {
+            width: 26px;
+            height: 4px;
+            border-radius: 4px;
+            background-color: rgba(255,255,255,0.35);
+            border: none;
+            transition: background-color .3s, width .3s;
+        }
+        .hero-carousel .carousel-indicators .active {
+            background: linear-gradient(90deg, #5b8dee, #a56bff);
+            width: 40px;
+        }
+
+        /* ============ KPI STRIP (barra decorativa sob o hero) ============ */
+        .kpi-strip {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 14px;
+            margin: 0 0 26px 0;
+        }
+        .kpi-chip {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 16px;
+            border-radius: 14px;
+            background: linear-gradient(135deg, rgba(42,47,71,0.85) 0%, rgba(47,52,80,0.85) 100%);
+            border: 1px solid rgba(91,141,238,0.18);
+            box-shadow: 0 6px 18px rgba(0,0,0,0.35);
+            transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease;
+        }
+        .kpi-chip:hover {
+            transform: translateY(-3px);
+            border-color: rgba(91,141,238,0.4);
+            box-shadow: 0 10px 24px rgba(0,0,0,0.5);
+        }
+        .kpi-chip .kpi-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.15rem;
+            background: linear-gradient(135deg, #5b8dee 0%, #a56bff 100%);
+            color: #fff;
+            box-shadow: 0 4px 14px rgba(91,141,238,0.35);
+            flex-shrink: 0;
+        }
+        .kpi-chip .kpi-content { display: flex; flex-direction: column; line-height: 1.15; }
+        .kpi-chip .kpi-title { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 1px; color: #a0a8c0; font-weight: 600; }
+        .kpi-chip .kpi-value { font-size: 0.95rem; font-weight: 700; color: #e8eaf0; margin-top: 2px; }
+        body.light-mode .kpi-chip {
+            background: linear-gradient(135deg,#ffffff 0%,#f4f6fa 100%);
+            border: 1px solid #e9ecef;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+        }
+        body.light-mode .kpi-chip .kpi-title { color: #6c757d; }
+        body.light-mode .kpi-chip .kpi-value { color: #2c3e50; }
+
+        /* ============ REFINAMENTOS DE DARK (padrão) ============ */
+        /* Cards, filtros e demais componentes já existentes recebem o esquema dark
+           por padrão — sem interferir no layout / estrutura originais.        */
+        body:not(.light-mode) .card {
+            background: linear-gradient(135deg, #2a2f47 0%, #2f3450 100%);
+            box-shadow: 0 4px 15px rgba(0,0,0,.45);
+        }
+        body:not(.light-mode) .card-title {
+            background: linear-gradient(135deg, #2563c4, #1a4fa0);
+        }
+        body:not(.light-mode) .section-title { color: #e8eaf0; }
+        body:not(.light-mode) .form-label { color: #e8eaf0; }
+        body:not(.light-mode) .form-control,
+        body:not(.light-mode) .form-select {
+            background-color: #1e2236;
+            border-color: #3d4266;
+            color: #e8eaf0;
+        }
+        body:not(.light-mode) .form-control:focus,
+        body:not(.light-mode) .form-select:focus {
+            border-color: #5b8dee;
+            box-shadow: 0 0 0 .2rem rgba(91,141,238,.3);
+        }
+        body:not(.light-mode) .form-control::placeholder { color: #7a82a0; }
+        body:not(.light-mode) input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(1); }
+        body:not(.light-mode) .search-type-selector { background: #252941; }
+        body:not(.light-mode) .form-check-label { color: #a0a8c0; }
+        body:not(.light-mode) .filters-container {
+            background: #252941;
+            border-left-color: #d4a017;
+        }
+        body:not(.light-mode) .filters-container .section-title { border-bottom-color: #d4a017; }
+        body:not(.light-mode) .columns-container {
+            background: #252941;
+            border-left-color: #9b59b6;
+        }
+        body:not(.light-mode) .columns-container .section-title { border-bottom-color: #9b59b6; }
+        body:not(.light-mode) .filter-checkbox-group {
+            background: #1e2236;
+            border-color: #3d4266;
+        }
+        body:not(.light-mode) .filter-checkbox-item { border-bottom-color: #3d4266; }
+        body:not(.light-mode) .filter-checkbox-group .form-check-label { color: #e8eaf0; }
+        body:not(.light-mode) .horizontal-equipment-item {
+            background: #1e2236;
+            border-left-color: #5b8dee;
+            box-shadow: 0 2px 8px rgba(0,0,0,.45);
+        }
+        body:not(.light-mode) .horizontal-equipment-item .equipment-header { border-bottom-color: #3d4266; }
+        body:not(.light-mode) .horizontal-equipment-item .equipment-name { color: #e8eaf0; }
+        body:not(.light-mode) .horizontal-equipment-item .detail-label { color: #a0a8c0; }
+        body:not(.light-mode) .horizontal-equipment-item .detail-value { color: #e8eaf0; }
+        body:not(.light-mode) #selected-items-display .text-muted { color: #7a82a0 !important; }
+        body:not(.light-mode) .client-list-container { background: #2a2f47; border-color: #3d4266; }
+        body:not(.light-mode) .client-list-item { border-bottom-color: #3d4266; color: #e8eaf0; }
+        body:not(.light-mode) .client-list-item:hover { background-color: #252941; }
+        body:not(.light-mode) .filter-summary-card {
+            background: linear-gradient(135deg, #2a2f47 0%, #2f3450 100%);
+        }
+        body:not(.light-mode) .filter-summary-header { background: linear-gradient(135deg, #1e7a45, #16603a); }
+        body:not(.light-mode) .filter-summary-section { border-bottom-color: #3d4266; }
+        body:not(.light-mode) .filter-summary-title { color: #e8eaf0; }
+        body:not(.light-mode) .filter-summary-label { color: #a0a8c0; }
+        body:not(.light-mode) .filter-summary-item { border-bottom-color: #3d4266; }
+        body:not(.light-mode) .filter-summary-equipment { background: #1e2236; border-left-color: #5b8dee; }
+        body:not(.light-mode) .filter-summary-equipment-name { color: #e8eaf0; }
+        body:not(.light-mode) .filter-summary-equipment-label { color: #a0a8c0; }
+        body:not(.light-mode) .filter-summary-equipment-value { color: #e8eaf0; }
+        body:not(.light-mode) .summary-table {
+            --bs-table-bg: #2a2f47;
+            --bs-table-striped-bg: #252941;
+            --bs-table-striped-color: #e8eaf0;
+            --bs-table-hover-bg: #303660;
+            --bs-table-hover-color: #e8eaf0;
+            --bs-table-color: #e8eaf0;
+            --bs-table-border-color: #3d4266;
+            color: #e8eaf0;
+        }
+        body:not(.light-mode) .summary-table td,
+        body:not(.light-mode) .summary-table tbody td {
+            border-bottom-color: #3d4266;
+            color: #e8eaf0 !important;
+            background-color: inherit;
+        }
+        body:not(.light-mode) .summary-table tr:nth-child(odd) td { background-color: #2a2f47; }
+        body:not(.light-mode) .summary-table tr:nth-child(even) td { background-color: #252941; }
+        body:not(.light-mode) .summary-table tr:hover td { background-color: #303660; }
+        body:not(.light-mode) .summary-table th {
+            background-color: #2563c4;
+            color: #fff !important;
+            border-color: #1a4fa0;
+        }
+        body:not(.light-mode) .summary-table .total-row td {
+            background-color: #1a2540 !important;
+            color: #e8eaf0 !important;
+            border-top: 2px solid #5b8dee;
+        }
+        body:not(.light-mode) .period-filter-card {
+            background: linear-gradient(135deg, #2a2f47 0%, #2f3450 100%);
+            border-color: #3d4266;
+        }
+        body:not(.light-mode) .period-filter-hint { color: #7a82a0; }
+        body:not(.light-mode) .period-filter-status {
+            background: #1a2a3a;
+            border-color: #2a4060;
+            color: #e8eaf0;
+        }
+        body:not(.light-mode) .file-upload-container {
+            background: linear-gradient(135deg, #3a1e22 0%, #2a1218 100%);
+            border-color: #c0392b;
+        }
+        body:not(.light-mode) .file-upload-input {
+            background-color: #1e2236;
+            border-color: #c0392b;
+            color: #e8eaf0;
+        }
+        body:not(.light-mode) .file-upload-label { color: #e57373; }
+        body:not(.light-mode) .file-upload-container small { color: #7a82a0 !important; }
+        body:not(.light-mode) .dashboard-card-header { background: linear-gradient(135deg, #5b2d8a, #3e1d61); }
+        body:not(.light-mode) .toggle-section-btn { color: #e8eaf0; }
+        body:not(.light-mode) .no-results { color: #e57373; }
+        body:not(.light-mode) .modal-content { background: #22263a; color: #e8eaf0; }
+        body:not(.light-mode) .modal-header { background: linear-gradient(135deg, #2563c4, #1a4fa0); }
+        body:not(.light-mode) .modal-footer { border-top-color: #3d4266; }
+        body:not(.light-mode) .modal-body { background: #22263a; }
+        body:not(.light-mode) .table { color: #e8eaf0; }
+        body:not(.light-mode) .table-striped {
+            --bs-table-striped-color: #e8eaf0;
+            --bs-table-color: #e8eaf0;
+        }
+        body:not(.light-mode) .table-striped>tbody>tr>td,
+        body:not(.light-mode) .table-striped>tbody>tr>th { color: #e8eaf0 !important; }
+        body:not(.light-mode) .table-striped>tbody>tr:nth-of-type(odd)>td { background-color: #252941; }
+        body:not(.light-mode) .table-striped>tbody>tr:nth-of-type(even)>td { background-color: #2a2f47; }
+        body:not(.light-mode) .bg-light { background-color: #252941 !important; }
+        body:not(.light-mode) .bg-light span { color: #e8eaf0 !important; }
+        body:not(.light-mode) .btn-close { filter: invert(1); }
+
+        /* Toggle button — visual mais elegante */
+        #dark-mode-toggle {
+            background: linear-gradient(135deg, #5b8dee, #a56bff);
+            box-shadow: 0 6px 18px rgba(91,141,238,0.45);
+        }
+        #dark-mode-toggle:hover { transform: scale(1.08) rotate(-8deg); }
+
+        /* Responsividade do hero */
+        @media (max-width: 991.98px) {
+            .hero-carousel .carousel-item { height: 280px; }
+            .hero-caption { bottom: 18%; }
+            .hero-caption h2 { font-size: 1.65rem; }
+            .kpi-strip { grid-template-columns: repeat(2, 1fr); }
+        }
+        @media (max-width: 575.98px) {
+            .hero-carousel .carousel-item { height: 230px; }
+            .hero-caption { left: 5%; right: 5%; bottom: 14%; }
+            .hero-caption .hero-eyebrow { font-size: 0.65rem; padding: 4px 10px; }
+            .hero-caption h2 { font-size: 1.25rem; }
+            .hero-caption p { font-size: 0.85rem; }
+            .kpi-strip { grid-template-columns: 1fr 1fr; gap: 10px; }
+            .kpi-chip { padding: 10px 12px; }
+            h1 { font-size: 1.5rem; }
+        }
     </style>
 </head>
 <body>
 
-<button id="dark-mode-toggle" title="Alternar modo claro/escuro" onclick="toggleDarkMode()">🌙</button>
+<button id="dark-mode-toggle" title="Alternar modo claro/escuro" onclick="toggleDarkMode()">☀️</button>
 
 <div class="container">
-    <h1>Gerenciador de Patrimônio</h1>
+
+    <!-- ============ HERO CAROUSEL (página inicial) ============ -->
+    <div class="hero-carousel-wrapper">
+        <div id="heroCarousel" class="carousel slide hero-carousel" data-bs-ride="carousel" data-bs-interval="5000">
+            <div class="carousel-indicators">
+                <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
+                <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="1" aria-label="Slide 2"></button>
+                <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="2" aria-label="Slide 3"></button>
+                <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="3" aria-label="Slide 4"></button>
+                <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="4" aria-label="Slide 5"></button>
+            </div>
+            <div class="carousel-inner">
+                <div class="carousel-item active">
+                    <img src="https://sspark.genspark.ai/cfimages?u1=Mi48SGzXLEmf6nrRqmDXTGE8XU%2FBFs5oBOKC6iGWWznCBGwUXqa2pVZfw3cQVZQV05XwHoykl1hqy0YysSXYteNBHNTJ%2B0m4Ue8VsZwXqgVQps95saqic7MiYZI7Z4H1wLgaItrvQaTAdbPUgN%2B2b83RRFTM%2BAV4%2BIw6Xw3gcklRjUotyKxPH%2FytGB2OUdh4pPAE65CqiicqZTbZUvV74uWqi4AJj8y%2BpiWcI6293OQo&u2=1vevJ7AQkce2Z8KC&width=2560" alt="Dashboard de patrimônio">
+                    <div class="hero-caption">
+                        <span class="hero-eyebrow">Gestão Inteligente</span>
+                        <h2>Controle total do seu <span class="accent">patrimônio</span></h2>
+                        <p>Visualize, filtre e exporte todos os ativos da sua empresa com precisão em tempo real.</p>
+                    </div>
+                </div>
+                <div class="carousel-item">
+                    <img src="https://sspark.genspark.ai/cfimages?u1=jWamvIgV0gjZXBIZ%2FAn7D66g8o2GKj%2B%2BcJrwQ6Kh7CGTryRErpcTHIGVWgtLCuMBdcla1%2BD%2F%2Bzx8H5d2p%2F3NEkKSaafNCqQOuOq8tw%2BCoCbJZO6aXPlO8sV%2B1RFOHt%2BP0ZO9cKuz0Av%2BBAtNir%2Bb9c9ul%2BUFZuzTLaDlZSxf&u2=S52vsisaxr3Al4xh&width=2560" alt="Interface financeira">
+                    <div class="hero-caption">
+                        <span class="hero-eyebrow">Dashboard Analítico</span>
+                        <h2>Decisões guiadas por <span class="accent">dados</span></h2>
+                        <p>Resumos por categoria, unidade e cliente em painéis claros e responsivos.</p>
+                    </div>
+                </div>
+                <div class="carousel-item">
+                    <img src="https://sspark.genspark.ai/cfimages?u1=ocToOa%2BuROkYQr3xUwcm7G%2FxmGSMWdl2Fn27VicenP130C5jlskCtC%2BdH4A%2Fy%2BukRZol1ItGNjiSmKl8%2BNEsRAc0nOlU%2BvfxWODZidTCNMXwKEcrtm5QvGU2xMvOBoUP9UcQAw%3D%3D&u2=GGAmuwm%2B5iDme21W&width=2560" alt="Gestão de inventário e equipamentos">
+                    <div class="hero-caption">
+                        <span class="hero-eyebrow">Inventário & Equipamentos</span>
+                        <h2>Rastreie cada <span class="accent">ativo</span> por unidade</h2>
+                        <p>Consulta rápida por cliente, unidade ou categoria — com contagem instantânea.</p>
+                    </div>
+                </div>
+                <div class="carousel-item">
+                    <img src="https://sspark.genspark.ai/cfimages?u1=dS3YDPxuFfh5YvX47U3cb2PoOGKBsRpf9OpZJHGb5bRQ6EI7hk0khm4nN877Rz1RvDNTlwWU9xJXqHa60LIHjqG23WS9w%2FahaDv1XNNk%2FwasQr716phfp9jspZFpqKbr4HDtVsrhEimJHQ0o5FXKFk8E&u2=oFv2b6Zgw8sYyfpO&width=2560" alt="Portfólio corporativo">
+                    <div class="hero-caption">
+                        <span class="hero-eyebrow">Portfólio Corporativo</span>
+                        <h2>Uma <span class="accent">visão executiva</span> completa</h2>
+                        <p>Filtros avançados, seleção múltipla e exportação em Excel ou PDF em poucos cliques.</p>
+                    </div>
+                </div>
+                <div class="carousel-item">
+                    <img src="https://sspark.genspark.ai/cfimages?u1=6ZbOWTAg7O70%2F1utycUVcBG%2BKylZoyIob4QgnRkHDWQJEU2wrgyXbrwgNeBX3mwxGN%2BQ48hemfW2RRfoW4lApIOgXxsCZQ5pSTsJGwp7zEP34qa9tlIwDcDb55x8qs5NzBVwc6AmbTtBrUj3EQ%3D%3D&u2=YjfInYBuSBLaqljo&width=2560" alt="Design de dashboards">
+                    <div class="hero-caption">
+                        <span class="hero-eyebrow">Experiência Refinada</span>
+                        <h2>Design <span class="accent">moderno</span> e intuitivo</h2>
+                        <p>Tema escuro por padrão, tipografia limpa e navegação fluida em qualquer dispositivo.</p>
+                    </div>
+                </div>
+            </div>
+            <button class="carousel-control-prev" type="button" data-bs-target="#heroCarousel" data-bs-slide="prev">
+                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Anterior</span>
+            </button>
+            <button class="carousel-control-next" type="button" data-bs-target="#heroCarousel" data-bs-slide="next">
+                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Próximo</span>
+            </button>
+        </div>
+    </div>
+
+    <h1><span class="brand-accent">GRUPO LABMEDIC - Gerenciador</span> de Patrimônio</h1>
+
+    <!-- ============ KPI STRIP (barra decorativa) ============ -->
+    <div class="kpi-strip" aria-hidden="true">
+        <div class="kpi-chip">
+            <div class="kpi-icon">📊</div>
+            <div class="kpi-content">
+                <span class="kpi-title">Dashboard</span>
+                <span class="kpi-value">Análise em tempo real</span>
+            </div>
+        </div>
+        <div class="kpi-chip">
+            <div class="kpi-icon">🔍</div>
+            <div class="kpi-content">
+                <span class="kpi-title">Busca Avançada</span>
+                <span class="kpi-value">Cliente · Unidade · Categoria</span>
+            </div>
+        </div>
+        <div class="kpi-chip">
+            <div class="kpi-icon">📁</div>
+            <div class="kpi-content">
+                <span class="kpi-title">Importação</span>
+                <span class="kpi-value">Planilhas .xlsx</span>
+            </div>
+        </div>
+        <div class="kpi-chip">
+            <div class="kpi-icon">📤</div>
+            <div class="kpi-content">
+                <span class="kpi-title">Exportação</span>
+                <span class="kpi-value">Excel & PDF</span>
+            </div>
+        </div>
+    </div>
 
     <div class="card dashboard-card" id="dashboard-inicial-card">
         <div class="card-header dashboard-card-header">
@@ -2192,22 +2696,42 @@
     // Inicia a lista de colunas selecionadas no carregamento
     document.addEventListener('DOMContentLoaded', () => {
         populateColumnCheckboxes();
-        // Restaura dark mode salvo
-        if (localStorage.getItem('darkMode') === 'on') {
+        // Tema: dark é o padrão. Só ativa modo claro se o usuário optou explicitamente.
+        const themePref = localStorage.getItem('themeMode'); // 'light' | 'dark' | null
+        const btn = document.getElementById('dark-mode-toggle');
+        if (themePref === 'light') {
+            document.body.classList.add('light-mode');
+            document.body.classList.remove('dark-mode');
+            if (btn) btn.textContent = '🌙';
+        } else {
+            // Compat: mantém a classe .dark-mode presente para os seletores legados
             document.body.classList.add('dark-mode');
-            document.getElementById('dark-mode-toggle').textContent = '☀️';
+            document.body.classList.remove('light-mode');
+            if (btn) btn.textContent = '☀️';
         }
     });
 
     function toggleDarkMode() {
-        const isDark = document.body.classList.toggle('dark-mode');
         const btn = document.getElementById('dark-mode-toggle');
-        btn.textContent = isDark ? '☀️' : '🌙';
-        localStorage.setItem('darkMode', isDark ? 'on' : 'off');
+        const goingLight = !document.body.classList.contains('light-mode');
+        if (goingLight) {
+            document.body.classList.add('light-mode');
+            document.body.classList.remove('dark-mode');
+            if (btn) btn.textContent = '🌙';
+            localStorage.setItem('themeMode', 'light');
+            localStorage.setItem('darkMode', 'off'); // compat com chave antiga
+        } else {
+            document.body.classList.remove('light-mode');
+            document.body.classList.add('dark-mode');
+            if (btn) btn.textContent = '☀️';
+            localStorage.setItem('themeMode', 'dark');
+            localStorage.setItem('darkMode', 'on'); // compat com chave antiga
+        }
     }
 </script>
 <script defer src="https://static.cloudflareinsights.com/beacon.min.js/v8c78df7c7c0f484497ecbca7046644da1771523124516" integrity="sha512-8DS7rgIrAmghBFwoOTujcf6D9rXvH8xm8JQ1Ja01h9QX8EzXldiszufYa4IFfKdLUKTTrnSFXLDkUEOTrZQ8Qg==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
 <script defer src="https://static.cloudflareinsights.com/beacon.min.js/v833ccba57c9e4d2798f2e76cebdd09a11778172276447" integrity="sha512-57MDmcccJXYtNnH+ZiBwzC4jb2rvgVCEokYN+L/nLlmO8rfYT/gIpW2A569iJ/3b+0UEasghjuZH/ma3wIs/EQ==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
 <script defer src="https://static.cloudflareinsights.com/beacon.min.js/v833ccba57c9e4d2798f2e76cebdd09a11778172276447" integrity="sha512-57MDmcccJXYtNnH+ZiBwzC4jb2rvgVCEokYN+L/nLlmO8rfYT/gIpW2A569iJ/3b+0UEasghjuZH/ma3wIs/EQ==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79"}' crossorigin="anonymous"></script>
 </body>
 </html>
