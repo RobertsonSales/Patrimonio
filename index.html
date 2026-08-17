@@ -1652,23 +1652,93 @@
             Array.from(filters[key]).sort().forEach(value => {
                 const div = document.createElement('div');
                 div.className = 'filter-checkbox-item form-check';
+                div.setAttribute('data-value', value);
                 div.innerHTML = `<input class="form-check-input" type="checkbox" value="${value}" id="filter-${key}-${value}" onchange="updateFilter('${key}', this)"> <label class="form-check-label" for="filter-${key}-${value}">${value}</label>`;
                 container.appendChild(div);
             });
         });
+        syncFilterOptions();
     }
 
     function updateFilter(type, checkbox){
         const set = type === 'regiao' ? selectedRegioes : type === 'categoria' ? selectedCategorias : selectedEquipamentos;
         if (checkbox.checked) set.add(checkbox.value);
         else set.delete(checkbox.value);
+        syncFilterOptions(type);
         applyFilters();
     }
 
+    /* ---------- SINCRONISMO ENTRE FILTROS (Região x Categoria x Equipamento) ----------
+       Regra: cada filtro exibe apenas os valores que existem no dataset considerando as
+       seleções ATIVAS dos OUTROS filtros (não do próprio filtro, para permitir seleção
+       múltipla). Itens já selecionados permanecem visíveis para não perder a seleção,
+       mas ficam marcados como "fora do escopo" (badge de aviso).
+    -------------------------------------------------------------------------------- */
+    function getAvailableValuesFor(targetType) {
+        // Aplica filtros dos OUTROS tipos ao dataset base, e coleta valores possíveis para targetType
+        const available = new Set();
+        if (!Array.isArray(data) || data.length === 0) return available;
+        data.forEach(i => {
+            if (targetType !== 'regiao' && selectedRegioes.size > 0 && !selectedRegioes.has(i.regiao)) return;
+            if (targetType !== 'categoria' && selectedCategorias.size > 0 && !selectedCategorias.has(i.categoria)) return;
+            if (targetType !== 'equipamento' && selectedEquipamentos.size > 0 && !selectedEquipamentos.has(i.equipamento)) return;
+            const val = i[targetType];
+            if (val) available.add(val);
+        });
+        return available;
+    }
+
+    function syncFilterOptions(changedType) {
+        const types = ['regiao', 'categoria', 'equipamento'];
+        types.forEach(type => {
+            // Não regenera o filtro que o usuário acabou de mexer (preserva scroll e foco)
+            const container = document.getElementById(`filter-${type}-checkboxes`);
+            if (!container) return;
+            const available = getAvailableValuesFor(type);
+            const selectedSet = type === 'regiao' ? selectedRegioes
+                              : type === 'categoria' ? selectedCategorias
+                              : selectedEquipamentos;
+
+            const items = Array.from(container.querySelectorAll('.filter-checkbox-item'));
+            items.forEach(item => {
+                const value = item.getAttribute('data-value');
+                const cb = item.querySelector('.form-check-input');
+                const isSelected = selectedSet.has(value);
+                const isAvailable = available.has(value);
+
+                // Se está disponível OU está selecionado (para não sumir a seleção do usuário), mantém no DOM
+                if (isAvailable || isSelected) {
+                    item.removeAttribute('data-out-of-scope');
+                    item.style.opacity = '';
+                    if (cb) cb.disabled = false;
+                    // Mantém visibilidade coerente com a busca textual atual
+                    // (não força display aqui; filterCheckboxList controla isso)
+                } else {
+                    // Fora do escopo e não selecionado: oculta do usuário
+                    item.setAttribute('data-out-of-scope', 'true');
+                    item.style.display = 'none';
+                }
+            });
+
+            // Reaplica busca textual (caso haja termo digitado) apenas em itens visíveis
+            const searchInput = document.getElementById(`search-filter-${type}`);
+            if (searchInput && searchInput.value) {
+                filterCheckboxList(type);
+            } else {
+                // Restaura display dos itens dentro do escopo
+                items.forEach(item => {
+                    if (item.getAttribute('data-out-of-scope') !== 'true') {
+                        item.style.display = '';
+                    }
+                });
+            }
+        });
+    }
+
     function selectAll(type){
-        // Apenas checkboxes VISÍVEIS (não ocultos pela busca interna)
+        // Apenas checkboxes VISÍVEIS (não ocultos pela busca interna nem pelo sincronismo)
         const checkboxes = Array.from(document.querySelectorAll(`#filter-${type}-checkboxes .filter-checkbox-item`))
-            .filter(item => item.style.display !== 'none')
+            .filter(item => item.style.display !== 'none' && item.getAttribute('data-out-of-scope') !== 'true')
             .map(item => item.querySelector('.form-check-input'));
             
         const set = type === 'regiao' ? selectedRegioes : type === 'categoria' ? selectedCategorias : selectedEquipamentos;
@@ -1682,6 +1752,7 @@
             if (cb.checked) set.add(cb.value);
             else set.delete(cb.value);
         });
+        syncFilterOptions(type);
         applyFilters();
     }
 
@@ -1692,6 +1763,11 @@
         const items = container.getElementsByClassName('filter-checkbox-item');
 
         for (let i = 0; i < items.length; i++) {
+            // Se o item está fora do escopo do sincronismo, mantém oculto
+            if (items[i].getAttribute('data-out-of-scope') === 'true') {
+                items[i].style.display = 'none';
+                continue;
+            }
             const label = items[i].getElementsByTagName('label')[0];
             const txtValue = label.textContent || label.innerText;
             if (txtValue.toLowerCase().indexOf(filter) > -1) {
@@ -1733,9 +1809,16 @@
             const searchInput = document.getElementById(`search-filter-${type}`);
             if (searchInput) {
                 searchInput.value = '';
-                filterCheckboxList(type);
             }
+            // Reseta marcações de "fora do escopo" para reexibir todos os itens
+            document.querySelectorAll(`#filter-${type}-checkboxes .filter-checkbox-item`).forEach(item => {
+                item.removeAttribute('data-out-of-scope');
+                item.style.display = '';
+            });
         });
+
+        // Ressincroniza opções de filtros após limpar
+        syncFilterOptions();
 
         // Limpa o campo de Pesquisa e a seleção de itens (Corrigido)
         document.getElementById('search').value = '';
@@ -2733,6 +2816,7 @@
 <script defer src="https://static.cloudflareinsights.com/beacon.min.js/v8c78df7c7c0f484497ecbca7046644da1771523124516" integrity="sha512-8DS7rgIrAmghBFwoOTujcf6D9rXvH8xm8JQ1Ja01h9QX8EzXldiszufYa4IFfKdLUKTTrnSFXLDkUEOTrZQ8Qg==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
 <script defer src="https://static.cloudflareinsights.com/beacon.min.js/v833ccba57c9e4d2798f2e76cebdd09a11778172276447" integrity="sha512-57MDmcccJXYtNnH+ZiBwzC4jb2rvgVCEokYN+L/nLlmO8rfYT/gIpW2A569iJ/3b+0UEasghjuZH/ma3wIs/EQ==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
 <script defer src="https://static.cloudflareinsights.com/beacon.min.js/v833ccba57c9e4d2798f2e76cebdd09a11778172276447" integrity="sha512-57MDmcccJXYtNnH+ZiBwzC4jb2rvgVCEokYN+L/nLlmO8rfYT/gIpW2A569iJ/3b+0UEasghjuZH/ma3wIs/EQ==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79"}' crossorigin="anonymous"></script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79"}' crossorigin="anonymous"></script>
 </body>
 </html>
