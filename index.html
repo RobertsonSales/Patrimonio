@@ -1036,12 +1036,43 @@
         .pm-legend span{display:flex;align-items:center;gap:5px}
         .pm-legend i{width:10px;height:10px;border-radius:3px;display:inline-block}
         .pm-hint{font-size:.78rem;color:#5d6d7e;margin-top:8px}
+        .pm-title-check{font-size:.82rem;font-weight:600;color:#2c3e50;white-space:nowrap;cursor:help}
+        .pm-title-check .form-check-label{cursor:help}
+        .pm-btn-clear{background:linear-gradient(135deg,#e74c3c,#c0392b);color:#fff;border:none;font-weight:600;box-shadow:0 2px 8px rgba(231,76,60,.3)}
+        .pm-btn-clear:hover{background:linear-gradient(135deg,#c0392b,#a93226);color:#fff;transform:translateY(-1px);box-shadow:0 4px 14px rgba(231,76,60,.4)}
+        .pm-btn-clear:focus{color:#fff;box-shadow:0 0 0 .2rem rgba(231,76,60,.4)}
+        .pm-comp-item.pm-comp-late{background:#fdecea;border-color:#f1a9a0}
+        .pm-comp-item.pm-comp-late label{color:#922b21}
+        .pm-count.pm-count-late{background:#c0392b}
+        .pm-comp-item.pm-comp-late{cursor:pointer;user-select:none;transition:transform .1s,box-shadow .1s}
+        .pm-comp-item.pm-comp-late label{cursor:pointer}
+        .pm-comp-item.pm-comp-late:hover{transform:translateY(-1px);box-shadow:0 2px 8px rgba(192,57,43,.25)}
+        .pm-comp-item.pm-comp-late:focus-visible{outline:2px solid #c0392b;outline-offset:2px}
+        .pm-comp-item.pm-comp-late.pm-comp-active{background:#c0392b;border-color:#a93226;box-shadow:0 2px 10px rgba(192,57,43,.4)}
+        .pm-comp-item.pm-comp-late.pm-comp-active label{color:#fff}
+        .pm-comp-item.pm-comp-late.pm-comp-active .pm-count-late{background:#fff;color:#a93226}
         .pm-alert{background:#fdf1e3;border:1px solid #f5cba7;color:#9c4a00;border-radius:8px;padding:10px 12px;font-size:.82rem}
 
         body.dark-mode .pm-section,
         body:not(.light-mode) .pm-section{background:var(--dm-bg-card);border-left-color:#d4780f}
         body.dark-mode .pm-section-title,
         body:not(.light-mode) .pm-section-title{color:var(--dm-text-primary)}
+        body.dark-mode .pm-title-check,
+        body:not(.light-mode) .pm-title-check{color:var(--dm-text-primary)}
+        body.dark-mode .pm-btn-clear,
+        body:not(.light-mode) .pm-btn-clear{background:linear-gradient(135deg,#ff6b5b,#e6433a);color:#fff;box-shadow:0 2px 10px rgba(255,107,91,.35)}
+        body.dark-mode .pm-btn-clear:hover,
+        body:not(.light-mode) .pm-btn-clear:hover{background:linear-gradient(135deg,#e6433a,#c0392b);color:#fff}
+        body.dark-mode .pm-comp-item.pm-comp-late,
+        body:not(.light-mode) .pm-comp-item.pm-comp-late{background:rgba(192,57,43,.22);border-color:rgba(255,107,91,.55)}
+        body.dark-mode .pm-comp-item.pm-comp-late label,
+        body:not(.light-mode) .pm-comp-item.pm-comp-late label{color:#ff9a8f !important}
+        body.dark-mode .pm-comp-item.pm-comp-late.pm-comp-active,
+        body:not(.light-mode) .pm-comp-item.pm-comp-late.pm-comp-active{background:#e6433a;border-color:#ff8a80}
+        body.dark-mode .pm-comp-item.pm-comp-late.pm-comp-active label,
+        body:not(.light-mode) .pm-comp-item.pm-comp-late.pm-comp-active label{color:#fff !important}
+        body.dark-mode .pm-comp-item.pm-comp-late.pm-comp-active .pm-count-late,
+        body:not(.light-mode) .pm-comp-item.pm-comp-late.pm-comp-active .pm-count-late{background:#fff;color:#a93226}
         body.dark-mode .pm-filter-head label,
         body:not(.light-mode) .pm-filter-head label{color:var(--dm-text-primary)}
         body.dark-mode .pm-list,
@@ -1479,7 +1510,7 @@
                     <div class="pm-section">
                         <div class="pm-section-title">
                             <span>1. Filtros do Relatório</span>
-                            <button type="button" class="btn btn-sm btn-outline-secondary" onclick="pmClearFilters()">Limpar Filtros</button>
+                            <button type="button" class="btn btn-sm pm-btn-clear" onclick="pmClearFilters()">Limpar Filtros</button>
                         </div>
                         <div class="pm-grid">
                             <div>
@@ -1517,7 +1548,7 @@
                         </div>
                     </div>
 
-                    <div class="pm-section">
+                    <div class="pm-section" id="pm-section-competencias">
                         <div class="pm-section-title">
                             <span>2. Competências (mês/ano) &mdash; última preventiva realizada (coluna K)</span>
                             <span>
@@ -1528,16 +1559,30 @@
                         <div class="pm-hint">As competências correspondem ao mês/ano da <strong>última manutenção preventiva realizada</strong> (coluna K) e são limitadas aos registros dos <strong>clientes/unidades filtrados</strong> acima. Se nenhuma for assinalada, o relatório considera todas as competências listadas.</div>
                     </div>
 
+                    <div class="pm-section" id="pm-section-atrasadas">
+                        <div class="pm-section-title">
+                            <span>Competências com Preventiva Atrasada</span>
+                            <button type="button" class="btn btn-sm pm-btn-clear" onclick="pmClearAtrasadaSelection()">Limpar marcações</button>
+                        </div>
+                        <div class="pm-comp-grid" id="pm-list-competencia-atrasada"></div>
+                        <div class="pm-hint">Lista as competências (mês/ano da última preventiva realizada, coluna K) que possuem ao menos um equipamento com a <strong>próxima preventiva vencida</strong> em relação à data atual do sistema, considerando os filtros de cliente/unidade/categoria/equipamento selecionados acima. <strong>Clique</strong> em uma ou mais competências para filtrar a listagem do quadro 3 (e o PDF) apenas pelos equipamentos atrasados dessa(s) competência(s); use "Limpar marcações" para remover a seleção.</div>
+                    </div>
+
                     <div class="pm-section">
                         <div class="pm-section-title">
                             <span>3. Equipamentos a Contemplar</span>
-                            <span class="d-flex gap-2 flex-wrap">
-                                <button type="button" class="btn btn-sm btn-outline-success" onclick="pmMarkAll(true)">Marcar todos como realizados</button>
-                                <button type="button" class="btn btn-sm btn-outline-secondary" onclick="pmMarkAll(false)">Limpar marcações</button>
+                            <span class="d-flex align-items-center gap-3 flex-wrap">
+                                <span class="form-check form-check-inline mb-0 pm-title-check" title="Mostra apenas os equipamentos com a próxima preventiva vencida (Pendentes) ou que vencem nos próximos 30 dias (a vencer), com base na data atual do sistema">
+                                    <input class="form-check-input" type="checkbox" id="pm-only-critical" onchange="pmRenderPreview()">
+                                    <label class="form-check-label" for="pm-only-critical">Atrasadas e a vencer</label>
+                                </span>
+                                <span class="d-flex gap-2 flex-wrap">
+                                    <button type="button" class="btn btn-sm pm-btn-clear" onclick="pmMarkAll(false)">Limpar marcações</button>
+                                </span>
                             </span>
                         </div>
                         <div class="pm-status-bar" id="pm-stats"></div>
-                        <div class="pm-hint mb-2">Situação apurada pela <strong>próxima preventiva prevista (coluna L)</strong>: o equipamento só é considerado <strong>Pendente</strong> quando a data atual é superior à data prevista. Até lá, permanece <strong>Em dia</strong>.</div>
+                        <div class="pm-hint mb-2">Situação apurada pela <strong>próxima preventiva prevista (coluna L)</strong>: o equipamento só é considerado <strong>Pendente</strong> quando a data atual é superior à data prevista. Até lá, permanece <strong>Em dia</strong>. O checkbox <strong>"Atrasadas e a vencer"</strong>, na barra de título acima, exibe apenas os equipamentos <strong>Pendentes</strong> ou que vencem nos próximos <strong>30 dias</strong>, tomando por base a data atual do sistema.</div>
                         <div class="form-check mb-2">
                             <input class="form-check-input" type="checkbox" id="pm-only-pending" onchange="pmRenderPreview()">
                             <label class="form-check-label" for="pm-only-pending">Exibir/imprimir somente os equipamentos <strong>pendentes</strong> (próxima preventiva vencida)</label>
@@ -1550,9 +1595,7 @@
                             <table class="table table-sm pm-table mb-0" id="pm-preview-table">
                                 <thead>
                                     <tr>
-                                        <th style="width:42px" title="Marcar equipamentos que já passaram por manutenção preventiva">
-                                            <input class="form-check-input" type="checkbox" id="pm-check-all" onchange="pmMarkAll(this.checked)" aria-label="Marcar todos">
-                                        </th>
+                                        <th style="width:60px" title="Indica se a manutenção preventiva já foi realizada">Realizada</th>
                                         <th>Linha / Categoria</th>
                                         <th>Modelo / Equipamento</th>
                                         <th>Serial</th>
@@ -3034,7 +3077,7 @@
     const PM_PREVIEW_LIMIT = 1200;
     const PM_MONTHS = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'];
 
-    const pmSel = { cliente: new Set(), unidade: new Set(), categoria: new Set(), equipamento: new Set(), competencia: new Set() };
+    const pmSel = { cliente: new Set(), unidade: new Set(), categoria: new Set(), equipamento: new Set(), competencia: new Set(), atrasada: new Set() };
     let pmRecords = [];
     let pmDone = new Set();
 
@@ -3137,6 +3180,21 @@
         return new Date(now.getFullYear(), now.getMonth(), now.getDate());
     }
 
+    /* Quantidade de dias, a partir da data do sistema, para um equipamento "Em dia"
+       ser considerado "a vencer" pelo checkbox "Atrasadas e a vencer" da barra de
+       título do quadro. Ajuste este valor conforme a necessidade. */
+    const PM_DUE_SOON_DAYS = 30;
+
+    /* Verdadeiro quando o equipamento está com a preventiva atrasada (Pendente)
+       ou prestes a vencer (Em dia dentro do prazo de PM_DUE_SOON_DAYS), sempre
+       tomando como referência a data atual do sistema. */
+    function pmIsCriticalStatus(rec) {
+        const status = pmStatus(rec);
+        if (status.key === 'pendente') return true;
+        if (status.key === 'emdia' && status.days <= PM_DUE_SOON_DAYS) return true;
+        return false;
+    }
+
     function pmStatus(rec) {
         if (pmDone.has(rec.id)) return Object.assign({ key: 'realizada', days: 0 }, PM_STATUS.realizada);
         const next = rec.item.proxPrevDate || parseDateValue(rec.item.proxPrev);
@@ -3166,7 +3224,18 @@
     }
 
     function pmFiltered() {
-        return pmRecords.filter(r => pmMatches(r, null));
+        return pmRecords.filter(r => pmMatches(r, null) && pmMatchesAtrasada(r));
+    }
+
+    /* Filtro aplicado pelo quadro "Competências com Preventiva Atrasada": quando
+       alguma competência estiver marcada ali, a listagem do quadro 3 (e o PDF)
+       passam a exibir somente os equipamentos dessa(s) competência(s) cuja
+       próxima preventiva esteja vencida (status "Pendente") em relação à data
+       atual do sistema. */
+    function pmMatchesAtrasada(rec) {
+        if (!pmSel.atrasada.size) return true;
+        if (!pmSel.atrasada.has(rec.compKey)) return false;
+        return pmStatus(rec).key === 'pendente';
     }
 
     function pmSortRecords(list) {
@@ -3262,6 +3331,86 @@
         }).join('');
     }
 
+    /* Exibe o quadro "2. Competências" somente quando houver ao menos um filtro
+       de Cliente ou Unidade ativo. */
+    function pmUpdateCompetenciaSectionVisibility() {
+        const section = document.getElementById('pm-section-competencias');
+        if (!section) return;
+        const hasFilter = pmSel.cliente.size > 0 || pmSel.unidade.size > 0;
+        section.classList.toggle('d-none', !hasFilter);
+    }
+
+    /* Quadro somente para consulta e filtro: lista as competências (mês/ano da
+       última preventiva realizada, coluna K) que possuem ao menos um equipamento
+       com a próxima preventiva vencida (status "Pendente") em relação à data
+       atual do sistema. Respeita os filtros de cliente/unidade/categoria/
+       equipamento, mas ignora a seleção de competências do quadro 2, para servir
+       como visão geral. Cada item é clicável: ao selecioná-lo, a listagem do
+       quadro 3 (e o PDF) passam a exibir somente os equipamentos atrasados da(s)
+       competência(s) marcada(s). */
+    function pmRenderCompetenciasAtrasadas() {
+        const container = document.getElementById('pm-list-competencia-atrasada');
+        if (!container) return;
+
+        const counts = new Map();
+        const labels = new Map();
+        pmRecords.forEach(rec => {
+            if (!pmMatches(rec, 'competencia')) return;
+            if (pmStatus(rec).key !== 'pendente') return;
+            labels.set(rec.compKey, rec.compLabel);
+            counts.set(rec.compKey, (counts.get(rec.compKey) || 0) + 1);
+        });
+        // Mantém visíveis competências já marcadas mesmo que não tenham mais
+        // atrasos para os filtros atuais, sinalizadas com contagem zero, para
+        // que a marcação possa ser desfeita.
+        pmSel.atrasada.forEach(key => {
+            if (labels.has(key)) return;
+            const rec = pmRecords.find(r => r.compKey === key);
+            labels.set(key, rec ? rec.compLabel : key);
+        });
+
+        const keys = Array.from(labels.keys()).sort((a, b) => {
+            const aTxt = a.startsWith('T:'), bTxt = b.startsWith('T:');
+            if (aTxt !== bTxt) return aTxt ? 1 : -1;
+            return a.localeCompare(b);
+        });
+
+        if (!keys.length) {
+            container.innerHTML = '<div class="pm-empty">Nenhuma competência com preventiva atrasada para os filtros atuais.</div>';
+            return;
+        }
+
+        container.innerHTML = keys.map((key, index) => {
+            const qty = counts.get(key) || 0;
+            const outOfScope = qty === 0 ? ' pm-out-of-scope' : '';
+            const selected = pmSel.atrasada.has(key) ? ' pm-comp-active' : '';
+            const id = `pm-atrasada-${index}`;
+            const title = qty === 0
+                ? 'Sem atrasos para os filtros atuais — clique para remover a marcação'
+                : `${qty} equipamento(s) com a próxima preventiva vencida — clique para filtrar a listagem`;
+            return `<div class="pm-comp-item pm-comp-late${selected}${outOfScope}" id="${id}" role="button" tabindex="0"
+                    data-pm-value="${pmEscapeAttr(key)}" title="${pmEscapeAttr(title)}"
+                    onclick="pmToggleAtrasada(this)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();pmToggleAtrasada(this);}">
+                <label>${pmEscapeHtml(labels.get(key))}<span class="pm-count pm-count-late">${qty}</span></label>
+            </div>`;
+        }).join('');
+    }
+
+    /* Alterna a marcação de uma competência atrasada e atualiza a listagem. */
+    function pmToggleAtrasada(el) {
+        const key = el.getAttribute('data-pm-value');
+        if (!key) return;
+        if (pmSel.atrasada.has(key)) pmSel.atrasada.delete(key);
+        else pmSel.atrasada.add(key);
+        pmRefresh();
+    }
+
+    /* Botão "Limpar marcações" da barra de título do quadro de atrasadas. */
+    function pmClearAtrasadaSelection() {
+        pmSel.atrasada.clear();
+        pmRefresh();
+    }
+
     function pmEscapeHtml(value) {
         return String(value).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
     }
@@ -3295,21 +3444,38 @@
             if (input) input.value = '';
         });
         pmSel.competencia.clear();
+        pmSel.atrasada.clear();
         pmRefresh();
     }
 
     function pmRefresh(skipType) {
         PM_TYPES.forEach(type => { if (type !== skipType) pmRenderList(type); });
         if (skipType !== 'competencia') pmRenderCompetencias();
+        pmUpdateCompetenciaSectionVisibility();
+        pmRenderCompetenciasAtrasadas();
         pmRenderPreview();
     }
 
     /* ---------- Pré-visualização e marcação de realizadas ---------- */
     function pmVisibleRecords() {
         const onlyPending = document.getElementById('pm-only-pending');
-        const list = pmSortRecords(pmFiltered());
-        if (onlyPending && onlyPending.checked) return list.filter(r => pmStatus(r).key === 'pendente');
+        const onlyCritical = document.getElementById('pm-only-critical');
+        let list = pmSortRecords(pmFiltered());
+        if (onlyPending && onlyPending.checked) list = list.filter(r => pmStatus(r).key === 'pendente');
+        if (onlyCritical && onlyCritical.checked) list = list.filter(r => pmIsCriticalStatus(r));
         return list;
+    }
+
+    /* Texto descritivo do critério de listagem ativo, usado no PDF. */
+    function pmListagemCriterioTexto() {
+        const onlyPending = document.getElementById('pm-only-pending');
+        const onlyCritical = document.getElementById('pm-only-critical');
+        const pendingOn = !!(onlyPending && onlyPending.checked);
+        const criticalOn = !!(onlyCritical && onlyCritical.checked);
+        if (pendingOn && criticalOn) return 'Somente equipamentos com a próxima preventiva vencida (Pendentes)';
+        if (pendingOn) return 'Somente equipamentos com a próxima preventiva vencida (Pendentes)';
+        if (criticalOn) return `Somente equipamentos atrasados (Pendentes) ou a vencer nos próximos ${PM_DUE_SOON_DAYS} dias, em relação a ${pmToday().toLocaleDateString('pt-BR')}`;
+        return 'Todos os equipamentos das competências selecionadas';
     }
 
     function pmRenderPreview() {
@@ -3332,8 +3498,6 @@
         }
 
         const visible = pmVisibleRecords();
-        const checkAll = document.getElementById('pm-check-all');
-        if (checkAll) checkAll.checked = visible.length > 0 && visible.every(r => pmDone.has(r.id));
 
         if (!visible.length) {
             body.innerHTML = '<tr><td colspan="9" class="pm-empty">Nenhum equipamento para os filtros selecionados.</td></tr>';
@@ -3510,9 +3674,7 @@
             ['Unidades', pmSel.unidade.size ? Array.from(pmSel.unidade).sort().join(', ') : 'Todas'],
             ['Linhas de ação / Categorias', pmSel.categoria.size ? Array.from(pmSel.categoria).sort().join(', ') : 'Todas'],
             ['Equipamentos', pmSel.equipamento.size ? Array.from(pmSel.equipamento).sort().join(', ') : 'Todos'],
-            ['Critério de listagem', document.getElementById('pm-only-pending') && document.getElementById('pm-only-pending').checked
-                ? 'Somente equipamentos com a próxima preventiva vencida (Pendentes)'
-                : 'Todos os equipamentos das competências selecionadas'],
+            ['Critério de listagem', pmListagemCriterioTexto()],
             ['Regra de apuração da situação', 'Coluna K = última preventiva realizada (competência). Coluna L = próxima preventiva prevista. '
                 + `Considera-se PENDENTE apenas o equipamento cuja próxima preventiva é anterior à data atual (${pmToday().toLocaleDateString('pt-BR')}); `
                 + 'dentro do prazo, a situação é EM DIA. REALIZADA indica marcação manual de preventiva já executada na competência.']
