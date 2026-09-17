@@ -990,6 +990,102 @@
             .kpi-chip { padding: 10px 12px; }
             h1 { font-size: 1.5rem; }
         }
+        /* ========== RELATÓRIO DE MANUTENÇÃO PREVENTIVA ========== */
+        .preventive-btn{background:linear-gradient(135deg,#e67e22,#d35400);color:#fff;border:none}
+        .preventive-btn:hover{background:linear-gradient(135deg,#d35400,#ba4a00);color:#fff;transform:translateY(-2px);box-shadow:0 4px 15px rgba(230,126,34,.4)}
+        #preventive-modal .modal-header{background:linear-gradient(135deg,#e67e22,#d35400)}
+        .pm-section{background:#f8f9fa;border-radius:10px;padding:15px;margin-bottom:18px;border-left:4px solid #e67e22}
+        .pm-section-title{font-weight:700;color:#2c3e50;font-size:.95rem;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+        .pm-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(215px,1fr));gap:14px}
+        .pm-filter-head{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:6px}
+        .pm-filter-head label{font-weight:600;color:#2c3e50;font-size:.82rem;margin:0}
+        .pm-list{background:#fff;border:1px solid #dee2e6;border-radius:8px;max-height:190px;overflow-y:auto;padding:8px}
+        .pm-list .form-check{padding:4px 0 4px 1.6rem;border-bottom:1px solid #f4f6f8;margin:0}
+        .pm-list .form-check:last-child{border-bottom:none}
+        .pm-list .form-check-label{font-size:.8rem;color:#2c3e50;cursor:pointer}
+        .pm-count{background:#3498db;color:#fff;border-radius:10px;font-size:.66rem;font-weight:700;padding:1px 6px;margin-left:6px}
+        .pm-empty{color:#7f8c8d;font-size:.8rem;padding:6px}
+        .pm-comp-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;max-height:210px;overflow-y:auto;background:#fff;border:1px solid #dee2e6;border-radius:8px;padding:10px}
+        .pm-comp-item{display:flex;align-items:center;gap:8px;background:#f4f7fb;border:1px solid #e3eaf3;border-radius:8px;padding:6px 8px}
+        .pm-comp-item label{font-size:.8rem;font-weight:600;color:#2c3e50;margin:0;cursor:pointer}
+        .pm-status-bar{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:12px}
+        .pm-stat{flex:1 1 140px;background:linear-gradient(135deg,#3498db,#2980b9);color:#fff;border-radius:10px;padding:10px 12px}
+        .pm-stat.done{background:linear-gradient(135deg,#27ae60,#219653)}
+        .pm-stat.pending{background:linear-gradient(135deg,#e67e22,#d35400)}
+        .pm-stat.neutral{background:linear-gradient(135deg,#8e44ad,#7d3c98)}
+        .pm-stat.blue{background:linear-gradient(135deg,#2980b9,#1f618d)}
+        .pm-stat.pending{background:linear-gradient(135deg,#c0392b,#a93226)}
+        .pm-stat-label{display:block;font-size:.7rem;text-transform:uppercase;letter-spacing:.5px;opacity:.9}
+        .pm-stat-value{display:block;font-size:1.25rem;font-weight:700;line-height:1.3}
+        .pm-preview-wrap{max-height:330px;overflow:auto;background:#fff;border:1px solid #dee2e6;border-radius:8px}
+        table.pm-table{width:100%;margin:0;font-size:.78rem}
+        table.pm-table thead th{position:sticky;top:0;background:#2c3e50;color:#fff;font-size:.72rem;font-weight:600;padding:7px 8px;white-space:nowrap;z-index:2}
+        table.pm-table td{padding:5px 8px;border-bottom:1px solid #eef1f4;color:#2c3e50;vertical-align:middle}
+        table.pm-table tr.pm-group td{background:#eaf2fb;font-weight:700;color:#1f5c99;font-size:.78rem}
+        table.pm-table tr.pm-marked td{background:#eafaf1}
+        .pm-badge{display:inline-block;border-radius:10px;padding:1px 7px;font-size:.68rem;font-weight:700;color:#fff}
+        .pm-badge.ok{background:#27ae60}
+        .pm-badge.no{background:#e67e22}
+        .pm-badge.late{background:#c0392b}
+        .pm-badge.due{background:#2980b9}
+        .pm-badge.none{background:#7f8c8d}
+        table.pm-table tr.pm-late td{background:#fdeceb}
+        .pm-comp-item.pm-out-of-scope{opacity:.55;border-style:dashed}
+        .pm-comp-item.pm-out-of-scope .pm-count{background:#95a5a6}
+        .pm-legend{display:flex;flex-wrap:wrap;gap:12px;font-size:.75rem;color:#5d6d7e;margin-top:8px}
+        .pm-legend span{display:flex;align-items:center;gap:5px}
+        .pm-legend i{width:10px;height:10px;border-radius:3px;display:inline-block}
+        .pm-hint{font-size:.78rem;color:#5d6d7e;margin-top:8px}
+        .pm-alert{background:#fdf1e3;border:1px solid #f5cba7;color:#9c4a00;border-radius:8px;padding:10px 12px;font-size:.82rem}
+
+        body.dark-mode .pm-section,
+        body:not(.light-mode) .pm-section{background:var(--dm-bg-card);border-left-color:#d4780f}
+        body.dark-mode .pm-section-title,
+        body:not(.light-mode) .pm-section-title{color:var(--dm-text-primary)}
+        body.dark-mode .pm-filter-head label,
+        body:not(.light-mode) .pm-filter-head label{color:var(--dm-text-primary)}
+        body.dark-mode .pm-list,
+        body:not(.light-mode) .pm-list{background:var(--dm-bg-input);border-color:var(--dm-border)}
+        body.dark-mode .pm-comp-grid,
+        body:not(.light-mode) .pm-comp-grid{background:var(--dm-bg-input);border-color:var(--dm-border)}
+        body.dark-mode .pm-preview-wrap,
+        body:not(.light-mode) .pm-preview-wrap{background:var(--dm-bg-input);border-color:var(--dm-border)}
+        body.dark-mode .pm-list .form-check,
+        body:not(.light-mode) .pm-list .form-check{border-bottom-color:var(--dm-border)}
+        body.dark-mode .pm-list .form-check-label,
+        body:not(.light-mode) .pm-list .form-check-label{color:var(--dm-text-primary) !important}
+        body.dark-mode .pm-comp-item label,
+        body:not(.light-mode) .pm-comp-item label{color:var(--dm-text-primary) !important}
+        body.dark-mode .pm-comp-item,
+        body:not(.light-mode) .pm-comp-item{background:var(--dm-bg-card2);border-color:var(--dm-border)}
+        body.dark-mode table.pm-table,
+        body:not(.light-mode) table.pm-table{--bs-table-bg:var(--dm-bg-input);--bs-table-color:var(--dm-text-primary);--bs-table-accent-bg:transparent;--bs-table-striped-bg:var(--dm-bg-filter);--bs-table-striped-color:var(--dm-text-primary);--bs-table-hover-bg:#303660;--bs-table-hover-color:var(--dm-text-primary);--bs-table-border-color:var(--dm-border);color:var(--dm-text-primary)}
+        body.dark-mode #preventive-modal,
+        body:not(.light-mode) #preventive-modal{color:var(--dm-text-primary)}
+        body.dark-mode table.pm-table td,
+        body:not(.light-mode) table.pm-table td{color:var(--dm-text-primary) !important;border-bottom-color:var(--dm-border);background-color:var(--dm-bg-input)}
+        body.dark-mode table.pm-table thead th,
+        body:not(.light-mode) table.pm-table thead th{background:#141728;color:#fff !important}
+        body.dark-mode table.pm-table tr.pm-group td,
+        body:not(.light-mode) table.pm-table tr.pm-group td{background:var(--dm-bg-card2) !important;color:#8ab4f8 !important}
+        body.dark-mode table.pm-table tr.pm-marked td,
+        body:not(.light-mode) table.pm-table tr.pm-marked td{background:#1d3b2a !important}
+        body.dark-mode table.pm-table tr.pm-late td,
+        body:not(.light-mode) table.pm-table tr.pm-late td{background:#3a1f1d !important}
+        body.dark-mode table.pm-table tr:hover td,
+        body:not(.light-mode) table.pm-table tr:hover td{background:#303660 !important}
+        body.dark-mode .pm-hint,
+        body:not(.light-mode) .pm-hint{color:var(--dm-text-secondary)}
+        body.dark-mode .pm-legend,
+        body:not(.light-mode) .pm-legend{color:var(--dm-text-secondary)}
+        body.dark-mode .pm-alert,
+        body:not(.light-mode) .pm-alert{background:#3a2a16;border-color:#6b4a1f;color:#f0c088}
+        body.dark-mode .pm-empty,
+        body:not(.light-mode) .pm-empty{color:var(--dm-text-muted)}
+        body.dark-mode .pm-section .form-check-label,
+        body:not(.light-mode) .pm-section .form-check-label{color:var(--dm-text-primary) !important}
+        @media (max-width:768px){.pm-grid{grid-template-columns:1fr}.pm-preview-wrap{max-height:400px}}
+
     </style>
 </head>
 <body>
@@ -1289,6 +1385,7 @@
     <div class="d-grid gap-2 d-md-flex justify-content-md-end mb-4">
         <button class="btn btn-success" onclick="exportToExcel()" disabled id="excel-btn">Exportar para Excel</button>
         <button class="btn btn-primary" onclick="previewPDF()" disabled id="pdf-btn">Visualizar/Imprimir PDF</button>
+        <button class="btn preventive-btn" onclick="openPreventiveModal()" disabled id="preventive-btn">Relatório de Manutenção Preventiva</button>
     </div>
 
     <div class="card-container" id="results"></div>
@@ -1357,6 +1454,131 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- ============ MODAL: RELATÓRIO DE MANUTENÇÃO PREVENTIVA ============ -->
+<div class="modal fade" id="preventive-modal" tabindex="-1" aria-labelledby="preventive-modal-title" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="preventive-modal-title">Relatório de Manutenção Preventiva</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+            <div class="modal-body">
+
+                <div id="pm-no-data" class="pm-alert d-none">
+                    Nenhuma planilha carregada (ou nenhum registro com a coluna <strong>K &mdash; Prev. Atual</strong> preenchida).
+                    Importe a planilha no Dashboard Inicial para habilitar o relatório.
+                </div>
+
+                <div id="pm-content">
+                    <div class="pm-section">
+                        <div class="pm-section-title">
+                            <span>1. Filtros do Relatório</span>
+                            <button type="button" class="btn btn-sm btn-outline-secondary" onclick="pmClearFilters()">Limpar Filtros</button>
+                        </div>
+                        <div class="pm-grid">
+                            <div>
+                                <div class="pm-filter-head">
+                                    <label for="pm-search-cliente">Cliente</label>
+                                    <button type="button" class="btn btn-sm btn-outline-primary select-all-btn" onclick="pmToggleAll('cliente')">Todos</button>
+                                </div>
+                                <input type="text" class="form-control form-control-sm mb-2" id="pm-search-cliente" placeholder="Buscar cliente..." oninput="pmRenderList('cliente')">
+                                <div class="pm-list" id="pm-list-cliente"></div>
+                            </div>
+                            <div>
+                                <div class="pm-filter-head">
+                                    <label for="pm-search-unidade">Unidade</label>
+                                    <button type="button" class="btn btn-sm btn-outline-primary select-all-btn" onclick="pmToggleAll('unidade')">Todos</button>
+                                </div>
+                                <input type="text" class="form-control form-control-sm mb-2" id="pm-search-unidade" placeholder="Buscar unidade..." oninput="pmRenderList('unidade')">
+                                <div class="pm-list" id="pm-list-unidade"></div>
+                            </div>
+                            <div>
+                                <div class="pm-filter-head">
+                                    <label for="pm-search-categoria">Linha de Ação / Categoria</label>
+                                    <button type="button" class="btn btn-sm btn-outline-primary select-all-btn" onclick="pmToggleAll('categoria')">Todos</button>
+                                </div>
+                                <input type="text" class="form-control form-control-sm mb-2" id="pm-search-categoria" placeholder="Buscar linha/categoria..." oninput="pmRenderList('categoria')">
+                                <div class="pm-list" id="pm-list-categoria"></div>
+                            </div>
+                            <div>
+                                <div class="pm-filter-head">
+                                    <label for="pm-search-equipamento">Equipamento</label>
+                                    <button type="button" class="btn btn-sm btn-outline-primary select-all-btn" onclick="pmToggleAll('equipamento')">Todos</button>
+                                </div>
+                                <input type="text" class="form-control form-control-sm mb-2" id="pm-search-equipamento" placeholder="Buscar equipamento..." oninput="pmRenderList('equipamento')">
+                                <div class="pm-list" id="pm-list-equipamento"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="pm-section">
+                        <div class="pm-section-title">
+                            <span>2. Competências (mês/ano) &mdash; última preventiva realizada (coluna K)</span>
+                            <span>
+                                <button type="button" class="btn btn-sm btn-outline-primary select-all-btn" onclick="pmToggleAll('competencia')">Todas</button>
+                            </span>
+                        </div>
+                        <div class="pm-comp-grid" id="pm-list-competencia"></div>
+                        <div class="pm-hint">As competências correspondem ao mês/ano da <strong>última manutenção preventiva realizada</strong> (coluna K) e são limitadas aos registros dos <strong>clientes/unidades filtrados</strong> acima. Se nenhuma for assinalada, o relatório considera todas as competências listadas.</div>
+                    </div>
+
+                    <div class="pm-section">
+                        <div class="pm-section-title">
+                            <span>3. Equipamentos a Contemplar</span>
+                            <span class="d-flex gap-2 flex-wrap">
+                                <button type="button" class="btn btn-sm btn-outline-success" onclick="pmMarkAll(true)">Marcar todos como realizados</button>
+                                <button type="button" class="btn btn-sm btn-outline-secondary" onclick="pmMarkAll(false)">Limpar marcações</button>
+                            </span>
+                        </div>
+                        <div class="pm-status-bar" id="pm-stats"></div>
+                        <div class="pm-hint mb-2">Situação apurada pela <strong>próxima preventiva prevista (coluna L)</strong>: o equipamento só é considerado <strong>Pendente</strong> quando a data atual é superior à data prevista. Até lá, permanece <strong>Em dia</strong>.</div>
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="checkbox" id="pm-only-pending" onchange="pmRenderPreview()">
+                            <label class="form-check-label" for="pm-only-pending">Exibir/imprimir somente os equipamentos <strong>pendentes</strong> (próxima preventiva vencida)</label>
+                        </div>
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="checkbox" id="pm-show-status" checked onchange="pmRenderPreview()">
+                            <label class="form-check-label" for="pm-show-status">Exibir coluna de <strong>situação</strong> (Realizada / Pendente) no PDF</label>
+                        </div>
+                        <div class="pm-preview-wrap">
+                            <table class="table table-sm pm-table mb-0" id="pm-preview-table">
+                                <thead>
+                                    <tr>
+                                        <th style="width:42px" title="Marcar equipamentos que já passaram por manutenção preventiva">
+                                            <input class="form-check-input" type="checkbox" id="pm-check-all" onchange="pmMarkAll(this.checked)" aria-label="Marcar todos">
+                                        </th>
+                                        <th>Linha / Categoria</th>
+                                        <th>Modelo / Equipamento</th>
+                                        <th>Serial</th>
+                                        <th>CD PAT</th>
+                                        <th>Setor</th>
+                                        <th>Últ. Prev. (K)</th>
+                                        <th>Próx. Prev. (L)</th>
+                                        <th>Situação</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="pm-preview-body"></tbody>
+                            </table>
+                        </div>
+                        <div class="pm-hint" id="pm-preview-hint"></div>
+                        <div class="pm-legend">
+                            <span><i style="background:#c0392b"></i>Pendente — próxima preventiva vencida</span>
+                            <span><i style="background:#2980b9"></i>Em dia — dentro do prazo previsto</span>
+                            <span><i style="background:#27ae60"></i>Realizada — marcada pelo usuário</span>
+                            <span><i style="background:#7f8c8d"></i>Sem previsão — coluna L não informada</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                <button type="button" class="btn btn-primary" id="pm-pdf-btn" onclick="pmPreviewPDF()">Visualizar PDF (A4 paisagem)</button>
             </div>
         </div>
     </div>
@@ -1565,7 +1787,7 @@
     function downloadPDF() {
         const a = document.createElement('a');
         a.href = currentPdfBlobUrl;
-        a.download = 'Relatorio_Patrimonio.pdf';
+        a.download = window.currentPdfFileName || 'Relatorio_Patrimonio.pdf';
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
@@ -1585,7 +1807,7 @@
             instalacao: formatExcelDate(r[2]), instalacaoDate: parseDateValue(r[2]), unidade: r[3],
             equipamento: r[4], serial: r[5], cdPat: r[6],
             setor: r[7], tec: r[8], cliente: r[9],
-            prevAtual: formatExcelDate(r[10]), proxPrev: formatExcelDate(r[11]),
+            prevAtual: formatExcelDate(r[10]), prevAtualDate: parseDateValue(r[10]), proxPrev: formatExcelDate(r[11]), proxPrevDate: parseDateValue(r[11]),
             responsavel: r[12], trocaLamp: r[13], trocaProb: r[14], trocaRefer: r[15],
             trocaLs: r[16], obs: r[17], locacao: r[18]
         })).filter(i=>Object.values(i).some(v=>v!=='' && v !== null));
@@ -1594,6 +1816,8 @@
         configurePeriodInputs();
         document.getElementById('excel-btn').disabled = false;
         document.getElementById('pdf-btn').disabled = false;
+        const preventiveBtn = document.getElementById('preventive-btn');
+        if (preventiveBtn) preventiveBtn.disabled = false;
         alert(`Planilha carregada com sucesso! Número de registros: ${data.length}`);
         applyFilters(); // Aplica filtros iniciais (todos)
         setTimeout(collapseInitialDashboardCard, 150);
@@ -2541,6 +2765,7 @@
 
     function previewPDF() {
         try {
+            window.currentPdfFileName = 'Relatorio_Patrimonio.pdf';
             // A função generatePDF() já aplica a ordenação por data se houver período.
             const doc = generatePDF();
             const pdfBlob = doc.output('blob');
@@ -2794,6 +3019,700 @@
             if (btn) btn.textContent = '☀️';
         }
     });
+
+
+    /* =======================================================================
+       RELATÓRIO DE MANUTENÇÃO PREVENTIVA
+       Competências extraídas da coluna "K" da planilha (campo prevAtual /
+       "Prev. Atual"): cada registro cujo conteúdo de K não seja nulo gera uma
+       competência mês/ano selecionável pelo usuário.
+    ======================================================================= */
+    const PM_TYPES = ['cliente', 'unidade', 'categoria', 'equipamento'];
+    const PM_TYPE_LABELS = { cliente: 'Cliente', unidade: 'Unidade', categoria: 'Linha de Ação / Categoria', equipamento: 'Equipamento' };
+    const PM_NA = '(Não informado)';
+    const PM_MARKS_KEY = 'pmManutencaoRealizada';
+    const PM_PREVIEW_LIMIT = 1200;
+    const PM_MONTHS = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'];
+
+    const pmSel = { cliente: new Set(), unidade: new Set(), categoria: new Set(), equipamento: new Set(), competencia: new Set() };
+    let pmRecords = [];
+    let pmDone = new Set();
+
+    function pmLoadMarks() {
+        try {
+            const raw = localStorage.getItem(PM_MARKS_KEY);
+            if (raw) pmDone = new Set(JSON.parse(raw));
+        } catch (e) { pmDone = new Set(); }
+    }
+    function pmSaveMarks() {
+        try { localStorage.setItem(PM_MARKS_KEY, JSON.stringify(Array.from(pmDone))); } catch (e) { /* storage indisponível */ }
+    }
+    pmLoadMarks();
+
+    function pmText(value) {
+        if (value === null || value === undefined) return '';
+        return String(value).trim();
+    }
+    function pmVal(item, field) {
+        return pmText(item[field]) || PM_NA;
+    }
+
+    /* Extrai a competência (mês/ano) da coluna K */
+    function pmCompetencia(item) {
+        const date = item.prevAtualDate || parseDateValue(item.prevAtual);
+        if (date) {
+            const month = date.getMonth() + 1;
+            const year = date.getFullYear();
+            return {
+                key: `${year}-${String(month).padStart(2, '0')}`,
+                label: `${String(month).padStart(2, '0')}/${year}`,
+                short: `${PM_MONTHS[month - 1]}/${year}`
+            };
+        }
+        const raw = pmText(item.prevAtual);
+        if (!raw) return null;
+
+        let m = raw.match(/(\d{1,2})\s*[\/\-.]\s*(\d{4})/);
+        if (m) {
+            const month = Math.min(12, Math.max(1, parseInt(m[1], 10)));
+            return { key: `${m[2]}-${String(month).padStart(2, '0')}`, label: `${String(month).padStart(2, '0')}/${m[2]}`, short: `${PM_MONTHS[month - 1]}/${m[2]}` };
+        }
+        m = raw.match(/(\d{4})\s*[\/\-.]\s*(\d{1,2})/);
+        if (m) {
+            const month = Math.min(12, Math.max(1, parseInt(m[2], 10)));
+            return { key: `${m[1]}-${String(month).padStart(2, '0')}`, label: `${String(month).padStart(2, '0')}/${m[1]}`, short: `${PM_MONTHS[month - 1]}/${m[1]}` };
+        }
+        m = raw.toLowerCase().match(/(jan|fev|mar|abr|mai|jun|jul|ago|set|out|nov|dez)[a-zç]*\s*[\/\-. ]\s*(\d{2,4})/);
+        if (m) {
+            const month = PM_MONTHS.indexOf(m[1]) + 1;
+            const year = m[2].length === 2 ? 2000 + parseInt(m[2], 10) : parseInt(m[2], 10);
+            return { key: `${year}-${String(month).padStart(2, '0')}`, label: `${String(month).padStart(2, '0')}/${year}`, short: `${m[1]}/${year}` };
+        }
+        return { key: `T:${raw.toUpperCase()}`, label: raw, short: raw };
+    }
+
+    function pmBuildRecords() {
+        pmRecords = [];
+        (Array.isArray(data) ? data : []).forEach(item => {
+            const comp = pmCompetencia(item);
+            if (!comp) return;
+            const vals = {
+                cliente: pmVal(item, 'cliente'),
+                unidade: pmVal(item, 'unidade'),
+                categoria: pmVal(item, 'categoria'),
+                equipamento: pmVal(item, 'equipamento')
+            };
+            pmRecords.push({
+                item,
+                vals,
+                compKey: comp.key,
+                compLabel: comp.label,
+                compShort: comp.short,
+                id: [vals.cliente, vals.unidade, vals.equipamento, pmText(item.serial), pmText(item.cdPat), comp.key].join('§')
+            });
+        });
+        // Remove seleções que não existem mais no dataset atual
+        PM_TYPES.forEach(type => {
+            const available = new Set(pmRecords.map(r => r.vals[type]));
+            Array.from(pmSel[type]).forEach(v => { if (!available.has(v)) pmSel[type].delete(v); });
+        });
+        const comps = new Set(pmRecords.map(r => r.compKey));
+        Array.from(pmSel.competencia).forEach(v => { if (!comps.has(v)) pmSel.competencia.delete(v); });
+    }
+
+    /* Situação do equipamento:
+       - "Realizada": marcada pelo usuário (já passou por preventiva na competência);
+       - "Pendente": a data do sistema é SUPERIOR à próxima preventiva prevista (coluna L);
+       - "Em dia": ainda dentro do prazo previsto;
+       - "Sem previsão": coluna L não informada. */
+    const PM_STATUS = {
+        realizada: { label: 'Realizada', tag: '[X] Realizada', cls: 'ok', color: [39, 174, 96] },
+        pendente: { label: 'Pendente', tag: '[!] Pendente', cls: 'late', color: [192, 57, 43] },
+        emdia: { label: 'Em dia', tag: '[ ] Em dia', cls: 'due', color: [41, 128, 185] },
+        semdata: { label: 'Sem previsão', tag: '[?] Sem previsão', cls: 'none', color: [127, 140, 141] }
+    };
+
+    function pmToday() {
+        const now = new Date();
+        return new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    }
+
+    function pmStatus(rec) {
+        if (pmDone.has(rec.id)) return Object.assign({ key: 'realizada', days: 0 }, PM_STATUS.realizada);
+        const next = rec.item.proxPrevDate || parseDateValue(rec.item.proxPrev);
+        if (!next) return Object.assign({ key: 'semdata', days: 0 }, PM_STATUS.semdata);
+        const today = pmToday();
+        if (today > next) {
+            const days = Math.round((today - next) / 86400000);
+            return Object.assign({ key: 'pendente', days }, PM_STATUS.pendente, {
+                label: `Pendente (${days} d)`,
+                tag: `[!] Pendente (${days} d)`
+            });
+        }
+        const days = Math.round((next - today) / 86400000);
+        return Object.assign({ key: 'emdia', days }, PM_STATUS.emdia, {
+            label: days === 0 ? 'Em dia (vence hoje)' : `Em dia (${days} d)`,
+            tag: days === 0 ? '[ ] Em dia (hoje)' : `[ ] Em dia (${days} d)`
+        });
+    }
+
+    function pmMatches(rec, skipType) {
+        for (const type of PM_TYPES) {
+            if (type === skipType) continue;
+            if (pmSel[type].size && !pmSel[type].has(rec.vals[type])) return false;
+        }
+        if (skipType !== 'competencia' && pmSel.competencia.size && !pmSel.competencia.has(rec.compKey)) return false;
+        return true;
+    }
+
+    function pmFiltered() {
+        return pmRecords.filter(r => pmMatches(r, null));
+    }
+
+    function pmSortRecords(list) {
+        const collator = new Intl.Collator('pt-BR', { numeric: true, sensitivity: 'base' });
+        return list.slice().sort((a, b) =>
+            collator.compare(a.vals.cliente, b.vals.cliente) ||
+            collator.compare(a.vals.unidade, b.vals.unidade) ||
+            collator.compare(a.vals.categoria, b.vals.categoria) ||
+            collator.compare(a.vals.equipamento, b.vals.equipamento) ||
+            a.compKey.localeCompare(b.compKey) ||
+            collator.compare(pmText(a.item.serial), pmText(b.item.serial))
+        );
+    }
+
+    /* ---------- Renderização dos filtros ---------- */
+    function pmRenderList(type) {
+        const container = document.getElementById(`pm-list-${type}`);
+        if (!container) return;
+        const searchInput = document.getElementById(`pm-search-${type}`);
+        const term = searchInput ? searchInput.value.trim().toLowerCase() : '';
+
+        const counts = new Map();
+        pmRecords.forEach(rec => {
+            if (!pmMatches(rec, type)) return;
+            const value = rec.vals[type];
+            counts.set(value, (counts.get(value) || 0) + 1);
+        });
+        pmSel[type].forEach(v => { if (!counts.has(v)) counts.set(v, 0); });
+
+        const collator = new Intl.Collator('pt-BR', { numeric: true, sensitivity: 'base' });
+        const values = Array.from(counts.keys())
+            .filter(v => !term || v.toLowerCase().includes(term))
+            .sort(collator.compare);
+
+        if (!values.length) {
+            container.innerHTML = '<div class="pm-empty">Nenhum valor disponível para os filtros atuais.</div>';
+            return;
+        }
+
+        container.innerHTML = values.map((value, index) => {
+            const id = `pm-${type}-${index}`;
+            const checked = pmSel[type].has(value) ? 'checked' : '';
+            return `<div class="form-check">
+                <input class="form-check-input" type="checkbox" id="${id}" ${checked} data-pm-value="${pmEscapeAttr(value)}" onchange="pmToggleValue('${type}', this)">
+                <label class="form-check-label" for="${id}">${pmEscapeHtml(value)}<span class="pm-count">${counts.get(value)}</span></label>
+            </div>`;
+        }).join('');
+    }
+
+    function pmRenderCompetencias() {
+        const container = document.getElementById('pm-list-competencia');
+        if (!container) return;
+
+        // Exibe apenas as competências existentes nos registros dos clientes/unidades
+        // (e demais filtros) selecionados pelo usuário. Competências já assinaladas
+        // permanecem visíveis, sinalizadas com contagem zero, para que possam ser desmarcadas.
+        const counts = new Map();
+        const labels = new Map();
+        pmRecords.forEach(rec => {
+            if (!pmMatches(rec, 'competencia')) return;
+            labels.set(rec.compKey, rec.compLabel);
+            counts.set(rec.compKey, (counts.get(rec.compKey) || 0) + 1);
+        });
+        pmSel.competencia.forEach(key => {
+            if (labels.has(key)) return;
+            const rec = pmRecords.find(r => r.compKey === key);
+            labels.set(key, rec ? rec.compLabel : key);
+        });
+
+        const keys = Array.from(labels.keys()).sort((a, b) => {
+            const aTxt = a.startsWith('T:'), bTxt = b.startsWith('T:');
+            if (aTxt !== bTxt) return aTxt ? 1 : -1;
+            return a.localeCompare(b);
+        });
+
+        if (!keys.length) {
+            container.innerHTML = pmRecords.length
+                ? '<div class="pm-empty">Nenhuma competência vinculada aos filtros selecionados.</div>'
+                : '<div class="pm-empty">A planilha não possui registros com a coluna K preenchida.</div>';
+            return;
+        }
+
+        container.innerHTML = keys.map((key, index) => {
+            const id = `pm-comp-${index}`;
+            const checked = pmSel.competencia.has(key) ? 'checked' : '';
+            const total = counts.get(key) || 0;
+            const outOfScope = total === 0 ? ' pm-out-of-scope' : '';
+            const title = total === 0 ? ' title="Sem registros para os clientes/unidades filtrados"' : '';
+            return `<div class="pm-comp-item${outOfScope}"${title}>
+                <input class="form-check-input mt-0" type="checkbox" id="${id}" ${checked} data-pm-value="${pmEscapeAttr(key)}" onchange="pmToggleValue('competencia', this)">
+                <label for="${id}">${pmEscapeHtml(labels.get(key))}<span class="pm-count">${total}</span></label>
+            </div>`;
+        }).join('');
+    }
+
+    function pmEscapeHtml(value) {
+        return String(value).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    }
+    function pmEscapeAttr(value) { return pmEscapeHtml(value); }
+
+    function pmToggleValue(type, checkbox) {
+        const value = checkbox.getAttribute('data-pm-value');
+        if (checkbox.checked) pmSel[type].add(value);
+        else pmSel[type].delete(value);
+        pmRefresh(type);
+    }
+
+    function pmToggleAll(type) {
+        const container = document.getElementById(`pm-list-${type}`);
+        if (!container) return;
+        const boxes = Array.from(container.querySelectorAll('input[type="checkbox"]'));
+        const allChecked = boxes.length > 0 && boxes.every(cb => cb.checked);
+        boxes.forEach(cb => {
+            const value = cb.getAttribute('data-pm-value');
+            cb.checked = !allChecked;
+            if (cb.checked) pmSel[type].add(value);
+            else pmSel[type].delete(value);
+        });
+        pmRefresh(type);
+    }
+
+    function pmClearFilters() {
+        PM_TYPES.forEach(type => {
+            pmSel[type].clear();
+            const input = document.getElementById(`pm-search-${type}`);
+            if (input) input.value = '';
+        });
+        pmSel.competencia.clear();
+        pmRefresh();
+    }
+
+    function pmRefresh(skipType) {
+        PM_TYPES.forEach(type => { if (type !== skipType) pmRenderList(type); });
+        if (skipType !== 'competencia') pmRenderCompetencias();
+        pmRenderPreview();
+    }
+
+    /* ---------- Pré-visualização e marcação de realizadas ---------- */
+    function pmVisibleRecords() {
+        const onlyPending = document.getElementById('pm-only-pending');
+        const list = pmSortRecords(pmFiltered());
+        if (onlyPending && onlyPending.checked) return list.filter(r => pmStatus(r).key === 'pendente');
+        return list;
+    }
+
+    function pmRenderPreview() {
+        const body = document.getElementById('pm-preview-body');
+        const hint = document.getElementById('pm-preview-hint');
+        const stats = document.getElementById('pm-stats');
+        if (!body) return;
+
+        const all = pmSortRecords(pmFiltered());
+        const tally = pmTally(all);
+        const compCount = pmSel.competencia.size || new Set(pmRecords.map(r => r.compKey)).size;
+
+        if (stats) {
+            stats.innerHTML = `
+                <div class="pm-stat"><span class="pm-stat-label">Equipamentos</span><span class="pm-stat-value">${all.length}</span></div>
+                <div class="pm-stat pending"><span class="pm-stat-label">Pendentes (vencidas)</span><span class="pm-stat-value">${tally.pendente}</span></div>
+                <div class="pm-stat blue"><span class="pm-stat-label">Em dia</span><span class="pm-stat-value">${tally.emdia}</span></div>
+                <div class="pm-stat done"><span class="pm-stat-label">Realizadas</span><span class="pm-stat-value">${tally.realizada}</span></div>
+                <div class="pm-stat neutral"><span class="pm-stat-label">Competências</span><span class="pm-stat-value">${compCount}</span></div>`;
+        }
+
+        const visible = pmVisibleRecords();
+        const checkAll = document.getElementById('pm-check-all');
+        if (checkAll) checkAll.checked = visible.length > 0 && visible.every(r => pmDone.has(r.id));
+
+        if (!visible.length) {
+            body.innerHTML = '<tr><td colspan="9" class="pm-empty">Nenhum equipamento para os filtros selecionados.</td></tr>';
+            if (hint) hint.textContent = '';
+            return;
+        }
+
+        const rows = [];
+        let currentGroup = '';
+        visible.slice(0, PM_PREVIEW_LIMIT).forEach(rec => {
+            const group = `${rec.vals.cliente} › ${rec.vals.unidade}`;
+            if (group !== currentGroup) {
+                currentGroup = group;
+                rows.push(`<tr class="pm-group"><td colspan="9">${pmEscapeHtml(group)}</td></tr>`);
+            }
+            const isDone = pmDone.has(rec.id);
+            const status = pmStatus(rec);
+            rows.push(`<tr class="${isDone ? 'pm-marked' : (status.key === 'pendente' ? 'pm-late' : '')}">
+                <td><input class="form-check-input" type="checkbox" ${isDone ? 'checked' : ''} data-pm-id="${pmEscapeAttr(rec.id)}" onchange="pmToggleDone(this)" aria-label="Manutenção preventiva realizada"></td>
+                <td>${pmEscapeHtml(rec.vals.categoria)}</td>
+                <td>${pmEscapeHtml(rec.vals.equipamento)}</td>
+                <td>${pmEscapeHtml(pmText(rec.item.serial) || '—')}</td>
+                <td>${pmEscapeHtml(pmText(rec.item.cdPat) || '—')}</td>
+                <td>${pmEscapeHtml(pmText(rec.item.setor) || '—')}</td>
+                <td>${pmEscapeHtml(rec.compLabel)}</td>
+                <td>${pmEscapeHtml(pmText(rec.item.proxPrev) || '—')}</td>
+                <td><span class="pm-badge ${status.cls}">${pmEscapeHtml(status.label)}</span></td>
+            </tr>`);
+        });
+        body.innerHTML = rows.join('');
+
+        if (hint) {
+            hint.textContent = visible.length > PM_PREVIEW_LIMIT
+                ? `Exibindo os primeiros ${PM_PREVIEW_LIMIT} de ${visible.length} equipamentos. O PDF contempla todos os registros filtrados.`
+                : `${visible.length} equipamento(s) serão listados no PDF. Marque o checkbox dos equipamentos que já passaram por manutenção preventiva nas competências assinaladas.`;
+        }
+    }
+
+    function pmTally(list) {
+        const tally = { total: list.length, realizada: 0, pendente: 0, emdia: 0, semdata: 0 };
+        list.forEach(rec => { tally[pmStatus(rec).key]++; });
+        return tally;
+    }
+
+    function pmToggleDone(checkbox) {
+        const id = checkbox.getAttribute('data-pm-id');
+        if (checkbox.checked) pmDone.add(id);
+        else pmDone.delete(id);
+        pmSaveMarks();
+        pmRenderPreview();
+    }
+
+    function pmMarkAll(state) {
+        pmVisibleRecords().forEach(rec => {
+            if (state) pmDone.add(rec.id);
+            else pmDone.delete(rec.id);
+        });
+        pmSaveMarks();
+        pmRenderPreview();
+    }
+
+    /* ---------- Abertura do modal ---------- */
+    function openPreventiveModal() {
+        pmBuildRecords();
+        const noData = document.getElementById('pm-no-data');
+        const content = document.getElementById('pm-content');
+        const pdfBtn = document.getElementById('pm-pdf-btn');
+        const hasData = pmRecords.length > 0;
+
+        if (noData) noData.classList.toggle('d-none', hasData);
+        if (content) content.classList.toggle('d-none', !hasData);
+        if (pdfBtn) pdfBtn.disabled = !hasData;
+
+        if (hasData) pmRefresh();
+        new bootstrap.Modal(document.getElementById('preventive-modal')).show();
+    }
+
+    /* ---------- Geração do PDF (A4 paisagem) ---------- */
+    const PM_COLORS = {
+        dark: [30, 45, 62],
+        accent: [230, 126, 34],
+        blue: [41, 128, 185],
+        green: [39, 174, 96],
+        red: [192, 57, 43],
+        light: [245, 248, 251],
+        band: [234, 242, 251],
+        grey: [120, 130, 140]
+    };
+
+    function pmSelectedCompetenciaLabels() {
+        const labels = new Map();
+        pmRecords.forEach(r => labels.set(r.compKey, r.compLabel));
+        const keys = pmSel.competencia.size ? Array.from(pmSel.competencia) : Array.from(labels.keys());
+        return keys.sort((a, b) => a.localeCompare(b)).map(k => labels.get(k) || k);
+    }
+
+    function pmDrawChrome(doc) {
+        const pageWidth = doc.internal.pageSize.getWidth();
+        const pageHeight = doc.internal.pageSize.getHeight();
+
+        doc.setFillColor.apply(doc, PM_COLORS.dark);
+        doc.rect(0, 0, pageWidth, 17, 'F');
+        doc.setFillColor.apply(doc, PM_COLORS.accent);
+        doc.rect(0, 17, pageWidth, 1.2, 'F');
+
+        doc.setTextColor(255, 255, 255);
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(13);
+        doc.text('RELATÓRIO DE MANUTENÇÃO PREVENTIVA', 12, 8.6);
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(8);
+        doc.setTextColor(200, 210, 220);
+        doc.text('GRUPO LABMEDIC · Gerenciador de Patrimônio', 12, 13.6);
+
+        const comps = pmSelectedCompetenciaLabels();
+        const compText = comps.length > 6 ? `${comps.slice(0, 6).join(', ')} (+${comps.length - 6})` : comps.join(', ');
+        doc.setFontSize(8);
+        doc.setTextColor(255, 255, 255);
+        doc.text(`Competências: ${compText || '—'}`, pageWidth - 12, 8.6, { align: 'right' });
+        doc.setTextColor(200, 210, 220);
+        doc.text(`Emissão: ${new Date().toLocaleString('pt-BR')}`, pageWidth - 12, 13.6, { align: 'right' });
+
+        doc.setDrawColor(210, 215, 222);
+        doc.setLineWidth(0.3);
+        doc.line(12, pageHeight - 12, pageWidth - 12, pageHeight - 12);
+        doc.setFontSize(7.5);
+        doc.setTextColor.apply(doc, PM_COLORS.grey);
+        doc.text('Documento gerado automaticamente — uso interno', 12, pageHeight - 7.5);
+    }
+
+    function pmSectionTitle(doc, text, y) {
+        const pageWidth = doc.internal.pageSize.getWidth();
+        doc.setFillColor.apply(doc, PM_COLORS.light);
+        doc.rect(12, y - 5, pageWidth - 24, 7.5, 'F');
+        doc.setFillColor.apply(doc, PM_COLORS.accent);
+        doc.rect(12, y - 5, 1.8, 7.5, 'F');
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(10);
+        doc.setTextColor.apply(doc, PM_COLORS.dark);
+        doc.text(text, 16.5, y);
+        doc.setFont('helvetica', 'normal');
+        return y + 6;
+    }
+
+    function pmEnsureSpace(doc, y, needed) {
+        if (y + needed > doc.internal.pageSize.getHeight() - 16) {
+            doc.addPage();
+            pmDrawChrome(doc);
+            return 26;
+        }
+        return y;
+    }
+
+    function pmGeneratePDF() {
+        const showStatus = (document.getElementById('pm-show-status') || {}).checked !== false;
+        const records = pmVisibleRecords();
+        if (!records.length) {
+            alert('Nenhum equipamento encontrado para os filtros e competências selecionados.');
+            return null;
+        }
+
+        const doc = new jsPDF('landscape', 'mm', 'a4');
+        const pageWidth = doc.internal.pageSize.getWidth();
+        const tableMargin = { top: 26, bottom: 16, left: 12, right: 12 };
+        pmDrawChrome(doc);
+        let y = 26;
+
+        /* 1. Parâmetros do relatório */
+        y = pmSectionTitle(doc, 'Parâmetros do Relatório', y);
+        const comps = pmSelectedCompetenciaLabels();
+        const params = [
+            ['Competências (mês/ano)', comps.join('  ·  ') || '—'],
+            ['Clientes', pmSel.cliente.size ? Array.from(pmSel.cliente).sort().join(', ') : 'Todos'],
+            ['Unidades', pmSel.unidade.size ? Array.from(pmSel.unidade).sort().join(', ') : 'Todas'],
+            ['Linhas de ação / Categorias', pmSel.categoria.size ? Array.from(pmSel.categoria).sort().join(', ') : 'Todas'],
+            ['Equipamentos', pmSel.equipamento.size ? Array.from(pmSel.equipamento).sort().join(', ') : 'Todos'],
+            ['Critério de listagem', document.getElementById('pm-only-pending') && document.getElementById('pm-only-pending').checked
+                ? 'Somente equipamentos com a próxima preventiva vencida (Pendentes)'
+                : 'Todos os equipamentos das competências selecionadas'],
+            ['Regra de apuração da situação', 'Coluna K = última preventiva realizada (competência). Coluna L = próxima preventiva prevista. '
+                + `Considera-se PENDENTE apenas o equipamento cuja próxima preventiva é anterior à data atual (${pmToday().toLocaleDateString('pt-BR')}); `
+                + 'dentro do prazo, a situação é EM DIA. REALIZADA indica marcação manual de preventiva já executada na competência.']
+        ];
+        doc.autoTable({
+            body: params,
+            startY: y,
+            theme: 'grid',
+            styles: { fontSize: 7.5, cellPadding: 1.8, overflow: 'linebreak', textColor: [45, 55, 65], lineColor: [222, 228, 235], lineWidth: 0.1 },
+            columnStyles: { 0: { cellWidth: 55, fontStyle: 'bold', fillColor: [248, 250, 252] }, 1: { cellWidth: pageWidth - 24 - 55 } },
+            margin: tableMargin,
+            didDrawPage: () => pmDrawChrome(doc)
+        });
+        y = doc.lastAutoTable.finalY + 8;
+
+        /* 2. Resumo consolidado por cliente / unidade */
+        const summary = new Map();
+        records.forEach(rec => {
+            const key = `${rec.vals.cliente}§${rec.vals.unidade}`;
+            if (!summary.has(key)) summary.set(key, { cliente: rec.vals.cliente, unidade: rec.vals.unidade, total: 0, pendente: 0, emdia: 0, realizada: 0, semdata: 0, cats: new Set() });
+            const row = summary.get(key);
+            row.total++;
+            row.cats.add(rec.vals.categoria);
+            row[pmStatus(rec).key]++;
+        });
+        const totals = pmTally(records);
+
+        y = pmEnsureSpace(doc, y, 30);
+        y = pmSectionTitle(doc, 'Resumo Consolidado por Cliente / Unidade', y);
+        const summaryRows = Array.from(summary.values())
+            .sort((a, b) => a.cliente.localeCompare(b.cliente, 'pt-BR') || a.unidade.localeCompare(b.unidade, 'pt-BR'))
+            .map(r => [r.cliente, r.unidade, r.cats.size, r.total, r.pendente, r.emdia, r.realizada, r.semdata,
+                `${Math.round((r.pendente / r.total) * 100)}%`]);
+
+        doc.autoTable({
+            head: [['Cliente', 'Unidade', 'Linhas', 'Equip.', 'Pendentes', 'Em dia', 'Realizadas', 'Sem prev.', '% Pend.']],
+            foot: [['TOTAL GERAL', '', '', totals.total, totals.pendente, totals.emdia, totals.realizada, totals.semdata,
+                `${Math.round((totals.pendente / totals.total) * 100)}%`]],
+            body: summaryRows,
+            startY: y,
+            theme: 'grid',
+            styles: { fontSize: 7.5, cellPadding: 1.8, overflow: 'linebreak', lineColor: [222, 228, 235], lineWidth: 0.1 },
+            headStyles: { fillColor: PM_COLORS.dark, textColor: [255, 255, 255], fontSize: 7.5, fontStyle: 'bold', halign: 'center' },
+            footStyles: { fillColor: [232, 237, 242], textColor: PM_COLORS.dark, fontStyle: 'bold', halign: 'center' },
+            alternateRowStyles: { fillColor: [250, 251, 253] },
+            columnStyles: {
+                0: { cellWidth: 62 }, 1: { cellWidth: 'auto' },
+                2: { cellWidth: 16, halign: 'center' }, 3: { cellWidth: 18, halign: 'center' },
+                4: { cellWidth: 22, halign: 'center', textColor: PM_COLORS.red, fontStyle: 'bold' },
+                5: { cellWidth: 20, halign: 'center', textColor: PM_COLORS.blue },
+                6: { cellWidth: 23, halign: 'center', textColor: PM_COLORS.green },
+                7: { cellWidth: 22, halign: 'center', textColor: PM_COLORS.grey },
+                8: { cellWidth: 20, halign: 'center' }
+            },
+            margin: tableMargin,
+            rowPageBreak: 'avoid',
+            showHead: 'everyPage',
+            didDrawPage: () => pmDrawChrome(doc)
+        });
+        y = doc.lastAutoTable.finalY + 9;
+
+        /* 3. Detalhamento por cliente / unidade, ordenado por linha de ação e modelo */
+        const head = ['#', 'Linha de Ação / Categoria', 'Modelo / Equipamento', 'Serial', 'CD PAT', 'Setor', 'Região', 'Últ. Prev. (K)', 'Próx. Prev. (L)'];
+        if (showStatus) head.push('Situação');
+
+        const byClient = new Map();
+        records.forEach(rec => {
+            if (!byClient.has(rec.vals.cliente)) byClient.set(rec.vals.cliente, new Map());
+            const units = byClient.get(rec.vals.cliente);
+            if (!units.has(rec.vals.unidade)) units.set(rec.vals.unidade, []);
+            units.get(rec.vals.unidade).push(rec);
+        });
+
+        Array.from(byClient.keys()).sort((a, b) => a.localeCompare(b, 'pt-BR')).forEach(cliente => {
+            const units = byClient.get(cliente);
+            const clientTotal = Array.from(units.values()).reduce((acc, arr) => acc + arr.length, 0);
+
+            y = pmEnsureSpace(doc, y, 26);
+            doc.setFillColor.apply(doc, PM_COLORS.blue);
+            doc.rect(12, y - 5, pageWidth - 24, 8, 'F');
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(10);
+            doc.setTextColor(255, 255, 255);
+            doc.text(`CLIENTE: ${cliente}`, 15, y);
+            doc.setFontSize(8);
+            doc.text(`${clientTotal} equipamento(s) · ${units.size} unidade(s)`, pageWidth - 15, y, { align: 'right' });
+            doc.setFont('helvetica', 'normal');
+            y += 8;
+
+            Array.from(units.keys()).sort((a, b) => a.localeCompare(b, 'pt-BR')).forEach(unidade => {
+                const items = pmSortRecords(units.get(unidade));
+                const unitTally = pmTally(items);
+
+                y = pmEnsureSpace(doc, y, 24);
+                doc.setFont('helvetica', 'bold');
+                doc.setFontSize(8.5);
+                doc.setTextColor.apply(doc, PM_COLORS.dark);
+                doc.text(`Unidade: ${unidade}`, 14, y);
+                doc.setFont('helvetica', 'normal');
+                doc.setFontSize(7.5);
+                doc.setTextColor.apply(doc, PM_COLORS.grey);
+                doc.text(`${items.length} equipamento(s) · ${unitTally.pendente} pendente(s) · ${unitTally.emdia} em dia · ${unitTally.realizada} realizada(s)`, pageWidth - 14, y, { align: 'right' });
+                y += 3;
+
+                // Alterna leve sombreado por linha de ação para leitura em blocos
+                const catOrder = [];
+                items.forEach(r => { if (!catOrder.includes(r.vals.categoria)) catOrder.push(r.vals.categoria); });
+
+                const rows = items.map((rec, index) => {
+                    const row = [
+                        index + 1,
+                        rec.vals.categoria,
+                        rec.vals.equipamento,
+                        pmText(rec.item.serial) || '—',
+                        pmText(rec.item.cdPat) || '—',
+                        pmText(rec.item.setor) || '—',
+                        pmText(rec.item.regiao) || '—',
+                        rec.compLabel,
+                        pmText(rec.item.proxPrev) || '—'
+                    ];
+                    if (showStatus) row.push(pmStatus(rec).tag);
+                    return row;
+                });
+
+                const columnStyles = {
+                    0: { cellWidth: 9, halign: 'center', textColor: PM_COLORS.grey },
+                    1: { cellWidth: 46, fontStyle: 'bold' },
+                    2: { cellWidth: 'auto' },
+                    3: { cellWidth: 30 },
+                    4: { cellWidth: 22 },
+                    5: { cellWidth: 30 },
+                    6: { cellWidth: 24 },
+                    7: { cellWidth: 21, halign: 'center' },
+                    8: { cellWidth: 21, halign: 'center' }
+                };
+                if (showStatus) columnStyles[9] = { cellWidth: 32, halign: 'center', fontStyle: 'bold' };
+
+                doc.autoTable({
+                    head: [head],
+                    body: rows,
+                    startY: y,
+                    theme: 'grid',
+                    styles: { fontSize: 7, cellPadding: 1.6, overflow: 'linebreak', valign: 'middle', lineColor: [225, 230, 236], lineWidth: 0.1, textColor: [45, 55, 65] },
+                    headStyles: { fillColor: [52, 73, 94], textColor: [255, 255, 255], fontSize: 7, fontStyle: 'bold', halign: 'center' },
+                    columnStyles,
+                    margin: tableMargin,
+                    pageBreak: 'auto',
+                    rowPageBreak: 'avoid',
+                    showHead: 'everyPage',
+                    didParseCell: (hook) => {
+                        if (hook.section !== 'body') return;
+                        const rec = items[hook.row.index];
+                        if (!rec) return;
+                        if (catOrder.indexOf(rec.vals.categoria) % 2 === 1) hook.cell.styles.fillColor = PM_COLORS.band;
+                        if (showStatus && hook.column.index === 9) {
+                            hook.cell.styles.textColor = pmStatus(rec).color;
+                        }
+                    },
+                    didDrawPage: () => pmDrawChrome(doc)
+                });
+                y = doc.lastAutoTable.finalY + 7;
+            });
+        });
+
+        /* Numeração final das páginas */
+        const pageCount = doc.internal.getNumberOfPages();
+        for (let page = 1; page <= pageCount; page++) {
+            doc.setPage(page);
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(7.5);
+            doc.setTextColor.apply(doc, PM_COLORS.grey);
+            doc.text(`Página ${page} de ${pageCount}`, pageWidth - 12, doc.internal.pageSize.getHeight() - 7.5, { align: 'right' });
+            if (showStatus) {
+                doc.text('Situação: [!] Pendente (próx. preventiva vencida) · [ ] Em dia · [X] Realizada · [?] Sem previsão',
+                    pageWidth / 2, doc.internal.pageSize.getHeight() - 7.5, { align: 'center' });
+            }
+        }
+
+        return doc;
+    }
+
+    function pmPreviewPDF() {
+        try {
+            const doc = pmGeneratePDF();
+            if (!doc) return;
+            window.currentPdfFileName = 'Relatorio_Manutencao_Preventiva.pdf';
+            const modalEl = document.getElementById('preventive-modal');
+            const instance = bootstrap.Modal.getInstance(modalEl);
+            const blob = doc.output('blob');
+            if (instance) {
+                modalEl.addEventListener('hidden.bs.modal', () => openPDFPreview(blob), { once: true });
+                instance.hide();
+            } else {
+                openPDFPreview(blob);
+            }
+        } catch (error) {
+            console.error('Erro ao gerar o PDF de manutenção preventiva:', error);
+            alert('Ocorreu um erro ao gerar o PDF de manutenção preventiva. Verifique o console para mais detalhes.');
+        }
+    }
 
     function toggleDarkMode() {
         const btn = document.getElementById('dark-mode-toggle');
