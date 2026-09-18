@@ -1014,6 +1014,11 @@
         .pm-stat.pending{background:linear-gradient(135deg,#e67e22,#d35400)}
         .pm-stat.neutral{background:linear-gradient(135deg,#8e44ad,#7d3c98)}
         .pm-stat.blue{background:linear-gradient(135deg,#2980b9,#1f618d)}
+        .pm-stat.gray{background:linear-gradient(135deg,#7f8c8d,#626567)}
+        .pm-stat[role="button"]{cursor:pointer;transition:transform .15s ease,box-shadow .15s ease;user-select:none}
+        .pm-stat[role="button"]:hover{transform:translateY(-2px);box-shadow:0 4px 10px rgba(0,0,0,.25)}
+        .pm-stat[role="button"]:focus-visible{outline:2px solid #f1c40f;outline-offset:2px}
+        .pm-stat-active{outline:3px solid #f1c40f;box-shadow:0 0 0 3px rgba(241,196,15,.35)}
         .pm-stat.pending{background:linear-gradient(135deg,#c0392b,#a93226)}
         .pm-stat-label{display:block;font-size:.7rem;text-transform:uppercase;letter-spacing:.5px;opacity:.9}
         .pm-stat-value{display:block;font-size:1.25rem;font-weight:700;line-height:1.3}
@@ -3080,6 +3085,24 @@
     const pmSel = { cliente: new Set(), unidade: new Set(), categoria: new Set(), equipamento: new Set(), competencia: new Set(), atrasada: new Set() };
     let pmRecords = [];
     let pmDone = new Set();
+    /* Controla se o quadro 3 (e o PDF) estão exibindo, no lugar da listagem
+       padrão, apenas os equipamentos sem nenhuma preventiva registrada —
+       acionado ao clicar no card "Sem Preventiva" da barra de estatísticas. */
+    let pmSemPreventivaActive = false;
+
+    /* Categorias/linhas que não são objeto de manutenção preventiva (ver
+       PM_CATEGORIAS_FORA_DE_ESCOPO, definida mais abaixo) e por isso não devem
+       aparecer nos filtros, na listagem nem no PDF deste quadro. A comparação
+       é por "contém" (não por igualdade exata) e normalizada (sem acentos,
+       minúsculas), para não depender de a planilha grafar a categoria no
+       singular/plural ou com texto adicional (ex.: "Periférico",
+       "Periféricos", "Periféricos/Acessórios", "Auxiliares" etc.) — qualquer
+       uma dessas variações continua sendo corretamente excluída. */
+    function pmCategoriaForaDeEscopo(categoria) {
+        const norm = pmNormalizeText(categoria);
+        if (!norm) return false;
+        return PM_CATEGORIAS_FORA_DE_ESCOPO.some(termo => norm.includes(termo));
+    }
 
     function pmLoadMarks() {
         try {
@@ -3137,12 +3160,14 @@
     function pmBuildRecords() {
         pmRecords = [];
         (Array.isArray(data) ? data : []).forEach(item => {
+            const categoria = pmVal(item, 'categoria');
+            if (pmCategoriaForaDeEscopo(categoria)) return;
             const comp = pmCompetencia(item);
             if (!comp) return;
             const vals = {
                 cliente: pmVal(item, 'cliente'),
                 unidade: pmVal(item, 'unidade'),
-                categoria: pmVal(item, 'categoria'),
+                categoria,
                 equipamento: pmVal(item, 'equipamento')
             };
             pmRecords.push({
@@ -3445,6 +3470,7 @@
         });
         pmSel.competencia.clear();
         pmSel.atrasada.clear();
+        pmSemPreventivaActive = false;
         pmRefresh();
     }
 
@@ -3458,6 +3484,7 @@
 
     /* ---------- Pré-visualização e marcação de realizadas ---------- */
     function pmVisibleRecords() {
+        if (pmSemPreventivaActive) return pmSortRecords(pmSemPreventivaRecords());
         const onlyPending = document.getElementById('pm-only-pending');
         const onlyCritical = document.getElementById('pm-only-critical');
         let list = pmSortRecords(pmFiltered());
@@ -3468,6 +3495,7 @@
 
     /* Texto descritivo do critério de listagem ativo, usado no PDF. */
     function pmListagemCriterioTexto() {
+        if (pmSemPreventivaActive) return 'Somente equipamentos sem nenhuma preventiva registrada (coluna K em branco), exceto categorias Periféricos e Auxiliar';
         const onlyPending = document.getElementById('pm-only-pending');
         const onlyCritical = document.getElementById('pm-only-critical');
         const pendingOn = !!(onlyPending && onlyPending.checked);
@@ -3484,9 +3512,15 @@
         const stats = document.getElementById('pm-stats');
         if (!body) return;
 
+        // A visão "Sem Preventiva" não é compatível com filtros de competência
+        // ou de atrasadas (esses equipamentos não pertencem a nenhuma
+        // competência), então a marcação é desfeita automaticamente nesse caso.
+        if (pmSemPreventivaActive && (pmSel.competencia.size || pmSel.atrasada.size)) pmSemPreventivaActive = false;
+
         const all = pmSortRecords(pmFiltered());
         const tally = pmTally(all);
         const compCount = pmSel.competencia.size || new Set(pmRecords.map(r => r.compKey)).size;
+        const semPreventiva = pmCountSemPreventiva();
 
         if (stats) {
             stats.innerHTML = `
@@ -3494,13 +3528,18 @@
                 <div class="pm-stat pending"><span class="pm-stat-label">Pendentes (vencidas)</span><span class="pm-stat-value">${tally.pendente}</span></div>
                 <div class="pm-stat blue"><span class="pm-stat-label">Em dia</span><span class="pm-stat-value">${tally.emdia}</span></div>
                 <div class="pm-stat done"><span class="pm-stat-label">Realizadas</span><span class="pm-stat-value">${tally.realizada}</span></div>
-                <div class="pm-stat neutral"><span class="pm-stat-label">Competências</span><span class="pm-stat-value">${compCount}</span></div>`;
+                <div class="pm-stat neutral"><span class="pm-stat-label">Competências</span><span class="pm-stat-value">${compCount}</span></div>
+                <div class="pm-stat gray${pmSemPreventivaActive ? ' pm-stat-active' : ''}" role="button" tabindex="0"
+                    title="Equipamentos sem nenhuma preventiva registrada (coluna K da planilha em branco), exceto categorias Periféricos e Auxiliar, que não são objeto de manutenção preventiva. Clique para ${pmSemPreventivaActive ? 'voltar à listagem padrão' : 'ver estes equipamentos na listagem abaixo'}."
+                    onclick="pmToggleSemPreventiva()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();pmToggleSemPreventiva();}">
+                    <span class="pm-stat-label">Sem Preventiva</span><span class="pm-stat-value">${semPreventiva}</span>
+                </div>`;
         }
 
         const visible = pmVisibleRecords();
 
         if (!visible.length) {
-            body.innerHTML = '<tr><td colspan="9" class="pm-empty">Nenhum equipamento para os filtros selecionados.</td></tr>';
+            body.innerHTML = `<tr><td colspan="9" class="pm-empty">${pmSemPreventivaActive ? 'Nenhum equipamento sem preventiva registrada para os filtros selecionados.' : 'Nenhum equipamento para os filtros selecionados.'}</td></tr>`;
             if (hint) hint.textContent = '';
             return;
         }
@@ -3530,9 +3569,13 @@
         body.innerHTML = rows.join('');
 
         if (hint) {
-            hint.textContent = visible.length > PM_PREVIEW_LIMIT
-                ? `Exibindo os primeiros ${PM_PREVIEW_LIMIT} de ${visible.length} equipamentos. O PDF contempla todos os registros filtrados.`
-                : `${visible.length} equipamento(s) serão listados no PDF. Marque o checkbox dos equipamentos que já passaram por manutenção preventiva nas competências assinaladas.`;
+            if (pmSemPreventivaActive) {
+                hint.textContent = `${visible.length} equipamento(s) sem nenhuma preventiva registrada. Clique novamente no card "Sem Preventiva" para voltar à listagem padrão.`;
+            } else {
+                hint.textContent = visible.length > PM_PREVIEW_LIMIT
+                    ? `Exibindo os primeiros ${PM_PREVIEW_LIMIT} de ${visible.length} equipamentos. O PDF contempla todos os registros filtrados.`
+                    : `${visible.length} equipamento(s) serão listados no PDF. Marque o checkbox dos equipamentos que já passaram por manutenção preventiva nas competências assinaladas.`;
+            }
         }
     }
 
@@ -3540,6 +3583,81 @@
         const tally = { total: list.length, realizada: 0, pendente: 0, emdia: 0, semdata: 0 };
         list.forEach(rec => { tally[pmStatus(rec).key]++; });
         return tally;
+    }
+
+    /* Conta os equipamentos da planilha cuja coluna K ("Prev. Atual" / última
+       preventiva realizada) não contém nenhuma informação aproveitável — ou
+       seja, sem competência (mês/ano) identificável. Esses equipamentos não
+       entram em pmRecords (não possuem competência), por isso são contados à
+       parte, respeitando os filtros de cliente/unidade/categoria/equipamento
+       atualmente selecionados. Como não pertencem a nenhuma competência, o
+       total é zero quando há competência(s) ou marcação(ões) de atraso
+       selecionadas nos quadros 2 ou "Competências com Preventiva Atrasada". */
+    /* Categorias que, por não serem objeto principal de manutenção preventiva
+       (itens adicionais/acessórios aos equipamentos), naturalmente não possuem
+       registro na coluna K. Por isso são desconsideradas do card "Sem
+       Preventiva", que deve refletir apenas equipamentos que deveriam ter
+       preventiva registrada mas não têm. Ajuste esta lista caso surjam outras
+       categorias na mesma situação. */
+    const PM_CATEGORIAS_FORA_DE_ESCOPO = ['periferic', 'auxiliar'];
+
+    /* Remove acentos e normaliza caixa para comparação de categorias, evitando
+       falsos negativos por causa de acentuação/maiúsculas na planilha. */
+    function pmNormalizeText(str) {
+        return String(str || '')
+            .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+            .trim().toLowerCase();
+    }
+
+    /* Conta os equipamentos da planilha cuja coluna K ("Prev. Atual" / última
+       preventiva realizada) não contém nenhuma informação aproveitável — ou
+       seja, sem competência (mês/ano) identificável. Esses equipamentos não
+       entram em pmRecords (não possuem competência), por isso são contados à
+       parte, respeitando os filtros de cliente/unidade/categoria/equipamento
+       atualmente selecionados. Categorias que naturalmente não recebem
+       preventiva (ver PM_CATEGORIAS_FORA_DE_ESCOPO) são excluídas da contagem,
+       para que o card reflita somente lacunas reais. Como não pertencem a
+       nenhuma competência, o total também é zero quando há competência(s) ou
+       marcação(ões) de atraso selecionadas nos quadros 2 ou "Competências com
+       Preventiva Atrasada". */
+    function pmSemPreventivaRecords() {
+        if (pmSel.competencia.size || pmSel.atrasada.size) return [];
+        const list = [];
+        (Array.isArray(data) ? data : []).forEach(item => {
+            if (pmCompetencia(item)) return;
+            const categoria = pmVal(item, 'categoria');
+            if (pmCategoriaForaDeEscopo(categoria)) return;
+            const vals = {
+                cliente: pmVal(item, 'cliente'),
+                unidade: pmVal(item, 'unidade'),
+                categoria,
+                equipamento: pmVal(item, 'equipamento')
+            };
+            for (const type of PM_TYPES) {
+                if (pmSel[type].size && !pmSel[type].has(vals[type])) return;
+            }
+            list.push({
+                item,
+                vals,
+                compKey: 'SEM_PREVENTIVA',
+                compLabel: 'Sem Preventiva',
+                compShort: 'Sem Preventiva',
+                id: [vals.cliente, vals.unidade, vals.equipamento, pmText(item.serial), pmText(item.cdPat), 'SEM_PREVENTIVA'].join('§')
+            });
+        });
+        return list;
+    }
+
+    function pmCountSemPreventiva() {
+        return pmSemPreventivaRecords().length;
+    }
+
+    /* Alterna a exibição do quadro 3 (e do PDF) entre a listagem padrão e
+       apenas os equipamentos sem nenhuma preventiva registrada. Acionado pelo
+       clique no card "Sem Preventiva". */
+    function pmToggleSemPreventiva() {
+        pmSemPreventivaActive = !pmSemPreventivaActive;
+        pmRenderPreview();
     }
 
     function pmToggleDone(checkbox) {
@@ -3561,6 +3679,7 @@
 
     /* ---------- Abertura do modal ---------- */
     function openPreventiveModal() {
+        pmSemPreventivaActive = false;
         pmBuildRecords();
         const noData = document.getElementById('pm-no-data');
         const content = document.getElementById('pm-content');
