@@ -3761,6 +3761,114 @@
         return y + 6;
     }
 
+    /* Retorna os equipamentos sem preventiva para o resumo do PDF. A apuração
+       respeita os filtros de cliente, unidade, categoria e equipamento, mas é
+       independente das competências selecionadas: como esses equipamentos não
+       possuem a coluna K aproveitável, não poderiam pertencer a uma competência. */
+    function pmSemPreventivaSummaryRecords() {
+        const list = [];
+        (Array.isArray(data) ? data : []).forEach(item => {
+            if (pmCompetencia(item)) return;
+            const categoria = pmVal(item, 'categoria');
+            if (pmCategoriaForaDeEscopo(categoria)) return;
+
+            const vals = {
+                cliente: pmVal(item, 'cliente'),
+                unidade: pmVal(item, 'unidade'),
+                categoria,
+                equipamento: pmVal(item, 'equipamento')
+            };
+            for (const type of PM_TYPES) {
+                if (type === 'competencia' || type === 'atrasada') continue;
+                if (pmSel[type].size && !pmSel[type].has(vals[type])) return;
+            }
+            list.push({ item, vals });
+        });
+        return list;
+    }
+
+    /* Desenha cards compactos por Região x Linha de Ação / Categoria. O bloco
+       controla a própria altura e abre uma nova página somente entre linhas de
+       cards, evitando que um card seja dividido ou fique cortado no rodapé. */
+    function pmAddSemPreventivaCards(doc, startY) {
+        const missing = pmSemPreventivaSummaryRecords();
+        const pageWidth = doc.internal.pageSize.getWidth();
+        const cardsPerRow = 4;
+        const gap = 4;
+        const cardHeight = 25;
+        const cardWidth = (pageWidth - 24 - gap * (cardsPerRow - 1)) / cardsPerRow;
+
+        startY = pmEnsureSpace(doc, startY, cardHeight + 14);
+        let y = pmSectionTitle(doc, 'Equipamentos sem Manutenção Preventiva — por Região e Linha de Ação', startY);
+
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(7.2);
+        doc.setTextColor.apply(doc, PM_COLORS.grey);
+        doc.text('Base: filtros de cliente, unidade, categoria e equipamento. Considera registros sem informação aproveitável na coluna K.', 16.5, y);
+        y += 5;
+
+        if (!missing.length) {
+            y = pmEnsureSpace(doc, y, 10);
+            doc.setFontSize(8.5);
+            doc.setTextColor.apply(doc, PM_COLORS.green);
+            doc.text('Nenhum equipamento sem manutenção preventiva encontrado para os filtros atuais.', 16.5, y + 1);
+            return y + 9;
+        }
+
+        const groups = new Map();
+        missing.forEach(rec => {
+            const regiao = pmText(rec.item.regiao) || 'Sem Região';
+            const key = `${regiao}§${rec.vals.categoria}`;
+            if (!groups.has(key)) groups.set(key, { regiao, categoria: rec.vals.categoria, items: [] });
+            groups.get(key).items.push(rec);
+        });
+
+        const orderedGroups = Array.from(groups.values()).sort((a, b) =>
+            a.regiao.localeCompare(b.regiao, 'pt-BR') || a.categoria.localeCompare(b.categoria, 'pt-BR')
+        );
+
+        for (let index = 0; index < orderedGroups.length; index += cardsPerRow) {
+            const rowGroups = orderedGroups.slice(index, index + cardsPerRow);
+            y = pmEnsureSpace(doc, y, cardHeight + 4);
+            const rowY = y;
+
+            rowGroups.forEach((group, col) => {
+                const x = 12 + col * (cardWidth + gap);
+                const fill = col % 2 === 0 ? [255, 248, 242] : [248, 251, 255];
+                doc.setDrawColor(218, 224, 231);
+                doc.setFillColor.apply(doc, fill);
+                doc.roundedRect(x, rowY, cardWidth, cardHeight, 1.5, 1.5, 'FD');
+                doc.setFillColor.apply(doc, PM_COLORS.accent);
+                doc.roundedRect(x, rowY, cardWidth, 6, 1.5, 1.5, 'F');
+                doc.rect(x, rowY + 3, cardWidth, 3, 'F');
+
+                doc.setFont('helvetica', 'bold');
+                doc.setFontSize(7);
+                doc.setTextColor(255, 255, 255);
+                const title = `${group.regiao} · ${group.categoria}`;
+                const titleLines = doc.splitTextToSize(title, cardWidth - 5).slice(0, 2);
+                doc.text(titleLines, x + 2.5, rowY + 3.9, { lineHeightFactor: 0.9 });
+
+                doc.setFontSize(10);
+                doc.setTextColor.apply(doc, PM_COLORS.red);
+                doc.text(`${group.items.length}`, x + 2.5, rowY + 13.5);
+                doc.setFontSize(7);
+                doc.setTextColor.apply(doc, PM_COLORS.dark);
+                doc.text(group.items.length === 1 ? 'equipamento sem preventiva' : 'equipamentos sem preventiva', x + 11, rowY + 13.5);
+
+                const examples = group.items.map(rec => rec.vals.equipamento).slice(0, 2);
+                const exampleText = examples.join(' · ') + (group.items.length > examples.length ? ` · +${group.items.length - examples.length}` : '');
+                doc.setFont('helvetica', 'normal');
+                doc.setFontSize(6.3);
+                doc.setTextColor.apply(doc, PM_COLORS.grey);
+                doc.text(doc.splitTextToSize(exampleText, cardWidth - 5).slice(0, 2), x + 2.5, rowY + 18, { lineHeightFactor: 1.05 });
+            });
+            y = rowY + cardHeight + gap;
+        }
+
+        return y + 2;
+    }
+
     function pmEnsureSpace(doc, y, needed) {
         if (y + needed > doc.internal.pageSize.getHeight() - 16) {
             doc.addPage();
@@ -3809,7 +3917,10 @@
         });
         y = doc.lastAutoTable.finalY + 8;
 
-        /* 2. Resumo consolidado por cliente / unidade */
+        /* 2. Cards de equipamentos sem preventiva por região / categoria */
+        y = pmAddSemPreventivaCards(doc, y);
+
+        /* 3. Resumo consolidado por cliente / unidade */
         const summary = new Map();
         records.forEach(rec => {
             const key = `${rec.vals.cliente}§${rec.vals.unidade}`;
