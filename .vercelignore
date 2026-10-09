@@ -1,0 +1,3 @@
+# Arquivos do repositório que NÃO devem ser publicados como páginas estáticas
+README.md
+.env.example

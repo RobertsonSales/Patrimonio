@@ -5,12 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GRUPO LABMEDIC - Gerenciador de Patrimônio</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <meta name="description" content="Gerenciador de Patrimônio do Grupo Labmedic — dados lidos da planilha Patrimônio aferido (Google Sheets).">
+    <!-- Bibliotecas servidas pelo jsDelivr (domínio liberado na CSP do vercel.json) -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.5.25/dist/jspdf.plugin.autotable.min.js"></script>
     <style>
         /* [ESTILOS ORIGINAIS MANTIDOS - SEM ALTERAÇÕES] */
         body{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);min-height:100vh;padding:20px;font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif}
@@ -1127,6 +1126,17 @@
         body:not(.light-mode) .pm-section .form-check-label{color:var(--dm-text-primary) !important}
         @media (max-width:768px){.pm-grid{grid-template-columns:1fr}.pm-preview-wrap{max-height:400px}}
 
+
+        /* ===== v2.1 — Origem dos dados: Google Sheets ===== */
+        .sheets-status { margin-top: 10px; display: flex; gap: 10px; align-items: center; justify-content: center; flex-wrap: wrap; }
+        .sheets-badge { font-size: .78rem; font-weight: 700; padding: 4px 12px; border-radius: 999px; border: 1px solid transparent; }
+        .sheets-badge--loading { background: rgba(148,163,184,.15); color: #94a3b8; border-color: rgba(148,163,184,.4); }
+        .sheets-badge--live { background: rgba(34,197,94,.15); color: #22c55e; border-color: rgba(34,197,94,.45); }
+        .sheets-badge--error { background: rgba(239,68,68,.12); color: #ef4444; border-color: rgba(239,68,68,.45); }
+        .sheets-badge--offline { background: rgba(245,158,11,.14); color: #f59e0b; border-color: rgba(245,158,11,.45); }
+        .sheets-actions { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-top: 14px; }
+        .sheets-actions .btn-link-updater { border: 1px solid rgba(148,163,184,.5) !important; background: transparent; color: inherit; text-decoration: none; }
+        .sheets-warning { margin-top: 10px; font-size: .85rem; color: #f59e0b; }
     </style>
 </head>
 <body>
@@ -1218,10 +1228,10 @@
             </div>
         </div>
         <div class="kpi-chip">
-            <div class="kpi-icon">📁</div>
+            <div class="kpi-icon">☁️</div>
             <div class="kpi-content">
-                <span class="kpi-title">Importação</span>
-                <span class="kpi-value">Planilhas .xlsx</span>
+                <span class="kpi-title">Fonte de dados</span>
+                <span class="kpi-value">Google Sheets</span>
             </div>
         </div>
         <div class="kpi-chip">
@@ -1243,10 +1253,22 @@
         <div id="dashboard-inicial-collapse" class="collapse show">
             <div class="card-body">
                 <div class="file-upload-container">
-                    <span class="file-upload-icon">📊</span>
-                    <label for="file-upload" class="file-upload-label">Importar Planilha (.xlsx)</label>
-                    <input type="file" id="file-upload" class="form-control file-upload-input" accept=".xlsx">
-                    <small class="text-muted mt-2 d-block">Selecione um arquivo Excel (.xlsx) para carregar os dados de patrimônio</small>
+                    <span class="file-upload-icon">☁️</span>
+                    <div class="file-upload-label">Planilha "Patrimônio aferido" — Google Sheets</div>
+                    <div class="sheets-status">
+                        <span id="sheets-badge" class="sheets-badge sheets-badge--loading">Conectando…</span>
+                        <small id="sheets-info" class="text-muted">Lendo os dados da planilha…</small>
+                    </div>
+                    <div id="sheets-warning" class="sheets-warning d-none"></div>
+                    <div class="sheets-actions">
+                        <button type="button" class="btn btn-primary" id="sheets-reload-btn" onclick="loadFromSheets()">↻ Atualizar dados da planilha</button>
+                        <a class="btn btn-link-updater" href="https://equipamentosonline.vercel.app/" target="_blank" rel="noopener" title="Incluir, editar ou excluir equipamentos na planilha">✎ Abrir o Atualizador da planilha</a>
+                    </div>
+                    <!-- Contingência: só aparece se a planilha não puder ser lida -->
+                    <div id="local-fallback" class="mt-3 d-none">
+                        <small class="text-muted d-block mb-2">Contingência (sem conexão com a planilha): importe um .xlsx exportado do Google Sheets (Arquivo › Fazer download › .xlsx).</small>
+                        <input type="file" id="file-upload" class="form-control file-upload-input" accept=".xlsx">
+                    </div>
                 </div>
             </div>
         </div>
@@ -1332,7 +1354,7 @@
                     <button type="button" class="btn btn-outline-secondary w-100" onclick="clearPeriodFilter()">Limpar período</button>
                 </div>
             </div>
-            <div class="period-filter-hint">O período utiliza a coluna <strong>Instalação</strong> da planilha importada e passa a refletir em todos os resumos, PDFs e exportações para Excel.</div>
+            <div class="period-filter-hint">O período utiliza a coluna <strong>Instalação</strong> da planilha e passa a refletir em todos os resumos, PDFs e exportações para Excel.</div>
             <div id="period-filter-status" class="period-filter-status d-none"></div>
         </div>
         
@@ -1658,8 +1680,8 @@
 <script>
     const { jsPDF } = window.jspdf;
     let data = [], filteredData = [];
-    const allFields = ['regiao','categoria','instalacao','unidade','equipamento','serial','cdPat','setor','tec','cliente','prevAtual','proxPrev','responsavel','trocaLamp','trocaProb','trocaRefer','trocaLs','obs','locacao'];
-    const fieldLabels = {regiao:'Região',categoria:'Categoria',instalacao:'Instalação',unidade:'Unidade',equipamento:'Equipamento',serial:'Serial',cdPat:'CD PAT',setor:'Setor',tec:'Tec',cliente:'Cliente',prevAtual:'Prev. Atual',proxPrev:'Prox. Prev',responsavel:'Responsável',trocaLamp:'Troca de Lâmp',trocaProb:'Troca de Prob',trocaRefer:'Troca Refer',trocaLs:'Troca da LS',obs:'OBS',locacao:'Locação R$'};
+    const allFields = ['regiao','categoria','instalacao','unidade','equipamento','serial','cdPat','setor','tec','cliente','cnpj','prevAtual','proxPrev','responsavel','trocaLamp','trocaProb','trocaRefer','trocaLs','obs','locacao'];
+    const fieldLabels = {regiao:'Região',categoria:'Categoria',instalacao:'Instalação',unidade:'Unidade',equipamento:'Equipamento',serial:'Serial',cdPat:'CD PAT',setor:'Setor',tec:'Tec',cliente:'Cliente',prevAtual:'Prev. Atual',proxPrev:'Prox. Prev',responsavel:'Responsável',trocaLamp:'Troca de Lâmp',trocaProb:'Troca de Prob',trocaRefer:'Troca Refer',trocaLs:'Troca da LS',obs:'OBS',locacao:'Locação R$',cnpj:'CNPJ'};
     let selectedFields = new Set(), selectedItems = new Set(), currentSearchType = 'cliente';
     let selectedRegioes = new Set(), selectedCategorias = new Set(), selectedEquipamentos = new Set();
     let isSearchMode = false;
@@ -1818,7 +1840,7 @@
         if (validDates.length > 0) {
             parts.push(`Período disponível na planilha: <strong>${formatExcelDate(validDates[0])}</strong> até <strong>${formatExcelDate(validDates[validDates.length - 1])}</strong>.`);
         } else {
-            parts.push('A planilha importada não possui datas válidas na coluna Instalação.');
+            parts.push('A planilha não possui datas válidas na coluna Instalação.');
         }
 
         parts.push(`Filtro atual: <strong>${formatDateRangeLabel(start, end)}</strong>.`);
@@ -1871,47 +1893,163 @@
     }
     
     /* ---------- FUNÇÕES DE MANIPULAÇÃO DE DADOS E FILTROS ---------- */
-    function processExcelData(dataArray){
-        data = dataArray.map(r => ({
-            regiao: r[0], categoria: r[1],
-            instalacao: formatExcelDate(r[2]), instalacaoDate: parseDateValue(r[2]), unidade: r[3],
-            equipamento: r[4], serial: r[5], cdPat: r[6],
-            setor: r[7], tec: r[8], cliente: r[9],
-            prevAtual: formatExcelDate(r[10]), prevAtualDate: parseDateValue(r[10]), proxPrev: formatExcelDate(r[11]), proxPrevDate: parseDateValue(r[11]),
-            responsavel: r[12], trocaLamp: r[13], trocaProb: r[14], trocaRefer: r[15],
-            trocaLs: r[16], obs: r[17], locacao: r[18]
-        })).filter(i=>Object.values(i).some(v=>v!=='' && v !== null));
+    /* ---------- CARGA DE DADOS — GOOGLE SHEETS (mesma fonte do Atualizador) ----------
+       O navegador lê a planilha pela função /api/patrimonio DESTE projeto na Vercel
+       (patrimonio-ten), que guarda a URL do Apps Script e o token SOMENTE LEITURA. As colunas são localizadas PELO NOME do cabeçalho
+       (não pela posição): a aba no Google Sheets tem a coluna "ID" (coluna A, criada
+       pelo Apps Script) e a coluna "CNPJ" no fim — a leitura posicional antiga
+       (r[0]…r[18]) deslocaria todos os campos.
+    -------------------------------------------------------------------------------- */
+    const SHEETS_API = '/api/patrimonio';
+
+    // cabeçalho normalizado (sem acento, minúsculo, só letras/dígitos) → campo interno
+    const HEADER_MAP = {
+        regiao: 'regiao', categoria: 'categoria', instalacao: 'instalacao', unidade: 'unidade',
+        equipamento: 'equipamento', serial: 'serial', cdpat: 'cdPat', setor: 'setor', tec: 'tec',
+        cliente: 'cliente', prevatual: 'prevAtual', prox: 'proxPrev', proxprev: 'proxPrev',
+        responsavel: 'responsavel', trocadelamp: 'trocaLamp', trocadeprob: 'trocaProb',
+        trocarefer: 'trocaRefer', trocadals: 'trocaLs', obs: 'obs', locacaor: 'locacao', locacao: 'locacao',
+        cnpj: 'cnpj', id: 'id'
+    };
+    // Ordem das colunas da planilha original (usada só se o cabeçalho não for reconhecido)
+    const LEGACY_ORDER = ['regiao','categoria','instalacao','unidade','equipamento','serial','cdPat','setor','tec','cliente','prevAtual','proxPrev','responsavel','trocaLamp','trocaProb','trocaRefer','trocaLs','obs','locacao'];
+    const REQUIRED_FIELDS = ['cliente', 'unidade', 'equipamento', 'categoria', 'regiao', 'instalacao', 'prevAtual', 'proxPrev'];
+    const DATA_FIELDS = LEGACY_ORDER.concat(['cnpj']);
+
+    const headerKey = h => String(h ?? '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]/g, '');
+    const cleanCell = v => (typeof v === 'string' ? v.trim() : (v === null || v === undefined ? '' : v));
+
+    function buildColumnIndex(headers) {
+        const idx = {};
+        (headers || []).forEach((h, i) => {
+            const field = HEADER_MAP[headerKey(h)];
+            if (field && idx[field] === undefined) idx[field] = i;
+        });
+        const recognized = Object.keys(idx).filter(k => k !== 'id' && k !== 'cnpj').length;
+        if (recognized < 5) {
+            // Cabeçalho irreconhecível: mantém o comportamento antigo (posição fixa)
+            LEGACY_ORDER.forEach((f, i) => { idx[f] = i; });
+            return { idx, legacy: true, missing: [] };
+        }
+        return { idx, legacy: false, missing: REQUIRED_FIELDS.filter(f => idx[f] === undefined) };
+    }
+
+    /**
+     * Converte linhas (arrays) em registros do app e (re)desenha toda a tela.
+     * headers: linha de cabeçalho; rows: linhas de dados (arrays alinhados ao cabeçalho).
+     */
+    function processRecords(headers, rows, options = {}) {
+        const { idx, legacy, missing } = buildColumnIndex(headers);
+        const get = (r, f) => idx[f] === undefined ? '' : cleanCell(r[idx[f]]);
+        const isReload = data.length > 0;
+        const prevPeriod = getInstallationPeriodFilters();
+
+        data = rows.map(r => ({
+            regiao: get(r, 'regiao'), categoria: get(r, 'categoria'),
+            instalacao: formatExcelDate(get(r, 'instalacao')), instalacaoDate: parseDateValue(get(r, 'instalacao')), unidade: get(r, 'unidade'),
+            equipamento: get(r, 'equipamento'), serial: get(r, 'serial'), cdPat: get(r, 'cdPat'),
+            setor: get(r, 'setor'), tec: get(r, 'tec'), cliente: get(r, 'cliente'),
+            prevAtual: formatExcelDate(get(r, 'prevAtual')), prevAtualDate: parseDateValue(get(r, 'prevAtual')),
+            proxPrev: formatExcelDate(get(r, 'proxPrev')), proxPrevDate: parseDateValue(get(r, 'proxPrev')),
+            responsavel: get(r, 'responsavel'), trocaLamp: get(r, 'trocaLamp'), trocaProb: get(r, 'trocaProb'), trocaRefer: get(r, 'trocaRefer'),
+            trocaLs: get(r, 'trocaLs'), obs: get(r, 'obs'), locacao: get(r, 'locacao'),
+            cnpj: get(r, 'cnpj'), id: get(r, 'id')
+        })).filter(i => DATA_FIELDS.some(f => i[f] !== '' && i[f] !== null && i[f] !== undefined));
+
         populateFilters();
         populateSuggestions();
         configurePeriodInputs();
+        if (isReload) restoreSelectionsAfterReload(prevPeriod);
         document.getElementById('excel-btn').disabled = false;
         document.getElementById('pdf-btn').disabled = false;
         const preventiveBtn = document.getElementById('preventive-btn');
         if (preventiveBtn) preventiveBtn.disabled = false;
-        alert(`Planilha carregada com sucesso! Número de registros: ${data.length}`);
-        applyFilters(); // Aplica filtros iniciais (todos)
-        setTimeout(collapseInitialDashboardCard, 150);
+
+        const warn = document.getElementById('sheets-warning');
+        const msgs = [];
+        if (legacy) msgs.push('Cabeçalho da planilha não reconhecido — colunas lidas pela posição original.');
+        if (missing.length) msgs.push('Colunas não encontradas na planilha: ' + missing.map(f => fieldLabels[f] || f).join(', ') + '.');
+        if (warn) { warn.textContent = msgs.length ? '⚠ ' + msgs.join(' ') : ''; warn.classList.toggle('d-none', !msgs.length); }
+
+        if (options.announce) alert(`Planilha carregada com sucesso! Número de registros: ${data.length}`);
+        applyFilters();
+        if (options.collapse) setTimeout(collapseInitialDashboardCard, 150);
+        return data.length;
     }
-    
+
+    // Ao atualizar os dados, mantém as seleções que ainda existem na planilha
+    function restoreSelectionsAfterReload(prevPeriod) {
+        const sets = { regiao: selectedRegioes, categoria: selectedCategorias, equipamento: selectedEquipamentos };
+        Object.entries(sets).forEach(([type, set]) => {
+            const present = new Set(data.map(i => String(i[type])));
+            Array.from(set).forEach(v => { if (!present.has(String(v))) set.delete(v); });
+            document.querySelectorAll(`#filter-${type}-checkboxes .form-check-input`).forEach(cb => { cb.checked = set.has(cb.value); });
+        });
+        const presentItems = new Set(data.map(i => i[currentSearchType]));
+        Array.from(selectedItems).forEach(v => { if (!presentItems.has(v)) selectedItems.delete(v); });
+        const startInput = document.getElementById('instalacao-start');
+        const endInput = document.getElementById('instalacao-end');
+        if (startInput && prevPeriod.start) startInput.value = prevPeriod.start;
+        if (endInput && prevPeriod.end) endInput.value = prevPeriod.end;
+        syncFilterOptions();
+        updateSelectedDisplay();
+        updatePeriodFilterStatus();
+    }
+
+    function setSheetsStatus(state, info) {
+        const labels = { loading: 'Conectando…', live: '● Conectado ao Google Sheets', error: 'Planilha indisponível', offline: 'Sem acesso à planilha' };
+        const badge = document.getElementById('sheets-badge');
+        badge.className = `sheets-badge sheets-badge--${state}`;
+        badge.textContent = labels[state];
+        document.getElementById('sheets-info').textContent = info || '';
+    }
+
+    function showLocalFallback(show) {
+        const el = document.getElementById('local-fallback');
+        if (el) el.classList.toggle('d-none', !show);
+    }
+
+    async function loadFromSheets() {
+        const btn = document.getElementById('sheets-reload-btn');
+        if (location.protocol === 'file:') {
+            setSheetsStatus('offline', 'Arquivo aberto localmente — a planilha só é lida quando o app está publicado na Vercel.');
+            showLocalFallback(true);
+            return;
+        }
+        setSheetsStatus('loading', 'Lendo os dados da planilha…');
+        if (btn) btn.disabled = true;
+        try {
+            const r = await fetch(SHEETS_API, { cache: 'no-store' });
+            const j = await r.json().catch(() => ({ ok: false, error: `Resposta inválida (HTTP ${r.status})` }));
+            if (!j.ok) throw new Error(j.error || `HTTP ${r.status}`);
+            const headers = j.data.headers || [];
+            const rows = (j.data.rows || []).map(o => headers.map(h => o[h]));
+            const n = processRecords(headers, rows);
+            setSheetsStatus('live', `${n} registro(s) · atualizado às ${new Date().toLocaleTimeString('pt-BR')}`);
+            showLocalFallback(false);
+        } catch (e) {
+            setSheetsStatus('error', `Não foi possível ler a planilha: ${e.message}`);
+            showLocalFallback(true);
+        } finally {
+            if (btn) btn.disabled = false;
+        }
+    }
+
+    // Contingência: importação de .xlsx (mesmo mapeamento por nome de coluna)
     document.getElementById('file-upload').addEventListener('change', (e) => {
+        const file = e.target.files && e.target.files[0];
+        if (!file) return;
         const reader = new FileReader();
         reader.onload = (event) => {
-            const data = event.target.result;
-            const workbook = XLSX.read(data, { type: 'binary' });
-            
+            const workbook = XLSX.read(new Uint8Array(event.target.result), { type: 'array' });
             // Procura pela aba "Patrimônio aferido"
-            let sheetName = workbook.SheetNames.find(n => n.includes("Patrimônio aferido"));
+            let sheetName = workbook.SheetNames.find(n => n.includes('Patrimônio aferido'));
             if (!sheetName) sheetName = workbook.SheetNames[0]; // Fallback para a primeira aba
-            
-            const worksheet = workbook.Sheets[sheetName];
-            // Converte para array de arrays (omitindo o cabeçalho)
-            const json = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: '' });
-            
-            // Identifica se a primeira linha é o cabeçalho e pula
-            const rows = json.slice(1);
-            processExcelData(rows);
+            const json = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName], { header: 1, defval: '' });
+            const n = processRecords(json[0] || [], json.slice(1), { announce: true, collapse: true });
+            setSheetsStatus('offline', `${n} registro(s) carregados do arquivo "${file.name}" (contingência — não reflete a planilha online).`);
         };
-        reader.readAsBinaryString(e.target.files[0]);
+        reader.readAsArrayBuffer(file);
     });
 
     function populateColumnCheckboxes(){
@@ -4219,11 +4357,9 @@
             localStorage.setItem('darkMode', 'on'); // compat com chave antiga
         }
     }
+
+    // Carga automática a partir do Google Sheets ao abrir a página
+    loadFromSheets();
 </script>
-<script defer src="https://static.cloudflareinsights.com/beacon.min.js/v8c78df7c7c0f484497ecbca7046644da1771523124516" integrity="sha512-8DS7rgIrAmghBFwoOTujcf6D9rXvH8xm8JQ1Ja01h9QX8EzXldiszufYa4IFfKdLUKTTrnSFXLDkUEOTrZQ8Qg==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
-<script defer src="https://static.cloudflareinsights.com/beacon.min.js/v833ccba57c9e4d2798f2e76cebdd09a11778172276447" integrity="sha512-57MDmcccJXYtNnH+ZiBwzC4jb2rvgVCEokYN+L/nLlmO8rfYT/gIpW2A569iJ/3b+0UEasghjuZH/ma3wIs/EQ==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
-<script defer src="https://static.cloudflareinsights.com/beacon.min.js/v833ccba57c9e4d2798f2e76cebdd09a11778172276447" integrity="sha512-57MDmcccJXYtNnH+ZiBwzC4jb2rvgVCEokYN+L/nLlmO8rfYT/gIpW2A569iJ/3b+0UEasghjuZH/ma3wIs/EQ==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
-<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79"}' crossorigin="anonymous"></script>
-<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79"}' crossorigin="anonymous"></script>
 </body>
 </html>

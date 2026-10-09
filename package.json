@@ -1,0 +1,7 @@
+{
+  "name": "patrimonio-ten",
+  "version": "2.1.0",
+  "private": true,
+  "description": "Gerenciador de Patrimônio — lê a planilha Patrimônio aferido (Google Sheets) por proxy somente leitura na Vercel",
+  "engines": { "node": ">=18" }
+}
