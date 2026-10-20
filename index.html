@@ -1137,6 +1137,159 @@
         .sheets-actions { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-top: 14px; }
         .sheets-actions .btn-link-updater { border: 1px solid rgba(148,163,184,.5) !important; background: transparent; color: inherit; text-decoration: none; }
         .sheets-warning { margin-top: 10px; font-size: .85rem; color: #f59e0b; }
+
+        /* ===================================================================
+           v2.2 — Contraste, quadro de filtros retrátil e cadastro de clientes
+           (regras ao final do arquivo para prevalecer sobre as anteriores)
+           =================================================================== */
+
+        /* Tons secundários mais claros no modo escuro (WCAG AA sobre #22263a/#2a2f47) */
+        :root {
+            --dm-text-secondary: #c3cbe0;
+            --dm-text-muted: #aab3cc;
+        }
+        body:not(.light-mode) .text-muted { color: #aab3cc !important; }
+        body:not(.light-mode) .form-control::placeholder { color: #8f98b5; }
+        body:not(.light-mode) .form-check-label,
+        body:not(.light-mode) .search-type-selector .form-check-label { color: #d4d9e8; }
+        body:not(.light-mode) .form-check-input { background-color: #1e2236; border-color: #6b749a; }
+        body:not(.light-mode) .form-check-input:checked { background-color: #5b8dee; border-color: #5b8dee; }
+        body:not(.light-mode) .horizontal-equipment-item .detail-label,
+        body:not(.light-mode) .filter-summary-label,
+        body:not(.light-mode) .filter-summary-equipment-label { color: #c3cbe0; }
+        body:not(.light-mode) .period-filter-hint { color: #b6bed4; }
+        body:not(.light-mode) .period-filter-hint strong { color: #e8eaf0; }
+        body:not(.light-mode) .kpi-chip .kpi-title { color: #b6bed4; }
+        body:not(.light-mode) .no-results { color: #ff9a8f; }
+
+        /* Botões "contorno" eram azul/cinza escuros sobre fundo escuro */
+        body:not(.light-mode) .btn-outline-primary { color: #a9c6ff; border: 1px solid #5b8dee; background: transparent; }
+        body:not(.light-mode) .btn-outline-primary:hover,
+        body:not(.light-mode) .btn-outline-primary:focus-visible { color: #fff; background: #4a7de0; border-color: #4a7de0; }
+        body:not(.light-mode) .btn-outline-secondary { color: #dde2ee; border: 1px solid #8a93b3; background: transparent; }
+        body:not(.light-mode) .btn-outline-secondary:hover,
+        body:not(.light-mode) .btn-outline-secondary:focus-visible { color: #12152b; background: #dde2ee; border-color: #dde2ee; }
+        .btn:focus-visible, .toggle-section-btn:focus-visible { outline: 3px solid #f1c40f; outline-offset: 2px; }
+
+        /* Badges de região dos cards: vermelho mais escuro garante texto branco legível */
+        .horizontal-equipment-item .unidade-badge { background: #c0392b; }
+
+        /* ---------- Dashboard Inicial: painel neutro e legível ---------- */
+        .dashboard-card .file-upload-container,
+        body:not(.light-mode) .dashboard-card .file-upload-container {
+            background: linear-gradient(135deg, #1b2038 0%, #212743 100%);
+            border: 1px solid rgba(91,141,238,.35);
+            border-top: none;
+            border-radius: 0 0 12px 12px;
+            text-align: center;
+            padding: 22px 20px;
+        }
+        .dashboard-card .file-upload-container:hover { transform: none; box-shadow: none; }
+        body:not(.light-mode) .dashboard-card .file-upload-label { color: #f2f4fb; font-size: 1.15rem; }
+        body:not(.light-mode) .dashboard-card .file-upload-icon { color: #a9c6ff; }
+        .sheets-info { font-size: .86rem; }
+        body:not(.light-mode) .sheets-info { color: #c3cbe0; }
+        body:not(.light-mode) .sheets-badge--loading { background: rgba(148,163,184,.2); color: #dbe1ec; border-color: rgba(203,213,225,.5); }
+        body:not(.light-mode) .sheets-badge--live { background: rgba(34,197,94,.18); color: #6ee7a0; border-color: rgba(74,222,128,.6); }
+        body:not(.light-mode) .sheets-badge--error { background: rgba(239,68,68,.18); color: #ffa3a3; border-color: rgba(248,113,113,.6); }
+        body:not(.light-mode) .sheets-badge--offline { background: rgba(245,158,11,.18); color: #fcd27b; border-color: rgba(251,191,36,.6); }
+        body:not(.light-mode) .sheets-warning { color: #fcd27b; }
+        body:not(.light-mode) .sheets-actions .btn-link-updater { color: #e8eaf0; border-color: rgba(203,213,225,.55) !important; }
+        body:not(.light-mode) .sheets-actions .btn-link-updater:hover { background: rgba(255,255,255,.08); color: #fff; }
+        body:not(.light-mode) .dashboard-card .file-upload-input { border-color: #3d4266; }
+
+        body.light-mode .dashboard-card .file-upload-container {
+            background: linear-gradient(135deg, #ffffff 0%, #f2f6ff 100%);
+            border: 1px solid #cdd9f0;
+            border-top: none;
+        }
+        body.light-mode .dashboard-card .file-upload-label { color: #1f3a68; }
+        body.light-mode .dashboard-card .file-upload-icon { color: #2980b9; }
+        body.light-mode .sheets-info { color: #44526a; }
+        body.light-mode .sheets-badge--loading { color: #475569; }
+        body.light-mode .sheets-badge--live { color: #15803d; background: #dcfce7; }
+        body.light-mode .sheets-badge--error { color: #b91c1c; background: #fee2e2; }
+        body.light-mode .sheets-badge--offline { color: #92400e; background: #fef3c7; }
+        body.light-mode .sheets-warning { color: #92400e; }
+        body.light-mode .sheets-actions .btn-link-updater { color: #1f3a68; border-color: #9fb3d6 !important; }
+
+        .btn-cadastro { background: linear-gradient(135deg, #16a085, #11806a); color: #fff; }
+        .btn-cadastro:hover { background: linear-gradient(135deg, #11806a, #0b6655); color: #fff; transform: translateY(-2px); box-shadow: 0 4px 15px rgba(22,160,133,.4); }
+        .btn-cadastro:disabled { background: #5d6d7e; color: #e5e8ec; opacity: .7; }
+
+        /* ---------- Quadro "Filtros de Exibição" retrátil ---------- */
+        .section-collapse-btn {
+            padding: 0 0 10px 0;
+            border-bottom: 2px solid #f39c12;
+            font-size: 1.25rem;
+            color: #2c3e50;
+        }
+        body:not(.light-mode) .section-collapse-btn { color: #f2f4fb; border-bottom-color: #d4a017; }
+        .filters-container .section-collapse-btn[aria-expanded="false"],
+        body:not(.light-mode) .filters-container .section-collapse-btn[aria-expanded="false"] { padding-bottom: 0; border-bottom-color: transparent; }
+
+        /* Botão cinza: o gradiente original (#95a5a6) com texto branco ficava abaixo de 3:1 */
+        .btn-secondary { background: linear-gradient(135deg, #6c7a89, #566573); color: #fff; }
+        .btn-secondary:hover { background: linear-gradient(135deg, #566573, #424f5c); color: #fff; }
+        body:not(.light-mode) .btn-secondary { background: linear-gradient(135deg, #4b5575, #3c4462); border: 1px solid #6b749a; }
+        body:not(.light-mode) .btn-secondary:hover { background: linear-gradient(135deg, #5a6488, #4b5575); }
+        .section-collapse-title { display: inline-flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+        .section-collapse-body { padding-top: 20px; }
+        .filters-active-badge {
+            font-size: .72rem; font-weight: 700; padding: 3px 10px; border-radius: 999px;
+            background: #f39c12; color: #1d1f2b; letter-spacing: .2px;
+        }
+        .filters-container .toggle-icon { font-size: 1.1rem; }
+
+        /* ---------- Modal de cadastro ---------- */
+        #cadastro-modal .modal-header { background: linear-gradient(135deg, #16a085, #11806a); color: #fff; }
+        .cad-tabs { gap: 6px; border-bottom: 2px solid #dee2e6; flex-wrap: wrap; }
+        .cad-tabs .nav-link {
+            border: none; border-radius: 8px 8px 0 0; font-weight: 600; color: #44526a;
+            padding: 8px 14px; background: transparent; margin-bottom: -2px; border-bottom: 3px solid transparent;
+        }
+        .cad-tabs .nav-link.active { color: #11806a; border-bottom-color: #16a085; background: rgba(22,160,133,.08); }
+        .cad-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 16px; }
+        .cad-col-2 { grid-column: 1 / -1; }
+        .cad-subsection { margin-top: 18px; padding: 14px; border-radius: 10px; background: #f6f8fb; border: 1px solid #e3e8f0; }
+        .cad-subtitle { font-weight: 700; color: #2c3e50; margin-bottom: 10px; }
+        .cad-subtitle span { font-weight: 500; color: #5d6d7e; font-size: .85rem; }
+        .cad-help { font-size: .8rem; color: #5d6d7e; margin-top: 5px; min-height: 0; }
+        .cad-help:empty { display: none; }
+        .cad-help--ok { color: #15803d; }
+        .cad-help--info { color: #1f5c99; }
+        .cad-help--warn { color: #92400e; font-weight: 600; }
+        .cad-help--err { color: #b91c1c; font-weight: 600; }
+        .cad-info { margin-top: 8px; font-size: .85rem; color: #2c3e50; }
+        .cad-warn-inline { color: #92400e; font-weight: 600; }
+        .cad-alert { border-radius: 8px; padding: 10px 12px; font-size: .86rem; margin-top: 14px; border: 1px solid; }
+        .cad-alert--info { background: #eaf2fb; border-color: #b9d3f0; color: #1f3a68; }
+        .cad-alert--ok { background: #e8f8ef; border-color: #a7e3c0; color: #14532d; }
+        .cad-alert--warn { background: #fdf3e3; border-color: #f5cba7; color: #7c3a00; }
+        .cad-alert--err { background: #fdecea; border-color: #f1a9a0; color: #8a1c12; }
+        .cad-auth .form-label { margin-bottom: 6px; }
+        @media (max-width: 575.98px) { .cad-grid { grid-template-columns: 1fr; } }
+
+        body:not(.light-mode) #cadastro-modal .modal-header { background: linear-gradient(135deg, #138a72, #0d6b59); }
+        body:not(.light-mode) .cad-tabs { border-bottom-color: #3d4266; }
+        body:not(.light-mode) .cad-tabs .nav-link { color: #c3cbe0; }
+        body:not(.light-mode) .cad-tabs .nav-link.active { color: #6ee7c8; border-bottom-color: #2dd4aa; background: rgba(45,212,170,.1); }
+        body:not(.light-mode) .cad-subsection { background: #2a2f47; border-color: #3d4266; }
+        body:not(.light-mode) .cad-subtitle { color: #f2f4fb; }
+        body:not(.light-mode) .cad-subtitle span,
+        body:not(.light-mode) .cad-help { color: #b6bed4; }
+        body:not(.light-mode) .cad-help--ok { color: #6ee7a0; }
+        body:not(.light-mode) .cad-help--info { color: #a9c6ff; }
+        body:not(.light-mode) .cad-help--warn,
+        body:not(.light-mode) .cad-warn-inline { color: #fcd27b; }
+        body:not(.light-mode) .cad-help--err { color: #ffa3a3; }
+        body:not(.light-mode) .cad-info { color: #e8eaf0; }
+        body:not(.light-mode) .cad-alert--info { background: #1c2b45; border-color: #2f4a78; color: #d6e4ff; }
+        body:not(.light-mode) .cad-alert--ok { background: #163326; border-color: #23664a; color: #c8f5dc; }
+        body:not(.light-mode) .cad-alert--warn { background: #3a2a16; border-color: #6b4a1f; color: #fbe0b5; }
+        body:not(.light-mode) .cad-alert--err { background: #3a1f1d; border-color: #7a2e27; color: #ffd0cb; }
+        body:not(.light-mode) .form-select option { background: #1e2236; color: #e8eaf0; }
+        body:not(.light-mode) .progress { background-color: #1e2236; }
     </style>
 </head>
 <body>
@@ -1257,16 +1410,17 @@
                     <div class="file-upload-label">Planilha "Patrimônio aferido" — Google Sheets</div>
                     <div class="sheets-status">
                         <span id="sheets-badge" class="sheets-badge sheets-badge--loading">Conectando…</span>
-                        <small id="sheets-info" class="text-muted">Lendo os dados da planilha…</small>
+                        <small id="sheets-info" class="sheets-info">Lendo os dados da planilha…</small>
                     </div>
                     <div id="sheets-warning" class="sheets-warning d-none"></div>
                     <div class="sheets-actions">
                         <button type="button" class="btn btn-primary" id="sheets-reload-btn" onclick="loadFromSheets()">↻ Atualizar dados da planilha</button>
+                        <button type="button" class="btn btn-cadastro" id="cadastro-btn" onclick="openCadastroModal()" disabled title="Incluir novas unidades ou editar clientes/unidades existentes na planilha">👥 Clientes e Unidades</button>
                         <a class="btn btn-link-updater" href="https://equipamentosonline.vercel.app/" target="_blank" rel="noopener" title="Incluir, editar ou excluir equipamentos na planilha">✎ Abrir o Atualizador da planilha</a>
                     </div>
                     <!-- Contingência: só aparece se a planilha não puder ser lida -->
                     <div id="local-fallback" class="mt-3 d-none">
-                        <small class="text-muted d-block mb-2">Contingência (sem conexão com a planilha): importe um .xlsx exportado do Google Sheets (Arquivo › Fazer download › .xlsx).</small>
+                        <small class="sheets-info d-block mb-2">Contingência (sem conexão com a planilha): importe um .xlsx exportado do Google Sheets (Arquivo › Fazer download › .xlsx).</small>
                         <input type="file" id="file-upload" class="form-control file-upload-input" accept=".xlsx">
                     </div>
                 </div>
@@ -1330,9 +1484,17 @@
         <div id="column-checkboxes" class="row"></div>
     </div>
 
-    <div class="filters-container">
-        <h5 class="section-title">Filtros de Exibição</h5>
-        
+    <div class="filters-container" id="filtros-exibicao-card">
+        <button class="toggle-section-btn section-collapse-btn collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#filtros-exibicao-collapse" aria-expanded="false" aria-controls="filtros-exibicao-collapse">
+            <span class="section-collapse-title">
+                Filtros de Exibição
+                <span id="filters-active-badge" class="filters-active-badge d-none" title="Filtros de exibição ativos"></span>
+            </span>
+            <span class="toggle-icon">▾</span>
+        </button>
+        <div id="filtros-exibicao-collapse" class="collapse">
+        <div class="section-collapse-body">
+
         <div class="mb-3">
             <button class="btn detailed-summary-btn w-100" onclick="showDetailedSummaryModal()">
                 Clique aqui para Exibir ou Ocultar o Resumo Detalhado por Cliente
@@ -1386,6 +1548,8 @@
         </div>
         <div class="mt-3 text-end">
             <button class="btn btn-secondary" onclick="clearAllFilters()" id="clear-all-filters-btn">Limpar Filtros</button>
+        </div>
+        </div>
         </div>
     </div>
 
@@ -1676,6 +1840,164 @@
     </div>
 </div>
 
+<!-- ============ MODAL: CADASTRO DE CLIENTES E UNIDADES ============ -->
+<div class="modal fade" id="cadastro-modal" tabindex="-1" aria-labelledby="cadastro-modal-title" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="cadastro-modal-title">Clientes e Unidades</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+            <div class="modal-body">
+                <div id="cad-readonly-alert" class="cad-alert cad-alert--warn d-none">
+                    Os dados atuais vieram de um arquivo de contingência — a gravação na planilha só é possível quando o app está conectado ao Google Sheets.
+                </div>
+
+                <ul class="nav cad-tabs mb-3" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#cad-tab-incluir" type="button" role="tab" aria-selected="true" onclick="cadSetMode('incluir')">＋ Incluir unidade</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#cad-tab-cliente" type="button" role="tab" aria-selected="false" onclick="cadSetMode('cliente')">✎ Editar cliente</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#cad-tab-unidade" type="button" role="tab" aria-selected="false" onclick="cadSetMode('unidade')">✎ Editar unidade</button>
+                    </li>
+                </ul>
+
+                <div class="tab-content">
+                    <!-- INCLUIR -->
+                    <div class="tab-pane fade show active" id="cad-tab-incluir" role="tabpanel">
+                        <div class="cad-grid">
+                            <div class="cad-col-2">
+                                <label class="form-label" for="cad-inc-cliente">Cliente *</label>
+                                <input type="text" class="form-control" id="cad-inc-cliente" list="cad-dl-clientes" placeholder="Selecione um cliente existente ou digite um novo" oninput="cadOnIncClienteChange()" autocomplete="off">
+                                <div class="cad-help" id="cad-inc-cliente-help"></div>
+                            </div>
+                            <div>
+                                <label class="form-label" for="cad-inc-cnpj">CNPJ</label>
+                                <input type="text" class="form-control" id="cad-inc-cnpj" placeholder="00.000.000/0000-00" inputmode="numeric" oninput="cadMaskCnpj(this)">
+                            </div>
+                            <div>
+                                <label class="form-label" for="cad-inc-regiao">Região *</label>
+                                <input type="text" class="form-control" id="cad-inc-regiao" list="cad-dl-regioes" autocomplete="off">
+                            </div>
+                            <div class="cad-col-2">
+                                <label class="form-label" for="cad-inc-unidade">Unidade *</label>
+                                <input type="text" class="form-control" id="cad-inc-unidade" placeholder="Nome da nova unidade" oninput="cadValidateInc()" autocomplete="off">
+                                <div class="cad-help" id="cad-inc-unidade-help"></div>
+                            </div>
+                        </div>
+
+                        <div class="cad-subsection">
+                            <div class="cad-subtitle">Primeiro equipamento da unidade <span>(opcional)</span></div>
+                            <div class="cad-grid">
+                                <div>
+                                    <label class="form-label" for="cad-inc-categoria">Categoria</label>
+                                    <input type="text" class="form-control" id="cad-inc-categoria" list="cad-dl-categorias" autocomplete="off">
+                                </div>
+                                <div>
+                                    <label class="form-label" for="cad-inc-equipamento">Equipamento</label>
+                                    <input type="text" class="form-control" id="cad-inc-equipamento" list="cad-dl-equipamentos" autocomplete="off">
+                                </div>
+                                <div>
+                                    <label class="form-label" for="cad-inc-serial">Serial</label>
+                                    <input type="text" class="form-control" id="cad-inc-serial">
+                                </div>
+                                <div>
+                                    <label class="form-label" for="cad-inc-setor">Setor</label>
+                                    <input type="text" class="form-control" id="cad-inc-setor">
+                                </div>
+                                <div>
+                                    <label class="form-label" for="cad-inc-instalacao">Instalação</label>
+                                    <input type="date" class="form-control" id="cad-inc-instalacao">
+                                </div>
+                            </div>
+                            <div class="cad-help">Como a planilha registra um equipamento por linha, uma unidade incluída sem equipamento aparece no Gerenciador como "Sem Equipamento" até que os equipamentos sejam lançados no Atualizador.</div>
+                        </div>
+                    </div>
+
+                    <!-- EDITAR CLIENTE -->
+                    <div class="tab-pane fade" id="cad-tab-cliente" role="tabpanel">
+                        <label class="form-label" for="cad-cli-sel">Cliente a editar *</label>
+                        <select class="form-select" id="cad-cli-sel" onchange="cadOnCliSelect()"></select>
+                        <div class="cad-info" id="cad-cli-info"></div>
+                        <div class="cad-grid mt-2">
+                            <div class="cad-col-2">
+                                <label class="form-label" for="cad-cli-nome">Nome do cliente</label>
+                                <input type="text" class="form-control" id="cad-cli-nome" oninput="cadValidateCli()" autocomplete="off">
+                                <div class="cad-help" id="cad-cli-nome-help"></div>
+                            </div>
+                            <div>
+                                <label class="form-label" for="cad-cli-cnpj">CNPJ</label>
+                                <input type="text" class="form-control" id="cad-cli-cnpj" placeholder="00.000.000/0000-00" inputmode="numeric" oninput="cadMaskCnpj(this); cadValidateCli()">
+                            </div>
+                        </div>
+                        <div class="cad-help">A alteração é aplicada a todas as linhas (equipamentos) deste cliente na planilha.</div>
+                    </div>
+
+                    <!-- EDITAR UNIDADE -->
+                    <div class="tab-pane fade" id="cad-tab-unidade" role="tabpanel">
+                        <div class="cad-grid">
+                            <div>
+                                <label class="form-label" for="cad-uni-cli-sel">Cliente *</label>
+                                <select class="form-select" id="cad-uni-cli-sel" onchange="cadOnUniCliSelect()"></select>
+                            </div>
+                            <div>
+                                <label class="form-label" for="cad-uni-sel">Unidade a editar *</label>
+                                <select class="form-select" id="cad-uni-sel" onchange="cadOnUniSelect()"></select>
+                            </div>
+                        </div>
+                        <div class="cad-info" id="cad-uni-info"></div>
+                        <div class="cad-grid mt-2">
+                            <div class="cad-col-2">
+                                <label class="form-label" for="cad-uni-nome">Nome da unidade</label>
+                                <input type="text" class="form-control" id="cad-uni-nome" oninput="cadValidateUni()" autocomplete="off">
+                                <div class="cad-help" id="cad-uni-nome-help"></div>
+                            </div>
+                            <div>
+                                <label class="form-label" for="cad-uni-regiao">Região</label>
+                                <input type="text" class="form-control" id="cad-uni-regiao" list="cad-dl-regioes" oninput="cadValidateUni()" autocomplete="off">
+                            </div>
+                            <div>
+                                <label class="form-label" for="cad-uni-novo-cli">Transferir para o cliente</label>
+                                <select class="form-select" id="cad-uni-novo-cli" onchange="cadValidateUni()"></select>
+                            </div>
+                        </div>
+                        <div class="cad-help">A alteração é aplicada a todas as linhas (equipamentos) desta unidade do cliente selecionado.</div>
+                    </div>
+                </div>
+
+                <div class="cad-subsection cad-auth">
+                    <label class="form-label" for="cad-key">Chave do operador *</label>
+                    <input type="password" class="form-control" id="cad-key" autocomplete="current-password" placeholder="Chave de gravação definida na Vercel (CADASTRO_KEY)">
+                    <div class="form-check mt-2">
+                        <input class="form-check-input" type="checkbox" id="cad-key-remember">
+                        <label class="form-check-label" for="cad-key-remember">Lembrar a chave até fechar o navegador</label>
+                    </div>
+                </div>
+
+                <div id="cad-summary" class="cad-alert cad-alert--info d-none"></div>
+                <div id="cad-progress-wrap" class="d-none mt-3">
+                    <div class="progress" role="progressbar" aria-label="Gravação na planilha">
+                        <div class="progress-bar progress-bar-striped progress-bar-animated" id="cad-progress" style="width:0%">0%</div>
+                    </div>
+                </div>
+                <div id="cad-result" class="cad-alert d-none mt-3"></div>
+
+                <datalist id="cad-dl-clientes"></datalist>
+                <datalist id="cad-dl-regioes"></datalist>
+                <datalist id="cad-dl-categorias"></datalist>
+                <datalist id="cad-dl-equipamentos"></datalist>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                <button type="button" class="btn btn-success" id="cad-save-btn" onclick="cadSave()">Gravar na planilha</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
     const { jsPDF } = window.jspdf;
@@ -1938,8 +2260,16 @@
      * Converte linhas (arrays) em registros do app e (re)desenha toda a tela.
      * headers: linha de cabeçalho; rows: linhas de dados (arrays alinhados ao cabeçalho).
      */
+    // Nome real de cada coluna na planilha (campo interno → cabeçalho), usado nas gravações
+    let sheetHeaderByField = {};
+    // Origem dos dados carregados: 'sheets' (planilha online) | 'file' (contingência) | 'none'
+    let dataSource = 'none';
+
     function processRecords(headers, rows, options = {}) {
         const { idx, legacy, missing } = buildColumnIndex(headers);
+        sheetHeaderByField = {};
+        if (!legacy) Object.keys(idx).forEach(f => { sheetHeaderByField[f] = String(headers[idx[f]]); });
+        dataSource = options.source || 'sheets';
         const get = (r, f) => idx[f] === undefined ? '' : cleanCell(r[idx[f]]);
         const isReload = data.length > 0;
         const prevPeriod = getInstallationPeriodFilters();
@@ -1964,6 +2294,8 @@
         document.getElementById('pdf-btn').disabled = false;
         const preventiveBtn = document.getElementById('preventive-btn');
         if (preventiveBtn) preventiveBtn.disabled = false;
+        const cadastroBtn = document.getElementById('cadastro-btn');
+        if (cadastroBtn) cadastroBtn.disabled = false;
 
         const warn = document.getElementById('sheets-warning');
         const msgs = [];
@@ -2046,7 +2378,7 @@
             let sheetName = workbook.SheetNames.find(n => n.includes('Patrimônio aferido'));
             if (!sheetName) sheetName = workbook.SheetNames[0]; // Fallback para a primeira aba
             const json = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName], { header: 1, defval: '' });
-            const n = processRecords(json[0] || [], json.slice(1), { announce: true, collapse: true });
+            const n = processRecords(json[0] || [], json.slice(1), { announce: true, collapse: true, source: 'file' });
             setSheetsStatus('offline', `${n} registro(s) carregados do arquivo "${file.name}" (contingência — não reflete a planilha online).`);
         };
         reader.readAsArrayBuffer(file);
@@ -2267,6 +2599,19 @@
         renderResults(currentFilteredData);
         updateFilterSummary(currentFilteredData);
         updatePeriodFilterStatus();
+        updateFiltersActiveBadge();
+    }
+
+    /* Indica, no cabeçalho do quadro "Filtros de Exibição" (que inicia contraído),
+       quantos filtros estão ativos — assim o operador sabe que há filtro aplicado
+       mesmo com o quadro fechado. */
+    function updateFiltersActiveBadge() {
+        const badge = document.getElementById('filters-active-badge');
+        if (!badge) return;
+        const { start, end } = getInstallationPeriodFilters();
+        const n = selectedRegioes.size + selectedCategorias.size + selectedEquipamentos.size + ((start || end) ? 1 : 0);
+        badge.textContent = n === 1 ? '1 filtro ativo' : `${n} filtros ativos`;
+        badge.classList.toggle('d-none', n === 0);
     }
 
     function renderResults(dataset = filteredData){
@@ -4338,6 +4683,403 @@
             console.error('Erro ao gerar o PDF de manutenção preventiva:', error);
             alert('Ocorreu um erro ao gerar o PDF de manutenção preventiva. Verifique o console para mais detalhes.');
         }
+    }
+
+
+    /* =======================================================================
+       CADASTRO DE CLIENTES E UNIDADES (modal do Dashboard Inicial)
+       Grava na planilha "Patrimônio aferido" pela função /api/cadastro deste
+       projeto, que exige a chave do operador (CADASTRO_KEY) e usa o token de
+       ESCRITA do Apps Script, guardado só na Vercel. Como a planilha tem uma
+       linha por equipamento:
+       - incluir unidade  → cria uma linha (opcionalmente já com o 1º equipamento);
+       - editar cliente   → atualiza Cliente/CNPJ em todas as linhas do cliente;
+       - editar unidade   → atualiza Unidade/Região/Cliente nas linhas da unidade.
+       Só as colunas alteradas são enviadas (atualização parcial por ID).
+    ======================================================================= */
+    const CADASTRO_API = '/api/cadastro';
+    const CAD_BATCH = 8;           // operações por requisição (limite de tempo da função na Vercel)
+    const CAD_KEY_STORAGE = 'cadKey';
+    let cadMode = 'incluir';
+    let cadBusy = false;
+
+    const cadNorm = v => String(v ?? '').replace(/\s+/g, ' ').trim();
+    const cadCmp = v => cadNorm(v).normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+    const cadDigits = v => String(v ?? '').replace(/\D/g, '');
+    const cadCollator = new Intl.Collator('pt-BR', { numeric: true, sensitivity: 'base' });
+
+    function cadUnique(field, rows = data) {
+        return Array.from(new Set(rows.map(i => cadNorm(i[field])).filter(Boolean))).sort(cadCollator.compare);
+    }
+    function cadRowsOfClient(cliente) {
+        const k = cadCmp(cliente);
+        return data.filter(i => cadCmp(i.cliente) === k);
+    }
+    function cadMostCommon(rows, field) {
+        const c = new Map();
+        rows.forEach(r => { const v = cadNorm(r[field]); if (v) c.set(v, (c.get(v) || 0) + 1); });
+        let best = '', n = 0;
+        c.forEach((q, v) => { if (q > n) { best = v; n = q; } });
+        return best;
+    }
+
+    /* ---------- CNPJ ---------- */
+    function cadFormatCnpj(v) {
+        const d = cadDigits(v).slice(0, 14);
+        return d.replace(/^(\d{2})(\d)/, '$1.$2').replace(/^(\d{2})\.(\d{3})(\d)/, '$1.$2.$3')
+                .replace(/\.(\d{3})(\d)/, '.$1/$2').replace(/(\d{4})(\d)/, '$1-$2');
+    }
+    function cadMaskCnpj(input) { input.value = cadFormatCnpj(input.value); }
+    function cadCnpjValido(v) {
+        const d = cadDigits(v);
+        if (d.length !== 14 || /^(\d)\1{13}$/.test(d)) return false;
+        const dv = len => {
+            let soma = 0, peso = len - 7;
+            for (let i = 0; i < len; i++) { soma += Number(d[i]) * peso--; if (peso < 2) peso = 9; }
+            const r = soma % 11;
+            return r < 2 ? 0 : 11 - r;
+        };
+        return dv(12) === Number(d[12]) && dv(13) === Number(d[13]);
+    }
+
+    /* ---------- UI helpers ---------- */
+    const $c = id => document.getElementById(id);
+    function cadSetHelp(id, text, kind) {
+        const el = $c(id);
+        if (!el) return;
+        el.textContent = text || '';
+        el.className = 'cad-help' + (kind ? ` cad-help--${kind}` : '');
+    }
+    function cadShowBox(id, html, kind) {
+        const el = $c(id);
+        if (!el) return;
+        if (!html) { el.classList.add('d-none'); el.innerHTML = ''; return; }
+        el.innerHTML = html;
+        el.className = `cad-alert cad-alert--${kind || 'info'}` + (id === 'cad-result' ? ' mt-3' : '');
+    }
+    function cadFillSelect(id, values, placeholder, selected) {
+        const sel = $c(id);
+        if (!sel) return;
+        sel.innerHTML = (placeholder ? `<option value="">${pmEscapeHtml(placeholder)}</option>` : '') +
+            values.map(v => `<option value="${pmEscapeAttr(v)}"${v === selected ? ' selected' : ''}>${pmEscapeHtml(v)}</option>`).join('');
+    }
+    function cadFillDatalist(id, values) {
+        const dl = $c(id);
+        if (dl) dl.innerHTML = values.map(v => `<option value="${pmEscapeAttr(v)}"></option>`).join('');
+    }
+
+    function openCadastroModal() {
+        if (!data.length) { alert('Carregue a planilha antes de cadastrar clientes ou unidades.'); return; }
+        const clientes = cadUnique('cliente');
+        cadFillDatalist('cad-dl-clientes', clientes);
+        cadFillDatalist('cad-dl-regioes', cadUnique('regiao'));
+        cadFillDatalist('cad-dl-categorias', cadUnique('categoria'));
+        cadFillDatalist('cad-dl-equipamentos', cadUnique('equipamento'));
+        cadFillSelect('cad-cli-sel', clientes, 'Selecione…');
+        cadFillSelect('cad-uni-cli-sel', clientes, 'Selecione…');
+        cadFillSelect('cad-uni-sel', [], 'Selecione o cliente primeiro');
+        cadFillSelect('cad-uni-novo-cli', clientes, '(manter o cliente atual)');
+        ['cad-inc-cliente','cad-inc-cnpj','cad-inc-regiao','cad-inc-unidade','cad-inc-categoria','cad-inc-equipamento',
+         'cad-inc-serial','cad-inc-setor','cad-inc-instalacao','cad-cli-nome','cad-cli-cnpj','cad-uni-nome','cad-uni-regiao']
+            .forEach(id => { if ($c(id)) $c(id).value = ''; });
+        ['cad-inc-cliente-help','cad-inc-unidade-help','cad-cli-nome-help','cad-uni-nome-help'].forEach(id => cadSetHelp(id, ''));
+        $c('cad-cli-info').innerHTML = '';
+        $c('cad-uni-info').innerHTML = '';
+        cadShowBox('cad-summary', '');
+        cadShowBox('cad-result', '');
+        $c('cad-progress-wrap').classList.add('d-none');
+
+        let saved = '';
+        try { saved = sessionStorage.getItem(CAD_KEY_STORAGE) || ''; } catch (e) { /* storage indisponível */ }
+        $c('cad-key').value = saved;
+        $c('cad-key-remember').checked = !!saved;
+
+        const readOnly = dataSource !== 'sheets';
+        $c('cad-readonly-alert').classList.toggle('d-none', !readOnly);
+        $c('cad-save-btn').disabled = readOnly;
+
+        const firstTab = document.querySelector('#cadastro-modal .cad-tabs .nav-link');
+        if (firstTab) bootstrap.Tab.getOrCreateInstance(firstTab).show();
+        cadMode = 'incluir';
+        bootstrap.Modal.getOrCreateInstance($c('cadastro-modal')).show();
+    }
+
+    function cadSetMode(mode) {
+        cadMode = mode;
+        cadShowBox('cad-summary', '');
+        cadShowBox('cad-result', '');
+        if (mode === 'incluir') cadValidateInc();
+        if (mode === 'cliente') cadValidateCli();
+        if (mode === 'unidade') cadValidateUni();
+    }
+
+    /* ---------- Incluir unidade ---------- */
+    function cadOnIncClienteChange() {
+        const nome = cadNorm($c('cad-inc-cliente').value);
+        const rows = nome ? cadRowsOfClient(nome) : [];
+        if (rows.length) {
+            const unidades = new Set(rows.map(r => cadNorm(r.unidade))).size;
+            cadSetHelp('cad-inc-cliente-help', `Cliente existente · ${unidades} unidade(s), ${rows.length} equipamento(s). CNPJ e região sugeridos a partir da planilha.`, 'ok');
+            const cnpj = cadMostCommon(rows, 'cnpj');
+            if (cnpj && !$c('cad-inc-cnpj').value) $c('cad-inc-cnpj').value = cadFormatCnpj(cnpj);
+            const regiao = cadMostCommon(rows, 'regiao');
+            if (regiao && !$c('cad-inc-regiao').value) $c('cad-inc-regiao').value = regiao;
+        } else {
+            cadSetHelp('cad-inc-cliente-help', nome ? 'Novo cliente — será criado junto com a unidade.' : '', nome ? 'info' : '');
+        }
+        cadValidateInc();
+    }
+
+    function cadValidateInc() {
+        const cliente = cadNorm($c('cad-inc-cliente').value);
+        const unidade = cadNorm($c('cad-inc-unidade').value);
+        if (cliente && unidade) {
+            const existe = cadRowsOfClient(cliente).some(r => cadCmp(r.unidade) === cadCmp(unidade));
+            cadSetHelp('cad-inc-unidade-help', existe ? 'Esta unidade já existe para este cliente — use a aba "Editar unidade" ou lance o equipamento no Atualizador.' : '', existe ? 'err' : '');
+            return !existe;
+        }
+        cadSetHelp('cad-inc-unidade-help', '');
+        return true;
+    }
+
+    /* ---------- Editar cliente ---------- */
+    function cadOnCliSelect() {
+        const sel = $c('cad-cli-sel').value;
+        const rows = sel ? cadRowsOfClient(sel) : [];
+        $c('cad-cli-nome').value = sel;
+        $c('cad-cli-cnpj').value = cadFormatCnpj(cadMostCommon(rows, 'cnpj'));
+        $c('cad-cli-info').innerHTML = sel
+            ? `<strong>${new Set(rows.map(r => cadNorm(r.unidade))).size}</strong> unidade(s) · <strong>${rows.length}</strong> linha(s)/equipamento(s) serão afetados.`
+            : '';
+        cadValidateCli();
+    }
+    function cadValidateCli() {
+        const sel = $c('cad-cli-sel').value;
+        const nome = cadNorm($c('cad-cli-nome').value);
+        if (sel && nome && cadCmp(nome) !== cadCmp(sel) && cadUnique('cliente').some(c => cadCmp(c) === cadCmp(nome))) {
+            cadSetHelp('cad-cli-nome-help', 'Já existe um cliente com esse nome: ao gravar, os dois cadastros serão unificados.', 'warn');
+        } else {
+            cadSetHelp('cad-cli-nome-help', '');
+        }
+        return true;
+    }
+
+    /* ---------- Editar unidade ---------- */
+    function cadOnUniCliSelect() {
+        const cli = $c('cad-uni-cli-sel').value;
+        const unidades = cli ? cadUnique('unidade', cadRowsOfClient(cli)) : [];
+        cadFillSelect('cad-uni-sel', unidades, cli ? 'Selecione…' : 'Selecione o cliente primeiro');
+        $c('cad-uni-nome').value = '';
+        $c('cad-uni-regiao').value = '';
+        $c('cad-uni-novo-cli').value = '';
+        $c('cad-uni-info').innerHTML = '';
+        cadValidateUni();
+    }
+    function cadUniRows() {
+        const cli = $c('cad-uni-cli-sel').value, uni = $c('cad-uni-sel').value;
+        if (!cli || !uni) return [];
+        return cadRowsOfClient(cli).filter(r => cadCmp(r.unidade) === cadCmp(uni));
+    }
+    function cadOnUniSelect() {
+        const rows = cadUniRows();
+        $c('cad-uni-nome').value = $c('cad-uni-sel').value;
+        $c('cad-uni-regiao').value = cadMostCommon(rows, 'regiao');
+        $c('cad-uni-novo-cli').value = '';
+        const regioes = new Set(rows.map(r => cadNorm(r.regiao)).filter(Boolean));
+        $c('cad-uni-info').innerHTML = rows.length
+            ? `<strong>${rows.length}</strong> linha(s)/equipamento(s) serão afetados.` +
+              (regioes.size > 1 ? ` <span class="cad-warn-inline">Atenção: a unidade está hoje em ${regioes.size} regiões diferentes; ao gravar, todas passam para a região informada.</span>` : '')
+            : '';
+        cadValidateUni();
+    }
+    function cadValidateUni() {
+        const cli = $c('cad-uni-cli-sel').value, uni = $c('cad-uni-sel').value;
+        const nome = cadNorm($c('cad-uni-nome').value);
+        const destino = $c('cad-uni-novo-cli').value || cli;
+        if (cli && uni && nome) {
+            const mesmo = cadCmp(destino) === cadCmp(cli) && cadCmp(nome) === cadCmp(uni);
+            const conflito = !mesmo && cadRowsOfClient(destino).some(r => cadCmp(r.unidade) === cadCmp(nome));
+            cadSetHelp('cad-uni-nome-help', conflito ? `O cliente "${destino}" já possui a unidade "${nome}": ao gravar, as duas serão unificadas.` : '', conflito ? 'warn' : '');
+        } else {
+            cadSetHelp('cad-uni-nome-help', '');
+        }
+        return true;
+    }
+
+    /* ---------- Montagem das operações ---------- */
+    function cadHeader(field) { return sheetHeaderByField[field]; }
+
+    /* Monta o objeto {cabeçalho da planilha: valor} só com as colunas existentes.
+       Campos cuja coluna não existe na planilha são listados em `skipped`. */
+    function cadRow(fields, skipped) {
+        const row = {};
+        Object.entries(fields).forEach(([field, value]) => {
+            const h = cadHeader(field);
+            if (!h) { skipped.add(fieldLabels[field] || field); return; }
+            row[h] = value;
+        });
+        return row;
+    }
+
+    function cadBuildOps() {
+        const skipped = new Set();
+        if (!Object.keys(sheetHeaderByField).length) throw new Error('O cabeçalho da planilha não foi reconhecido; não é seguro gravar.');
+
+        if (cadMode === 'incluir') {
+            const cliente = cadNorm($c('cad-inc-cliente').value);
+            const unidade = cadNorm($c('cad-inc-unidade').value);
+            const regiao = cadNorm($c('cad-inc-regiao').value);
+            const cnpj = cadNorm($c('cad-inc-cnpj').value);
+            if (!cliente || !unidade || !regiao) throw new Error('Preencha Cliente, Unidade e Região.');
+            if (cnpj && !cadCnpjValido(cnpj)) throw new Error('CNPJ inválido.');
+            if (!cadValidateInc()) throw new Error('Esta unidade já existe para o cliente informado.');
+            const fields = { cliente, unidade, regiao };
+            if (cnpj) fields.cnpj = cadFormatCnpj(cnpj);
+            const extra = {
+                categoria: cadNorm($c('cad-inc-categoria').value), equipamento: cadNorm($c('cad-inc-equipamento').value),
+                serial: cadNorm($c('cad-inc-serial').value), setor: cadNorm($c('cad-inc-setor').value)
+            };
+            Object.entries(extra).forEach(([k, v]) => { if (v) fields[k] = v; });
+            const inst = $c('cad-inc-instalacao').value;
+            if (inst) fields.instalacao = inst; // 'aaaa-mm-dd': o Apps Script converte em data no fuso da planilha
+            const descr = `Incluir a unidade <strong>${pmEscapeHtml(unidade)}</strong> no cliente <strong>${pmEscapeHtml(cliente)}</strong> (região ${pmEscapeHtml(regiao)})` +
+                (extra.equipamento ? `, com o equipamento <strong>${pmEscapeHtml(extra.equipamento)}</strong>` : ', sem equipamento') + '.';
+            return { ops: [{ action: 'create', row: cadRow(fields, skipped) }], descr, skipped };
+        }
+
+        // Edições: exigem a coluna ID para atualizar a linha certa
+        if (!cadHeader('id')) throw new Error('A planilha não tem a coluna "ID"; não é possível editar linhas com segurança.');
+        let rows = [], changes = {}, descr = '';
+
+        if (cadMode === 'cliente') {
+            const sel = $c('cad-cli-sel').value;
+            if (!sel) throw new Error('Selecione o cliente a editar.');
+            const nome = cadNorm($c('cad-cli-nome').value);
+            const cnpj = cadNorm($c('cad-cli-cnpj').value);
+            if (!nome) throw new Error('O nome do cliente não pode ficar em branco.');
+            if (cnpj && !cadCnpjValido(cnpj)) throw new Error('CNPJ inválido.');
+            rows = cadRowsOfClient(sel);
+            changes = { cliente: nome, cnpj: cnpj ? cadFormatCnpj(cnpj) : '' };
+            descr = `Atualizar o cliente <strong>${pmEscapeHtml(sel)}</strong>` +
+                (nome !== sel ? ` → <strong>${pmEscapeHtml(nome)}</strong>` : '') + (cnpj ? ` (CNPJ ${pmEscapeHtml(cadFormatCnpj(cnpj))})` : '');
+        } else {
+            const cli = $c('cad-uni-cli-sel').value, uni = $c('cad-uni-sel').value;
+            if (!cli || !uni) throw new Error('Selecione o cliente e a unidade a editar.');
+            const nome = cadNorm($c('cad-uni-nome').value);
+            const regiao = cadNorm($c('cad-uni-regiao').value);
+            const destino = $c('cad-uni-novo-cli').value;
+            if (!nome) throw new Error('O nome da unidade não pode ficar em branco.');
+            if (!regiao) throw new Error('Informe a região.');
+            rows = cadUniRows();
+            changes = { unidade: nome, regiao };
+            if (destino && cadCmp(destino) !== cadCmp(cli)) {
+                changes.cliente = destino;
+                // As linhas passam a ter o CNPJ do cliente de destino (ou nenhum, se ele não tiver)
+                changes.cnpj = cadMostCommon(cadRowsOfClient(destino), 'cnpj');
+            }
+            descr = `Atualizar a unidade <strong>${pmEscapeHtml(uni)}</strong> do cliente <strong>${pmEscapeHtml(cli)}</strong>` +
+                (nome !== uni ? ` → <strong>${pmEscapeHtml(nome)}</strong>` : '') + ` · região ${pmEscapeHtml(regiao)}` +
+                (changes.cliente ? ` · transferida para <strong>${pmEscapeHtml(changes.cliente)}</strong>` : '');
+        }
+
+        const semId = rows.filter(r => !cadNorm(r.id)).length;
+        if (semId) throw new Error(`${semId} linha(s) sem ID na planilha. Abra o Atualizador para gerar os IDs antes de editar.`);
+
+        // Envia, para cada linha, só as colunas que realmente mudam
+        const ops = [];
+        rows.forEach(r => {
+            const diff = {};
+            Object.entries(changes).forEach(([f, v]) => { if (cadNorm(r[f]) !== cadNorm(v)) diff[f] = v; });
+            if (Object.keys(diff).length) ops.push({ action: 'update', id: cadNorm(r.id), row: cadRow(diff, skipped) });
+        });
+        return { ops: ops.filter(o => Object.keys(o.row).length), descr: descr + '.', skipped };
+    }
+
+    /* ---------- Gravação ---------- */
+    async function cadPost(key, ops) {
+        const r = await fetch(CADASTRO_API, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-Cadastro-Key': key },
+            body: JSON.stringify({ ops }),
+            cache: 'no-store'
+        });
+        const j = await r.json().catch(() => ({ ok: false, error: `Resposta inválida (HTTP ${r.status})` }));
+        if (!r.ok || !j.ok) throw new Error(j.error || `HTTP ${r.status}`);
+        return j;
+    }
+
+    async function cadSave() {
+        if (cadBusy) return;
+        cadShowBox('cad-result', '');
+        if (dataSource !== 'sheets') { cadShowBox('cad-result', 'Sem conexão com a planilha — gravação indisponível.', 'err'); return; }
+        const key = $c('cad-key').value.trim();
+        if (!key) { cadShowBox('cad-result', 'Informe a chave do operador.', 'err'); $c('cad-key').focus(); return; }
+
+        let plan;
+        try { plan = cadBuildOps(); }
+        catch (e) { cadShowBox('cad-result', pmEscapeHtml(e.message), 'err'); return; }
+
+        if (!plan.ops.length) { cadShowBox('cad-result', 'Nada a gravar: os valores informados já são os da planilha.', 'warn'); return; }
+        const skippedTxt = plan.skipped.size ? `<br><span class="cad-warn-inline">Colunas inexistentes na planilha, ignoradas: ${pmEscapeHtml(Array.from(plan.skipped).join(', '))}.</span>` : '';
+        cadShowBox('cad-summary', `${plan.descr}<br><strong>${plan.ops.length}</strong> linha(s) da planilha serão ${plan.ops[0].action === 'create' ? 'incluídas' : 'alteradas'}.${skippedTxt}`, 'info');
+        if (!confirm(`Confirma a gravação na planilha?\n\n${plan.ops.length} linha(s) serão ${plan.ops[0].action === 'create' ? 'incluídas' : 'alteradas'}.`)) return;
+
+        try {
+            if ($c('cad-key-remember').checked) sessionStorage.setItem(CAD_KEY_STORAGE, key);
+            else sessionStorage.removeItem(CAD_KEY_STORAGE);
+        } catch (e) { /* storage indisponível */ }
+
+        cadBusy = true;
+        const btn = $c('cad-save-btn');
+        btn.disabled = true;
+        const bar = $c('cad-progress');
+        $c('cad-progress-wrap').classList.remove('d-none');
+        let done = 0;
+        const setBar = () => { const pct = Math.round((done / plan.ops.length) * 100); bar.style.width = pct + '%'; bar.textContent = pct + '%'; };
+        setBar();
+
+        try {
+            for (let i = 0; i < plan.ops.length; i += CAD_BATCH) {
+                const batch = plan.ops.slice(i, i + CAD_BATCH);
+                const res = await cadPost(key, batch);
+                const results = res.results || [];
+                const okCount = results.filter(x => x.ok).length;
+                done += okCount;
+                setBar();
+                if (okCount < batch.length) {
+                    const fail = results.find(x => !x.ok);
+                    throw new Error(`a planilha recusou a gravação: ${(fail && fail.error) || 'erro não informado'}`);
+                }
+            }
+            const okMsg = `✔ Gravação concluída: ${done} linha(s) ${plan.ops[0].action === 'create' ? 'incluída(s)' : 'atualizada(s)'}.`;
+            cadShowBox('cad-result', `${okMsg} Recarregando os dados…`, 'ok');
+            await loadFromSheets();
+            openCadastroModalRefreshLists();
+            cadShowBox('cad-result', `${okMsg} Dados da planilha recarregados.`, 'ok');
+        } catch (e) {
+            const parcial = done ? ` ${done} de ${plan.ops.length} linha(s) já foram gravadas; recarregue os dados e repita para concluir.` : '';
+            cadShowBox('cad-result', `✖ Não foi possível concluir: ${pmEscapeHtml(e.message)}.${parcial}`, 'err');
+            if (done) loadFromSheets();
+        } finally {
+            cadBusy = false;
+            btn.disabled = dataSource !== 'sheets';
+            bar.classList.remove('progress-bar-animated');
+            setTimeout(() => bar.classList.add('progress-bar-animated'), 0);
+        }
+    }
+
+    /* Após gravar, atualiza as listas do modal com os dados recarregados sem fechá-lo */
+    function openCadastroModalRefreshLists() {
+        const clientes = cadUnique('cliente');
+        cadFillDatalist('cad-dl-clientes', clientes);
+        cadFillDatalist('cad-dl-regioes', cadUnique('regiao'));
+        const keep = (id, placeholder) => { const v = $c(id).value; cadFillSelect(id, clientes, placeholder, clientes.includes(v) ? v : ''); };
+        keep('cad-cli-sel', 'Selecione…');
+        keep('cad-uni-cli-sel', 'Selecione…');
+        keep('cad-uni-novo-cli', '(manter o cliente atual)');
+        if (cadMode === 'cliente') cadOnCliSelect();
+        if (cadMode === 'unidade') cadOnUniCliSelect();
+        if (cadMode === 'incluir') { $c('cad-inc-unidade').value = ''; cadValidateInc(); }
     }
 
     function toggleDarkMode() {
