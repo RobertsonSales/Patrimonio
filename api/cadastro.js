@@ -11,7 +11,10 @@
  *
  * Corpo esperado: { "ops": [ { "action": "create", "row": {"Cliente": "...", ...} },
  *                            { "action": "update", "id": "...", "row": {"Unidade": "..."} } ] }
- * Resposta:       { "ok": true, "results": [ { "ok": true } | { "ok": false, "error": "..." } ] }
+ * Resposta:       { "ok": true, "results": [ { "ok": true, "meta": {planilha, aba, linha} } | { "ok": false, "error": "..." } ] }
+ *
+ * v2 — Unidade deixou de ser obrigatória na inclusão (aba "Incluir cliente"); o "meta" devolvido pelo
+ *      Apps Script v3.2 é repassado ao navegador, que mostra em qual planilha/linha gravou.
  *
  * O formato enviado ao Apps Script ({ action, record, token }) é montado em
  * toScriptPayload(), conforme o doPost da "API de Patrimônio" v3.0.
@@ -88,7 +91,8 @@ function validateOp(op) {
   }
   if (op.action === 'create') {
     const present = new Set(keys.map(norm));
-    const need = ['cliente', 'unidade', 'regiao'].filter((f) => !present.has(f) || !String(op.row[keys.find((k) => norm(k) === f)]).trim());
+    // Unidade é opcional: a aba "Incluir cliente" pode gravar um cliente ainda sem unidades
+    const need = ['cliente', 'regiao'].filter((f) => !present.has(f) || !String(op.row[keys.find((k) => norm(k) === f)]).trim());
     if (need.length) return `Campos obrigatórios ausentes: ${need.join(', ')}`;
   }
   return null;
@@ -128,7 +132,8 @@ module.exports = async (req, res) => {
   const results = [];
   for (const op of ops) {
     const r = await callScript(url, toScriptPayload(op, token));
-    results.push(r && r.ok ? { ok: true } : { ok: false, error: (r && r.error) || 'Erro não informado pelo Apps Script' });
+    // meta (Apps Script v3.2+): { planilha, planilhaId, aba, linha } — onde a linha foi gravada
+    results.push(r && r.ok ? { ok: true, meta: r.meta || null } : { ok: false, error: (r && r.error) || 'Erro não informado pelo Apps Script' });
     if (!r || !r.ok) break; // interrompe no primeiro erro para não deixar lacunas silenciosas
   }
 
