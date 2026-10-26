@@ -2397,9 +2397,11 @@
             const n = processRecords(headers, rows);
             setSheetsStatus('live', `${n} registro(s) · atualizado às ${new Date().toLocaleTimeString('pt-BR')}`);
             showLocalFallback(false);
+            return true;
         } catch (e) {
             setSheetsStatus('error', `Não foi possível ler a planilha: ${e.message}`);
             showLocalFallback(true);
+            return false;
         } finally {
             if (btn) btn.disabled = false;
         }
@@ -5201,6 +5203,8 @@
         const bar = $c('cad-progress');
         $c('cad-progress-wrap').classList.remove('d-none');
         let done = 0;
+        const metas = [];                                  // onde cada linha foi gravada (Apps Script v3.2+)
+        const esperado = cadEsperadoAposGravar();          // o que deve aparecer nos dados recarregados
         const setBar = () => { const pct = Math.round((done / plan.ops.length) * 100); bar.style.width = pct + '%'; bar.textContent = pct + '%'; };
         setBar();
 
@@ -5209,6 +5213,7 @@
                 const batch = plan.ops.slice(i, i + CAD_BATCH);
                 const res = await cadPost(key, batch);
                 const results = res.results || [];
+                results.forEach(x => { if (x.ok) metas.push(x.meta || null); });
                 const okCount = results.filter(x => x.ok).length;
                 done += okCount;
                 setBar();
@@ -5218,10 +5223,22 @@
                 }
             }
             const okMsg = `✔ Gravação concluída: ${done} linha(s) ${plan.ops[0].action === 'create' ? 'incluída(s)' : 'atualizada(s)'}.`;
-            cadShowBox('cad-result', `${okMsg} Recarregando os dados…`, 'ok');
-            await loadFromSheets();
+            const onde = cadDescreverOnde(metas);
+            cadShowBox('cad-result', `${okMsg}${onde} Recarregando os dados…`, 'ok');
+            const recarregou = await loadFromSheets();
+            /* Conferência: o que foi gravado precisa aparecer na leitura da planilha */
+            const faltando = recarregou && esperado ? esperado() : [];
             openCadastroModalRefreshLists();
-            cadShowBox('cad-result', `${okMsg} Dados da planilha recarregados.`, 'ok');
+            if (!recarregou) {
+                cadShowBox('cad-result', `${okMsg}${onde}<br><span class="cad-warn-inline">Não foi possível recarregar a planilha para conferir — use "Atualizar dados".</span>`, 'ok');
+            } else if (faltando.length) {
+                cadShowBox('cad-result', `⚠ O Apps Script confirmou a gravação, mas a leitura da planilha não mostra: ${faltando.map(pmEscapeHtml).join(', ')}.${onde}<br>` +
+                    'Provável causa: a gravação (variável <code>APPS_SCRIPT_URL</code> do <code>/api/cadastro</code>) e a leitura (<code>/api/patrimonio</code>) estão apontando para implantações ou planilhas diferentes. Confira as variáveis na Vercel.', 'warn');
+            } else if (metas.length && !metas.some(Boolean)) {
+                cadShowBox('cad-result', `${okMsg} Dados da planilha recarregados.<br><span class="cad-warn-inline">O Apps Script não informou a planilha/linha gravada — a URL configurada na Vercel não aponta para a versão 3.2 do script.</span>`, 'ok');
+            } else {
+                cadShowBox('cad-result', `${okMsg}${onde} Dados da planilha recarregados e conferidos.`, 'ok');
+            }
         } catch (e) {
             const parcial = done ? ` ${done} de ${plan.ops.length} linha(s) já foram gravadas; recarregue os dados e repita para concluir.` : '';
             cadShowBox('cad-result', `✖ Não foi possível concluir: ${pmEscapeHtml(e.message)}.${parcial}`, 'err');
@@ -5232,6 +5249,33 @@
             bar.classList.remove('progress-bar-animated');
             setTimeout(() => bar.classList.add('progress-bar-animated'), 0);
         }
+    }
+
+    /* "Gravado na planilha X · aba Y · linha(s) N" a partir do meta devolvido pelo Apps Script */
+    function cadDescreverOnde(metas) {
+        const ok = metas.filter(Boolean);
+        if (!ok.length) return '';
+        const planilhas = Array.from(new Set(ok.map(m => `${m.planilha} › ${m.aba}`)));
+        const linhas = ok.map(m => m.linha).filter(Boolean);
+        const faixa = linhas.length > 1 ? `linhas ${Math.min(...linhas)} a ${Math.max(...linhas)}` : `linha ${linhas[0]}`;
+        return ` <br>Gravado em <strong>${pmEscapeHtml(planilhas.join(' · '))}</strong>, ${faixa}.`;
+    }
+
+    /* Captura, ANTES de gravar, o que deve existir depois; devolve uma função que lista o que está faltando */
+    function cadEsperadoAposGravar() {
+        if (cadMode === 'novocliente') {
+            const cli = cadNorm($c('cad-nc-nome').value), unidades = cadNcUnidades().lista;
+            return () => {
+                const rows = cadRowsOfClient(cli);
+                if (!rows.length) return [`cliente "${cli}"`];
+                return unidades.filter(u => !rows.some(r => cadCmp(r.unidade) === cadCmp(u))).map(u => `unidade "${u}"`);
+            };
+        }
+        if (cadMode === 'incluir') {
+            const cli = cadNorm($c('cad-inc-cliente').value), uni = cadNorm($c('cad-inc-unidade').value);
+            return () => cadRowsOfClient(cli).some(r => cadCmp(r.unidade) === cadCmp(uni)) ? [] : [`unidade "${uni}" do cliente "${cli}"`];
+        }
+        return null;
     }
 
     /* Após gravar, atualiza as listas do modal com os dados recarregados sem fechá-lo */
