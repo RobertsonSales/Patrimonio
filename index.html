@@ -1268,6 +1268,11 @@
         .cad-alert--warn { background: #fdf3e3; border-color: #f5cba7; color: #7c3a00; }
         .cad-alert--err { background: #fdecea; border-color: #f1a9a0; color: #8a1c12; }
         .cad-auth .form-label { margin-bottom: 6px; }
+        .cad-nc-next { margin-top: 12px; }
+        .cad-similar { margin: 4px 0 0; padding-left: 18px; }
+        .cad-similar li { margin: 1px 0; }
+        .cad-similar small { opacity: .8; }
+        #cad-nc-unidades { font-family: inherit; resize: vertical; min-height: 92px; }
         @media (max-width: 575.98px) { .cad-grid { grid-template-columns: 1fr; } }
 
         body:not(.light-mode) #cadastro-modal .modal-header { background: linear-gradient(135deg, #138a72, #0d6b59); }
@@ -1415,7 +1420,7 @@
                     <div id="sheets-warning" class="sheets-warning d-none"></div>
                     <div class="sheets-actions">
                         <button type="button" class="btn btn-primary" id="sheets-reload-btn" onclick="loadFromSheets()">↻ Atualizar</button>
-                        <button type="button" class="btn btn-cadastro" id="cadastro-btn" onclick="openCadastroModal()" disabled title="Incluir novas unidades ou editar clientes/unidades existentes na planilha">👥 Gestão de Clientes</button>
+                        <button type="button" class="btn btn-cadastro" id="cadastro-btn" onclick="openCadastroModal()" disabled title="Incluir novos clientes e unidades ou editar clientes/unidades existentes na planilha">👥 Gestão de Clientes</button>
                         <a class="btn btn-link-updater" href="https://equipamentosonline.vercel.app/" target="_blank" rel="noopener" title="Incluir, editar ou excluir equipamentos na planilha">✎ Equipamentos Online</a>
                     </div>
                     <!-- Contingência: só aparece se a planilha não puder ser lida -->
@@ -1855,7 +1860,10 @@
 
                 <ul class="nav cad-tabs mb-3" role="tablist">
                     <li class="nav-item" role="presentation">
-                        <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#cad-tab-incluir" type="button" role="tab" aria-selected="true" onclick="cadSetMode('incluir')">＋ Incluir unidade</button>
+                        <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#cad-tab-novocliente" type="button" role="tab" aria-selected="true" onclick="cadSetMode('novocliente')">＋ Incluir cliente</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#cad-tab-incluir" type="button" role="tab" aria-selected="false" onclick="cadSetMode('incluir')">＋ Incluir unidade</button>
                     </li>
                     <li class="nav-item" role="presentation">
                         <button class="nav-link" data-bs-toggle="tab" data-bs-target="#cad-tab-cliente" type="button" role="tab" aria-selected="false" onclick="cadSetMode('cliente')">✎ Editar cliente</button>
@@ -1866,8 +1874,38 @@
                 </ul>
 
                 <div class="tab-content">
-                    <!-- INCLUIR -->
-                    <div class="tab-pane fade show active" id="cad-tab-incluir" role="tabpanel">
+                    <!-- INCLUIR CLIENTE -->
+                    <div class="tab-pane fade show active" id="cad-tab-novocliente" role="tabpanel">
+                        <div class="cad-grid">
+                            <div class="cad-col-2">
+                                <label class="form-label" for="cad-nc-nome">Nome do cliente *</label>
+                                <input type="text" class="form-control" id="cad-nc-nome" placeholder="Razão social ou nome do cliente" oninput="cadValidateNc()" autocomplete="off" maxlength="150">
+                                <div class="cad-help" id="cad-nc-nome-help"></div>
+                            </div>
+                            <div>
+                                <label class="form-label" for="cad-nc-cnpj">CNPJ</label>
+                                <input type="text" class="form-control" id="cad-nc-cnpj" placeholder="00.000.000/0000-00" inputmode="numeric" oninput="cadMaskCnpj(this); cadValidateNc()">
+                                <div class="cad-help" id="cad-nc-cnpj-help"></div>
+                            </div>
+                            <div>
+                                <label class="form-label" for="cad-nc-regiao">Região *</label>
+                                <input type="text" class="form-control" id="cad-nc-regiao" list="cad-dl-regioes" oninput="cadValidateNc()" autocomplete="off">
+                            </div>
+                        </div>
+
+                        <div class="cad-subsection">
+                            <div class="cad-subtitle">Unidades do cliente <span>(opcional — uma por linha)</span></div>
+                            <textarea class="form-control" id="cad-nc-unidades" rows="4" placeholder="Ex.:&#10;HOSPITAL MUNICIPAL CENTRO&#10;UPA ZONA NORTE" oninput="cadValidateNc()" spellcheck="false"></textarea>
+                            <div class="cad-help" id="cad-nc-unidades-help"></div>
+                            <div class="cad-help">Como a planilha registra um equipamento por linha, cada unidade informada vira uma linha (sem equipamento) com o cliente, o CNPJ e a região. Sem unidades, o cliente é gravado numa única linha e aparece no Gerenciador como "Sem Unidade" até que as unidades sejam incluídas.</div>
+                        </div>
+                        <div class="cad-nc-next d-none" id="cad-nc-next">
+                            <button type="button" class="btn btn-outline-success btn-sm" onclick="cadIrParaIncluirUnidade()">＋ Incluir unidade com equipamento para este cliente</button>
+                        </div>
+                    </div>
+
+                    <!-- INCLUIR UNIDADE -->
+                    <div class="tab-pane fade" id="cad-tab-incluir" role="tabpanel">
                         <div class="cad-grid">
                             <div class="cad-col-2">
                                 <label class="form-label" for="cad-inc-cliente">Cliente *</label>
@@ -4780,9 +4818,12 @@
         cadFillSelect('cad-uni-sel', [], 'Selecione o cliente primeiro');
         cadFillSelect('cad-uni-novo-cli', clientes, '(manter o cliente atual)');
         ['cad-inc-cliente','cad-inc-cnpj','cad-inc-regiao','cad-inc-unidade','cad-inc-categoria','cad-inc-equipamento',
-         'cad-inc-serial','cad-inc-setor','cad-inc-instalacao','cad-cli-nome','cad-cli-cnpj','cad-uni-nome','cad-uni-regiao']
+         'cad-inc-serial','cad-inc-setor','cad-inc-instalacao','cad-cli-nome','cad-cli-cnpj','cad-uni-nome','cad-uni-regiao',
+         'cad-nc-nome','cad-nc-cnpj','cad-nc-regiao','cad-nc-unidades']
             .forEach(id => { if ($c(id)) $c(id).value = ''; });
-        ['cad-inc-cliente-help','cad-inc-unidade-help','cad-cli-nome-help','cad-uni-nome-help'].forEach(id => cadSetHelp(id, ''));
+        ['cad-inc-cliente-help','cad-inc-unidade-help','cad-cli-nome-help','cad-uni-nome-help',
+         'cad-nc-nome-help','cad-nc-cnpj-help','cad-nc-unidades-help'].forEach(id => cadSetHelp(id, ''));
+        $c('cad-nc-next').classList.add('d-none');
         $c('cad-cli-info').innerHTML = '';
         $c('cad-uni-info').innerHTML = '';
         cadShowBox('cad-summary', '');
@@ -4800,17 +4841,123 @@
 
         const firstTab = document.querySelector('#cadastro-modal .cad-tabs .nav-link');
         if (firstTab) bootstrap.Tab.getOrCreateInstance(firstTab).show();
-        cadMode = 'incluir';
+        cadMode = 'novocliente';
         bootstrap.Modal.getOrCreateInstance($c('cadastro-modal')).show();
+        setTimeout(() => { if (cadMode === 'novocliente') $c('cad-nc-nome').focus(); }, 350);
     }
 
     function cadSetMode(mode) {
         cadMode = mode;
         cadShowBox('cad-summary', '');
         cadShowBox('cad-result', '');
+        if (mode !== 'novocliente') $c('cad-nc-next').classList.add('d-none');
+        if (mode === 'novocliente') cadValidateNc();
         if (mode === 'incluir') cadValidateInc();
         if (mode === 'cliente') cadValidateCli();
         if (mode === 'unidade') cadValidateUni();
+    }
+
+    /* ---------- Incluir cliente ----------
+       Verificações antes de gravar:
+       • nome idêntico a um cliente existente (ignorando acentos/maiúsculas/espaços) → bloqueia;
+       • nome parecido (sem LTDA, S/A, ME, EIRELI, preposições, pontuação; ou diferença de até 2 letras) → avisa;
+       • CNPJ: dígitos verificadores; se já pertence a outro cliente → avisa quem é;
+       • unidades: uma por linha, repetidas são descartadas. */
+    const CAD_PALAVRAS_IGNORADAS = new Set(['ltda','me','epp','eireli','sa','ss','cia','companhia','de','da','do','das','dos','e','the']);
+    function cadChaveNome(v) {
+        return cadCmp(v).replace(/[.\/\\-]/g, '').replace(/[^a-z0-9]+/g, ' ').split(' ')
+            .filter(w => w && !CAD_PALAVRAS_IGNORADAS.has(w)).join(' ');
+    }
+    function cadLev(a, b) {
+        if (Math.abs(a.length - b.length) > 2) return 9;
+        let p = Array.from({ length: b.length + 1 }, (_, j) => j);
+        for (let i = 1; i <= a.length; i++) {
+            const c = [i];
+            for (let j = 1; j <= b.length; j++) c[j] = Math.min(p[j] + 1, c[j - 1] + 1, p[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
+            p = c;
+        }
+        return p[b.length];
+    }
+    function cadClientesParecidos(nome) {
+        const k = cadChaveNome(nome);
+        if (k.length < 3) return [];
+        return cadUnique('cliente').filter(c => {
+            if (cadCmp(c) === cadCmp(nome)) return false;                 // idêntico é tratado à parte
+            const o = cadChaveNome(c);
+            if (!o) return false;
+            if (o === k) return true;
+            if (Math.min(o.length, k.length) >= 6 && (o.includes(k) || k.includes(o))) return true;
+            return Math.min(o.length, k.length) >= 8 && cadLev(o, k) <= 2;
+        }).slice(0, 5);
+    }
+    function cadNcUnidades() {
+        const vistas = new Set(), lista = [], repetidas = [];
+        String($c('cad-nc-unidades').value || '').split(/\r?\n|;/).map(cadNorm).filter(Boolean).forEach(u => {
+            const k = cadCmp(u);
+            if (vistas.has(k)) repetidas.push(u); else { vistas.add(k); lista.push(u); }
+        });
+        return { lista, repetidas };
+    }
+    function cadSetHelpHtml(id, html, kind) {
+        const el = $c(id);
+        if (!el) return;
+        el.innerHTML = html || '';
+        el.className = 'cad-help' + (kind ? ` cad-help--${kind}` : '');
+    }
+    /* Devolve { ok, erro } — ok=false bloqueia a gravação */
+    function cadValidateNc() {
+        const nome = cadNorm($c('cad-nc-nome').value);
+        const cnpj = cadNorm($c('cad-nc-cnpj').value);
+        let erro = '';
+
+        // Nome
+        if (!nome) cadSetHelp('cad-nc-nome-help', '');
+        else if (cadUnique('cliente').some(c => cadCmp(c) === cadCmp(nome))) {
+            const rows = cadRowsOfClient(nome);
+            erro = 'Este cliente já está cadastrado.';
+            cadSetHelp('cad-nc-nome-help', `Este cliente já existe (${new Set(rows.map(r => cadCmp(r.unidade))).size} unidade(s), ${rows.length} linha(s)). Use a aba "Incluir unidade" para acrescentar unidades ou "Editar cliente" para alterar o cadastro.`, 'err');
+        } else {
+            const par = cadClientesParecidos(nome);
+            if (par.length) {
+                cadSetHelpHtml('cad-nc-nome-help', 'Atenção: há cliente(s) com nome parecido — confira se não é o mesmo:<ul class="cad-similar">' +
+                    par.map(c => { const cn = cadMostCommon(cadRowsOfClient(c), 'cnpj');
+                        return `<li>${pmEscapeHtml(c)}${cn ? ` <small>· CNPJ ${pmEscapeHtml(cadFormatCnpj(cn))}</small>` : ''}</li>`; }).join('') + '</ul>', 'warn');
+            } else cadSetHelp('cad-nc-nome-help', 'Novo cliente.', 'ok');
+        }
+
+        // CNPJ
+        const d = cadDigits(cnpj);
+        if (!d) cadSetHelp('cad-nc-cnpj-help', 'Opcional, mas recomendado.', '');
+        else if (d.length < 14) cadSetHelp('cad-nc-cnpj-help', `Faltam ${14 - d.length} dígito(s).`, 'info');
+        else if (!cadCnpjValido(cnpj)) { cadSetHelp('cad-nc-cnpj-help', 'CNPJ inválido (dígitos verificadores não conferem).', 'err'); erro = erro || 'CNPJ inválido.'; }
+        else {
+            const donos = cadUnique('cliente', data.filter(r => cadDigits(r.cnpj) === d)).filter(c => cadCmp(c) !== cadCmp(nome));
+            if (donos.length) cadSetHelp('cad-nc-cnpj-help', `Este CNPJ já está vinculado a: ${donos.join(' · ')}.`, 'warn');
+            else cadSetHelp('cad-nc-cnpj-help', 'CNPJ válido.', 'ok');
+        }
+
+        // Unidades
+        const { lista, repetidas } = cadNcUnidades();
+        const partes = [];
+        if (lista.length) partes.push(`<strong>${lista.length}</strong> unidade(s) serão criadas.`);
+        if (repetidas.length) partes.push(`Repetidas e ignoradas: ${repetidas.map(pmEscapeHtml).join(', ')}.`);
+        const longas = lista.filter(u => u.length > 120);
+        if (longas.length) { partes.push('Há unidade com nome muito longo (mais de 120 caracteres) — confira as quebras de linha.'); erro = erro || 'Nome de unidade muito longo.'; }
+        cadSetHelpHtml('cad-nc-unidades-help', partes.join(' '), longas.length ? 'err' : repetidas.length ? 'warn' : (lista.length ? 'info' : ''));
+
+        return { ok: !erro, erro };
+    }
+    /* Após incluir o cliente: abre "Incluir unidade" já com o cliente, CNPJ e região preenchidos */
+    function cadIrParaIncluirUnidade() {
+        const nome = $c('cad-nc-next').dataset.cliente || '';
+        const tab = document.querySelector('#cadastro-modal [data-bs-target="#cad-tab-incluir"]');
+        if (tab) bootstrap.Tab.getOrCreateInstance(tab).show();
+        cadSetMode('incluir');
+        $c('cad-inc-cliente').value = nome;
+        $c('cad-inc-cnpj').value = '';
+        $c('cad-inc-regiao').value = '';
+        cadOnIncClienteChange();
+        setTimeout(() => $c('cad-inc-unidade').focus(), 200);
     }
 
     /* ---------- Incluir unidade ---------- */
@@ -4924,6 +5071,25 @@
     function cadBuildOps() {
         const skipped = new Set();
         if (!Object.keys(sheetHeaderByField).length) throw new Error('O cabeçalho da planilha não foi reconhecido; não é seguro gravar.');
+
+        if (cadMode === 'novocliente') {
+            const nome = cadNorm($c('cad-nc-nome').value);
+            const cnpj = cadNorm($c('cad-nc-cnpj').value);
+            const regiao = cadNorm($c('cad-nc-regiao').value);
+            if (!nome || !regiao) throw new Error('Preencha o nome do cliente e a região.');
+            if (cadDigits(cnpj) && cadDigits(cnpj).length < 14) throw new Error('CNPJ incompleto.');
+            const v = cadValidateNc();
+            if (!v.ok) throw new Error(v.erro);
+            const base = { cliente: nome, regiao };
+            if (cnpj) base.cnpj = cadFormatCnpj(cnpj);
+            const { lista } = cadNcUnidades();
+            const ops = (lista.length ? lista : ['']).map(unidade =>
+                ({ action: 'create', row: cadRow(unidade ? { ...base, unidade } : base, skipped) }));
+            const descr = `Incluir o cliente <strong>${pmEscapeHtml(nome)}</strong>` + (cnpj ? ` (CNPJ ${pmEscapeHtml(cadFormatCnpj(cnpj))})` : '') +
+                ` · região ${pmEscapeHtml(regiao)}` +
+                (lista.length ? `, com ${lista.length} unidade(s): ${lista.map(pmEscapeHtml).join(', ')}` : ', ainda sem unidades') + '.';
+            return { ops, descr, skipped };
+        }
 
         if (cadMode === 'incluir') {
             const cliente = cadNorm($c('cad-inc-cliente').value);
@@ -5079,6 +5245,16 @@
         keep('cad-uni-novo-cli', '(manter o cliente atual)');
         if (cadMode === 'cliente') cadOnCliSelect();
         if (cadMode === 'unidade') cadOnUniCliSelect();
+        if (cadMode === 'novocliente') {
+            // Cliente gravado: limpa o formulário e oferece o atalho para lançar unidade com equipamento
+            const nome = cadNorm($c('cad-nc-nome').value);
+            ['cad-nc-nome','cad-nc-cnpj','cad-nc-regiao','cad-nc-unidades'].forEach(id => { $c(id).value = ''; });
+            ['cad-nc-nome-help','cad-nc-cnpj-help','cad-nc-unidades-help'].forEach(id => cadSetHelp(id, ''));
+            const nx = $c('cad-nc-next');
+            nx.dataset.cliente = nome;
+            nx.querySelector('button').textContent = `＋ Incluir unidade com equipamento para ${nome}`;
+            nx.classList.toggle('d-none', !nome);
+        }
         if (cadMode === 'incluir') { $c('cad-inc-unidade').value = ''; cadValidateInc(); }
     }
 
